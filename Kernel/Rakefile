@@ -32,7 +32,6 @@ CLEAN.include('kernel.sym')
 task :default => [ 'kernel' ]
 
 file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
-  puts ROOT
 	puts " [LD] #{t.name}"
 	sh "#{LD} -T#{LINKER_SCRIPT} -o #{t.name} #{OBJ.join(' ')} #{LDFLAGS.join(' ')}"
 	puts " [SYM] #{t.name}.sym"
