@@ -1,0 +1,52 @@
+require_relative '../BuildSupport/Common'
+require 'rake/clean'
+require 'rake/loaders/makefile'
+
+SRC=FileList[]
+
+SRC.include([
+  # files go here
+])
+
+CFLAGS << '-I.' \
+       << '-ffreestanding' << '-mno-sse' << '-mno-red-zone' \
+       << '-mno-mmx' << '-mno-sse' << '-mno-sse2' \
+       << '-mno-sse3' << '-mno-3dnow'
+
+DEFINES << '-D__KERNEL__'
+DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'
+
+OBJ = SRC.ext('o').pathmap("#{OBJ_DIR}/%p")
+DEPS = OBJ.ext('depend')
+
+LINKER_SCRIPT = 'kernel.ld'
+
+CLEAN.include(OBJ_DIR)
+CLEAN.include('kernel')
+CLEAN.include('kernel.sym')
+
+task :default => [ 'kernel' ]
+
+file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
+	puts " [LD] #{t.name}"
+	sh "#{LD} -T#{LINKER_SCRIPT} -o #{t.name} #{OBJ.join(' ')} #{LDFLAGS.join(' ')}"
+	puts " [SYM] #{t.name}.sym"
+	sh "#{OBJCOPY} --only-keep-debug #{t.name} #{t.name}.sym"
+	puts " [STRIP] #{t.name}"
+	sh "#{STRIP} #{t.name}"
+end
+
+task 'run' => ['kernel'] do
+    sh "qemu-system-#{PLATFORM} -d int,pcall -no-reboot -serial stdio -kernel kernel"
+end
+
+task 'debug' => ['kernel'] do
+    puts "Connect with gdb on tcp::1234. Execution is halted."
+    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -serial stdio -kernel kernel"
+end
+
+task 'attach' => ['kernel.sym'] do
+    sh "#{GDB} kernel.sym --eval-command=\"target remote tcp::1234\""
+end
+
+DEPS.each{|file| Rake::MakefileLoader.new.load(file) if File.file?(file)}
