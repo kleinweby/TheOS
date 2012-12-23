@@ -1,0 +1,174 @@
+Index: lib/Driver/Tools.cpp
+===================================================================
+--- lib/Driver/Tools.cpp	(revision 171006)
++++ lib/Driver/Tools.cpp	(working copy)
+@@ -5955,3 +5955,61 @@
+     Args.MakeArgString(getToolChain().GetProgramPath("link.exe"));
+   C.addCommand(new Command(JA, *this, Exec, CmdArgs));
+ }
++
++// Just copied from minix for now
++void theos::Link::ConstructJob(Compilation &C, const JobAction &JA,
++                               const InputInfo &Output,
++                               const InputInfoList &Inputs,
++                               const ArgList &Args,
++                               const char *LinkingOutput) const {
++    const Driver &D = getToolChain().getDriver();
++    ArgStringList CmdArgs;
++    
++    if (Output.isFilename()) {
++        CmdArgs.push_back("-o");
++        CmdArgs.push_back(Output.getFilename());
++    } else {
++        assert(Output.isNothing() && "Invalid output.");
++    }
++    
++    // No start objects avaiable for now
++//    if (!Args.hasArg(options::OPT_nostdlib) &&
++//        !Args.hasArg(options::OPT_nostartfiles)) {
++//        CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("crt1.o")));
++//        CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("crti.o")));
++//        CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("crtbegin.o")));
++//        CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("crtn.o")));
++//    }
++    
++    Args.AddAllArgs(CmdArgs, options::OPT_L);
++    Args.AddAllArgs(CmdArgs, options::OPT_T_Group);
++    Args.AddAllArgs(CmdArgs, options::OPT_e);
++    
++    AddLinkerInputs(getToolChain(), Inputs, Args, CmdArgs);
++    
++    addProfileRT(getToolChain(), Args, CmdArgs, getToolChain().getTriple());
++    
++    // No math lib avaiable
++//    if (!Args.hasArg(options::OPT_nostdlib) &&
++//        !Args.hasArg(options::OPT_nodefaultlibs)) {
++//        if (D.CCCIsCXX) {
++//            getToolChain().AddCXXStdlibLibArgs(Args, CmdArgs);
++//            CmdArgs.push_back("-lm");
++//        }
++//    }
++    
++// No std lib is avaiable for now
++//    if (!Args.hasArg(options::OPT_nostdlib) &&
++//        !Args.hasArg(options::OPT_nostartfiles)) {
++//        if (Args.hasArg(options::OPT_pthread))
++//            CmdArgs.push_back("-lpthread");
++//        CmdArgs.push_back("-lc");
++//        CmdArgs.push_back("-lCompilerRT-Generic");
++//        CmdArgs.push_back("-L/usr/pkg/compiler-rt/lib");
++//        CmdArgs.push_back(
++//                          Args.MakeArgString(getToolChain().GetFilePath("crtend.o")));
++//    }
++    
++    const char *Exec = Args.MakeArgString(getToolChain().GetProgramPath("i386-theos-elf-ld"));
++    C.addCommand(new Command(JA, *this, Exec, CmdArgs));
++}
+Index: lib/Driver/ToolChains.cpp
+===================================================================
+--- lib/Driver/ToolChains.cpp	(revision 171006)
++++ lib/Driver/ToolChains.cpp	(working copy)
+@@ -2647,3 +2647,42 @@
+ 
+   return *T;
+ }
++
++TheOS::TheOS(const Driver &D, const llvm::Triple& Triple, const ArgList &Args)
++: Generic_ELF(D, Triple, Args) {
++//    getFilePaths().push_back(getDriver().Dir + "/../lib");
++//    getFilePaths().push_back("/usr/lib");
++}
++
++Tool &TheOS::SelectTool(const Compilation &C, const JobAction &JA,
++                        const ActionList &Inputs) const {
++    Action::ActionClass Key;
++    if (getDriver().ShouldUseClangCompiler(C, JA, getTriple()))
++        Key = Action::AnalyzeJobClass;
++    else
++        Key = JA.getKind();
++    
++    bool UseIntegratedAs = C.getArgs().hasFlag(options::OPT_integrated_as,
++                                               options::OPT_no_integrated_as,
++                                               IsIntegratedAssemblerDefault());
++    
++    Tool *&T = Tools[Key];
++    if (!T) {
++        switch (Key) {
++            case Action::AssembleJobClass:
++                if (UseIntegratedAs)
++                    T = new tools::ClangAs(*this);
++                else
++                    T = new tools::gcc::Assemble(*this); break;
++                break;
++            case Action::LinkJobClass:
++                T = new tools::theos::Link(*this); break;
++            default:
++                T = &Generic_GCC::SelectTool(C, JA, Inputs);
++
++        }
++    }
++    
++    return *T;
++}
++
+Index: lib/Driver/Tools.h
+===================================================================
+--- lib/Driver/Tools.h	(revision 171006)
++++ lib/Driver/Tools.h	(working copy)
+@@ -590,6 +590,23 @@
+   };
+ } // end namespace visualstudio
+ 
++/// theos --
++namespace theos {
++  class LLVM_LIBRARY_VISIBILITY Link : public Tool  {
++  public:
++    Link(const ToolChain &TC) : Tool("theos::Link", "linker", TC) {}
++            
++    virtual bool hasIntegratedCPP() const { return false; }
++    virtual bool isLinkJob() const { return true; }
++            
++    virtual void ConstructJob(Compilation &C, const JobAction &JA,
++                              const InputInfo &Output,
++                              const InputInfoList &Inputs,
++                              const ArgList &TCArgs,
++                              const char *LinkingOutput) const;
++  };
++} // end namespace theos
++    
+ } // end namespace toolchains
+ } // end namespace driver
+ } // end namespace clang
+Index: lib/Driver/ToolChains.h
+===================================================================
+--- lib/Driver/ToolChains.h	(revision 171006)
++++ lib/Driver/ToolChains.h	(working copy)
+@@ -578,6 +578,14 @@
+                                             ArgStringList &CC1Args) const;
+ 
+ };
++        
++class LLVM_LIBRARY_VISIBILITY TheOS : public Generic_ELF {
++public:
++    TheOS(const Driver &D, const llvm::Triple& Triple, const ArgList &Args);
++            
++    virtual Tool &SelectTool(const Compilation &C, const JobAction &JA,
++                             const ActionList &Inputs) const;
++};
+ 
+ } // end namespace toolchains
+ } // end namespace driver
+Index: lib/Driver/Driver.cpp
+===================================================================
+--- lib/Driver/Driver.cpp	(revision 171006)
++++ lib/Driver/Driver.cpp	(working copy)
+@@ -1715,6 +1715,9 @@
+     case llvm::Triple::Win32:
+       TC = new toolchains::Windows(*this, Target);
+       break;
++    case llvm::Triple::TheOS:
++      TC = new toolchains::TheOS(*this, Target, Args);
++      break;
+     case llvm::Triple::MinGW32:
+       // FIXME: We need a MinGW toolchain. Fallthrough for now.
+     default:

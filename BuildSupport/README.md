@@ -30,3 +30,16 @@ Download the las release of gdb and compile it
  $ ./configure --prefix="$TOOLCHAIN_ROOT" --target=i386-unkown-elf --program-prefix=i386-theos-elf-
  $ make
  $ make install
+
+Building clang
+--------------
+
+Checkout llvm and clang as described in http://clang.llvm.org/get_started.html
+
+Patch llvm and clang.
+
+ $ mkdir llvm-build
+ $ cd llvm-build
+ $ ../llvm/configure --target=i386-unkown-theos --prefix="$TOOLCHAIN_ROOT"
+ $ make
+ $ make install

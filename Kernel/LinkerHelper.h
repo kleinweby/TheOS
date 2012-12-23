@@ -42,6 +42,6 @@
 // Declares a symbol name of a type that can hold a pointer-sized integer
 // with is specified by the linker.
 //
-#define LINKER_SYMBOL(name) extern void _##name(); const int name = (int)&_##name
+#define LINKER_SYMBOL(name) extern void _##name(); static const int name = (int)&_##name
 
 #endif // _LINKER_HELPER_H_
