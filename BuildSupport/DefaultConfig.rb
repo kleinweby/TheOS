@@ -6,6 +6,8 @@ DEFINES = []
 
 TOOLCHAIN="#{File.dirname(__FILE__)}/toolchain"
 
+ROOT="#{File.dirname(File.dirname(__FILE__))}/root"
+
 ENV['PATH'] = "#{TOOLCHAIN}/bin:#{ENV['PATH']}"
 
 CC      = ENV['CC'] || "clang"

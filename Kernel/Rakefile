@@ -32,6 +32,7 @@ CLEAN.include('kernel.sym')
 task :default => [ 'kernel' ]
 
 file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
+  puts ROOT
 	puts " [LD] #{t.name}"
 	sh "#{LD} -T#{LINKER_SCRIPT} -o #{t.name} #{OBJ.join(' ')} #{LDFLAGS.join(' ')}"
 	puts " [SYM] #{t.name}.sym"
@@ -40,7 +41,12 @@ file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
 	sh "#{STRIP} #{t.name}"
 end
 
-task 'run' => ['kernel'] do
+task 'install' => ['kernel'] do
+  puts " [INSTALL] kernel"
+  cp 'kernel', "#{ROOT}/kernel"
+end
+
+task 'run' => ['install'] do
     sh "qemu-system-#{PLATFORM} -d int,pcall -no-reboot -serial stdio -kernel kernel"
 end
 

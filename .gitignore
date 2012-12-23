@@ -2,5 +2,6 @@ BuildSupport/toolchain/*
 Kernel/kernel
 Kernel/kernel.sym
 .objs
+root
 
 !.keep-folder
