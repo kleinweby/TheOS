@@ -1,5 +1,7 @@
 
-#include "linkerHelper.h"
+#include "LinkerHelper.h"
+
+#include "Multiboot/Multiboot.h"
 
 LINKER_SYMBOL(KernelOffset);
 LINKER_SYMBOL(KernelLength);

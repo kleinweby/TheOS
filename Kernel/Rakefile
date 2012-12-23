@@ -15,7 +15,7 @@ CFLAGS << '-I.' \
        << '-mno-sse3' << '-mno-3dnow'
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'
