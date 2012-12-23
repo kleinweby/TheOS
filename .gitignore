@@ -1,2 +1,6 @@
 BuildSupport/toolchain/*
+Kernel/kernel
+Kernel/kernel.sym
+.objs
+
 !.keep-folder

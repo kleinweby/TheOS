@@ -14,22 +14,23 @@ SECTIONS
       LONG(-((1 << 1 | 1 << 0) + 0x1BADB002)); /* Checksum */
    }
    
-   kernel_start_symbol = .;
+   PROVIDE_HIDDEN(_KernelOffset = .);
    
-   _kernel_startup_begin = . - 0xC0000000;
+   PROVIDE_HIDDEN(_KernelStartupOffset = .);
    .startup ALIGN(4096) : {
       *(.startup)
    }
-   _kernel_startup_end = .;
+   PROVIDE_HIDDEN(_KernelStartupLength = _KernelStartupOffset - .);
 
    . += 0xC0000000;
-   _kernel_text_start = .;
+
+   PROVIDE_HIDDEN(_KernelTextOffset = .);
    .text : AT(ADDR(.text) - 0xC0000000) {
       *(.text)
    }
-   _kernel_text_end = .;
-
-   _kernel_data_start = .;
+   PROVIDE_HIDDEN(_KernelTextLength = _KernelTextOffset - .);
+   
+   PROVIDE_HIDDEN(_KernelDataOffset = .);
    .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
       *(.data)
    }
@@ -39,20 +40,10 @@ SECTIONS
    .bss ALIGN(4096) :  AT(ADDR(.bss) - 0xC0000000) {
      *(.bss)
    }
-
-   /* Support for staticly declaring logging providers */
-   .LoggingProviders : {
-      KEEP(*(.LoggingProviders.*))
-      KEEP(*(.LoggingProviders))
-   }
-   PROVIDE_HIDDEN(LoggingProvidersArrayStart = ADDR(.LoggingProviders));
-   PROVIDE_HIDDEN(LoggingProvidersArraySize = SIZEOF(.LoggingProviders));
-
-
-   _kernel_data_end = .;
+   PROVIDE_HIDDEN(_KernelDataLength = _KernelDataOffset - .);
+   PROVIDE_HIDDEN(_KernelLength = _KernelOffset - .);
    
-   kernel_end_symbol = ADDR(.bss) + SIZEOF(.bss) - 0xC0000000;
-   
+   /* for debug */
    .debug_abbrev 0 : { *(.debug_abbrev) }
    .debug_info 0 : { *(.debug_info) }
    .debug_line 0 : { *(.debug_line) }
@@ -62,5 +53,4 @@ SECTIONS
    .debug_ranges 0 : { *(.debug_ranges) }
    .debug_str 0 : { *(.debug_str) }
    .debug_frame 0 : { *(.debug_frame) }
-   
 }
