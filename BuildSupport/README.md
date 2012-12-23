@@ -15,10 +15,18 @@ the only build platform tested is Mac OS X ;)
 Build the toolchain
 -------------------
 
+TOOLCHAIN_ROOT must point to the fullpath of BuildSupport/toolchain
+
+I use bintuils 2.22 and gdb 7.5 on osx 10.8
+
 Download the last release of binutils and compile it
 
  $ ./configure --prefix="$TOOLCHAIN_ROOT" --target=i386-unkown-elf --program-prefix=i386-theos-elf-
  $ make
  $ make install
 
-TOOLCHAIN_ROOT must point to the fullpath of BuildSupport/toolchain
+Download the las release of gdb and compile it
+
+ $ ./configure --prefix="$TOOLCHAIN_ROOT" --target=i386-unkown-elf --program-prefix=i386-theos-elf-
+ $ make
+ $ make install
