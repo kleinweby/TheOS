@@ -50,11 +50,11 @@ static void VGAPutChar(char c)
 		case '\n':
 			cursorPosition.y += 1;
 		case '\r':
-			cursorPosition.x = 0;
+			cursorPosition.x = 1;
 			break;
 		default:
-			if (cursorPosition.x >= width) {
-				cursorPosition.x  = 0;
+			if (cursorPosition.x >= width - 1) {
+				cursorPosition.x  = 1;
 				cursorPosition.y += 1;
 			}
 			
@@ -66,8 +66,8 @@ static void VGAPutChar(char c)
 
 static void VGAClear()
 {
-	cursorPosition.x = 0;
-	cursorPosition.y = 0;
+	cursorPosition.x = 1;
+	cursorPosition.y = 1;
 	cursorPosition.attr = 0x74;
 	
 	for (uint16_t i = 0; i < width*height; i++) {
@@ -92,7 +92,11 @@ void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState)
 	pprintf(VGAPutChar, "Message: %s\n\n", message);
 	
 	if (cpuState) {
+		pprintf(VGAPutChar, "CPU State:\n");
+		pprintf(VGAPutChar, "  eax = %08x   ebx = %08x   ecx = %08x   edx =  %08x\n", cpuState->eax, cpuState->ebx, cpuState->ecx, cpuState->edx);
+		pprintf(VGAPutChar, "  ebp = %08x   esi = %08x   edi = %08x   eip = %p\n\n", cpuState->ebp, cpuState->esi, cpuState->edi, cpuState->eip);
 		
+		pprintf(VGAPutChar, "Backtrace:\n");
 	}
 	else {
 		pprintf(VGAPutChar, "No cpu state was supplied!\n\n");
@@ -100,5 +104,3 @@ void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState)
 }
 
 PanicRegisterDriver(PanicDriverVGA);
-
-
