@@ -36,7 +36,7 @@ void _SerialPutchar(char chr) {
 	_SerialWrite(0x3F8, chr);
 }
 
-void SerialLoggingProvider(const char* function, const char* filename, uint32_t line, uint64_t timestamp,
+void LoggingDriverSerial(const char* function, const char* filename, uint32_t line, uint64_t timestamp,
  							LogLevel logLevel, const char* format, va_list args)
 {
 	#pragma unused(filename)
@@ -72,4 +72,4 @@ void SerialLoggingProvider(const char* function, const char* filename, uint32_t 
 	_SerialPutchar('\n');
 }
 
-LoggingRegisterProvider(Serial, SerialLoggingProvider);
+LoggingRegisterDriver(Serial, LoggingDriverSerial);

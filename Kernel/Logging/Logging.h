@@ -76,16 +76,16 @@ void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel
 // =============
 //
 
-typedef void(*LogProviderLog)(const char* function, const char* filename, uint32_t line, uint64_t timestamp, LogLevel logLevel, const char* format, va_list args);
+typedef void(*LogDriverLog)(const char* function, const char* filename, uint32_t line, uint64_t timestamp, LogLevel logLevel, const char* format, va_list args);
 
-typedef struct LogProvider {
+typedef struct LogDriver {
 	char const* name;
-	LogProviderLog log;
-} LogProvider;
+	LogDriverLog log;
+} LogDriver;
 
 //
 // Use this macro on the top level to staticly register a log provider at compile time
 //
-#define LoggingRegisterProvider(_name, provider) LogProvider LogProvider_##_name __attribute__ ((section (".LoggingProviders"))) = {.name = #_name, .log = &provider}
+#define LoggingRegisterDriver(_name, driver) LogDriver LogDriver_##_name __attribute__ ((section (".LoggingDrivers"))) = {.name = #_name, .log = &driver}
 
 #endif /* __LOGGING_H__ */

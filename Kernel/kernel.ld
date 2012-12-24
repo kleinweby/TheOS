@@ -42,12 +42,12 @@ SECTIONS
    }
    
    /* Support for staticly declaring logging providers */
-   .LoggingProviders : {
-      KEEP(*(.LoggingProviders.*))
-      KEEP(*(.LoggingProviders))
+   .LoggingDrivers : {
+      KEEP(*(.LoggingDrivers.*))
+      KEEP(*(.LoggingDrivers))
    }
-   PROVIDE_HIDDEN(_LoggingProviders = ADDR(.LoggingProviders));
-   PROVIDE_HIDDEN(_LoggingProvidersLength = SIZEOF(.LoggingProviders));
+   PROVIDE_HIDDEN(_LoggingDrivers = ADDR(.LoggingDrivers));
+   PROVIDE_HIDDEN(_LoggingDriversLength = SIZEOF(.LoggingDrivers));
    
    PROVIDE_HIDDEN(_KernelDataLength = _KernelDataOffset - .);
    PROVIDE_HIDDEN(_KernelLength = _KernelOffset - .);

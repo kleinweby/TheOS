@@ -27,8 +27,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Logging.h"
 #include "LinkerHelper.h"
 
-LINKER_SYMBOL(LoggingProviders, LogProvider*);
-LINKER_SYMBOL(LoggingProvidersLength, uint32_t);
+LINKER_SYMBOL(LoggingDrivers, LogDriver*);
+LINKER_SYMBOL(LoggingDriversLength, uint32_t);
 
 void LoggingInitialize()
 {
@@ -48,9 +48,9 @@ void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel
 {
 	// Use some hackish way to get a simple timestamp
 	uint64_t timestamp = TimeStampCounter() >> 24;
-	uint32_t count = LoggingProvidersLength/sizeof(LogProvider);
+	uint32_t count = LoggingDriversLength/sizeof(LogDriver);
 
 	for (uint32_t i = 0; i < count; i++) {
-		LoggingProviders[i].log(function, filename, line, timestamp, logLevel, format, args);
+		LoggingDrivers[i].log(function, filename, line, timestamp, logLevel, format, args);
 	}
 }
