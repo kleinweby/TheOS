@@ -22,7 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "String.h"
+#include <CoreSystem/String.h>
 
 static char numberDefinitions[] = "0123456789ABCDEF";
 static char *trueString = "true";
@@ -47,17 +47,14 @@ size_t strlen(char const* string)
 	return length;
 }
 
-char* formatNumber(char* string, uint32_t number, uint8_t base, uint32_t minLength, bool useWhitespacePadding)
-{
-	// Well, we can not work with this string
-	if (string == NULL)
-		return string;
-		
+void formatNumber(VPrintfPutChar putchar, uint32_t number, uint8_t base, uint32_t minLength, bool useWhitespacePadding)
+{		
 	// We only support base 2 to 16
 	if (base < 2 || base > 16)
-		return string;
+		return;
 	
-	char* tempString = string;
+	char buffer[25];
+	char* tempString = buffer;
 	uint32_t usedLength = 0;
 	
 	// First we put the number in in reverse to
@@ -90,18 +87,11 @@ char* formatNumber(char* string, uint32_t number, uint8_t base, uint32_t minLeng
 	tempString--;
 	
 	// Now swap the thing around
-	for (uint8_t i = 0; i < usedLength; i++) {
-		if (i < usedLength/2) {
-			char t = *string;
-			*string = *tempString;
-			*tempString = t;
-		}
-		
-		string++;
-		tempString--;
+	for (uint8_t i = 0; i < usedLength; i++, tempString--) {
+		putchar(*tempString);
 	}
-	
-	return string;
+
+	return;
 }
 
 void snprintf(char *string, size_t maxStringSize, char const* format, ...)
@@ -113,25 +103,50 @@ void snprintf(char *string, size_t maxStringSize, char const* format, ...)
 	va_end(args);
 }
 
+void pprintf(VPrintfPutChar putchar, char const* format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	vpprintf(putchar, format, args);
+	va_end(args);
+}
+
 void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list args)
 {
-	void putchar(char c) {
-		if (maxStringSize > 0) {
-			*string = c;
-			string++;
-			maxStringSize--;
-		}
+	#pragma unused(string, maxStringSize, format, args)
+	// void putchar(char c)
+	// {
+	// 	if (maxStringSize > 0) {
+	// 		*string = c;
+	// 		string++;
+	// 		maxStringSize--;
+	// 	}
+	// }
+	// 
+	// vpprintf(putchar, format, args);
+	// 
+	// // We used all aviable buffer
+	// // but wee need to isnert an \0
+	// // so replace the last char
+	// if (maxStringSize == 0) {
+	// 	// Go one back
+	// 	string--;
+	// 	maxStringSize++;
+	// }
+	// 
+	// *string = '\0';
+}
+
+void putstr(VPrintfPutChar putchar, char* str) {
+	while (*str != '\0') {
+		putchar(*str);
+		str++;
 	}
-	
-	void putstr(char* str) {
-		while (maxStringSize > 0 && *str != '\0') {
-			*string = *str;
-			string++;
-			str++;
-			maxStringSize--;
-		}
-	}
-	
+}
+
+void vpprintf(VPrintfPutChar putchar, char const* format, va_list args)
+{	
 	while (*format != '\0') {
 		// We have a format specifier here
 		// so we need to evaluate it.
@@ -145,7 +160,7 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 			else {
 				bool useWhitespacePadding = true;
 				uint32_t minLength = 0;
-				uint32_t precision = -1;
+				int32_t precision = -1;
 				
 				// Read the length specifier
 				// if there is any.
@@ -156,7 +171,7 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 					if (minLength == 0 && *format == '0') {
 						useWhitespacePadding = false;
 					} else {
-						minLength = minLength * 10 + (*format - '0');
+						minLength = minLength * 10 + ((uint32_t)*format - '0');
 					}
 					format++;
 				}
@@ -187,7 +202,7 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 						uint32_t val = va_arg(args, uint32_t);
 						putchar('0');
 						putchar('x');
-						string = formatNumber(string, val, 16, minLength, useWhitespacePadding);
+						formatNumber(putchar, val, 16, minLength, useWhitespacePadding);
 						break;
 					}
 					// Signed integer
@@ -200,14 +215,14 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 							val = -val;
 						}
 						
-						string = formatNumber(string, (uint32_t)val, 10, minLength, useWhitespacePadding);
+						formatNumber(putchar, (uint32_t)val, 10, minLength, useWhitespacePadding);
 						break;
 					}
 					// Unsinged integer
 					case 'u':
 					{
 						uint32_t val = va_arg(args, uint32_t);
-						string = formatNumber(string, val, 10, minLength, useWhitespacePadding);
+						formatNumber(putchar, val, 10, minLength, useWhitespacePadding);
 						break;
 					}
 					// Boolean
@@ -216,10 +231,10 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 						uint32_t val = va_arg(args, uint32_t);
 						
 						if (val == true) {
-							putstr(trueString);
+							putstr(putchar, trueString);
 						}
 						else {
-							putstr(falseString);
+							putstr(putchar, falseString);
 						}
 						break;
 					}
@@ -228,7 +243,7 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 					{
 						char* str = va_arg(args, char*);
 
-						putstr(str);
+						putstr(putchar, str);
 						break;
 					}
 					default:
@@ -243,15 +258,4 @@ void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list a
 		
 		format++;
 	}
-	
-	// We used all aviable buffer
-	// but wee need to isnert an \0
-	// so replace the last char
-	if (maxStringSize == 0) {
-		// Go one back
-		string--;
-		maxStringSize++;
-	}
-	
-	*string = '\0';
 }

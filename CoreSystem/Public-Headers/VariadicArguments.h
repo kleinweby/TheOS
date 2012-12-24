@@ -32,4 +32,4 @@ typedef __builtin_va_list va_list;
 #define va_copy(dest, src) __builtin_va_copy(dest, src)
 #define va_end(ap) __builtin_va_end(ap)
 
-#endif /* VARIADIC_ARGUMENTS_H */
+#endif // VARIADIC_ARGUMENTS_H

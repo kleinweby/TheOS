@@ -5,8 +5,14 @@ require 'rake/loaders/makefile'
 SRC=FileList[]
 
 SRC.include([
-  # files go here
-  'test.c'
+  "Boot/KernelInitialize.c",
+  "Boot/startup.nasm",
+  
+  #Logging
+  "Logging/Logging.c",
+  "Logging/SerialLoggingProvider.c",
+  
+  "../CoreSystem/String.c"
 ])
 
 CFLAGS << '-I.' \
@@ -15,7 +21,7 @@ CFLAGS << '-I.' \
        << '-mno-sse3' << '-mno-3dnow'
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

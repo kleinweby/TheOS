@@ -22,19 +22,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef STRING_H
-#define STRING_H
+#include "Multiboot/Multiboot.h"
+#include "Logging/Logging.h"
 
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/VariadicArguments.h>
-
-typedef void (*VPrintfPutChar)(char c);
-void vpprintf(VPrintfPutChar putchar, char const* format, va_list args);
-void pprintf(VPrintfPutChar putchar, char const* format, ...);
-
-void vsnprintf(char *string, size_t maxStringSize, char const* format, va_list args);
-void snprintf(char *string, size_t maxStringSize, char const* format, ...);
-
-size_t strlen(char const* string);
-
-#endif // STRING_H
+void KernelInitialize(uint32_t magic, struct Multiboot* header)
+{
+	#pragma unused(magic)
+	#pragma unused(header)
+	
+	LoggingInitialize();
+}

@@ -40,6 +40,15 @@ SECTIONS
    .bss ALIGN(4096) :  AT(ADDR(.bss) - 0xC0000000) {
      *(.bss)
    }
+   
+   /* Support for staticly declaring logging providers */
+   .LoggingProviders : {
+      KEEP(*(.LoggingProviders.*))
+      KEEP(*(.LoggingProviders))
+   }
+   PROVIDE_HIDDEN(_LoggingProviders = ADDR(.LoggingProviders));
+   PROVIDE_HIDDEN(_LoggingProvidersLength = SIZEOF(.LoggingProviders));
+   
    PROVIDE_HIDDEN(_KernelDataLength = _KernelDataOffset - .);
    PROVIDE_HIDDEN(_KernelLength = _KernelOffset - .);
    

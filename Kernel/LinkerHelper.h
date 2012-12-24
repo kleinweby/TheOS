@@ -38,10 +38,12 @@
 #ifndef _LINKER_HELPER_H_
 #define _LINKER_HELPER_H_
 
+#include <CoreSystem/CommonTypes.h>
+
 //
 // Declares a symbol name of a type that can hold a pointer-sized integer
 // with is specified by the linker.
 //
-#define LINKER_SYMBOL(name) extern void _##name(); static const int name = (int)&_##name
+#define LINKER_SYMBOL(name, type) extern void _##name(); static const type name = (type)&_##name
 
 #endif // _LINKER_HELPER_H_
