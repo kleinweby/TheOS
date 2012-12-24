@@ -1,5 +1,12 @@
 require_relative '../BuildSupport/Common'
 
+CFLAGS << "-Wno-missing-prototypes"
+
 rule 'CoreSystem.framework' => [] do |t|
   create_framework 'CoreSystem', 'Public-Headers'
+end
+
+file 'libCoreSystem-kernel.a' => ['CoreSystem.framework', 'String.o'] do |t|
+  puts " [AR] #{t.name}"
+  sh "#{AR} cr #{t.name} String.o"
 end

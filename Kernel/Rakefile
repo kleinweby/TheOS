@@ -11,8 +11,6 @@ SRC.include([
   #Logging
   "Logging/Logging.c",
   "Logging/SerialLoggingProvider.c",
-  
-  "../CoreSystem/String.c"
 ])
 
 CFLAGS << '-I.' \
@@ -25,6 +23,7 @@ CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-vari
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'
+LDFLAGS << '../CoreSystem/libCoreSystem-kernel.a'
 
 OBJ = SRC.ext('o').pathmap("#{OBJ_DIR}/%p")
 DEPS = OBJ.ext('depend')

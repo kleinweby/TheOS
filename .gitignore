@@ -4,6 +4,7 @@ Kernel/kernel.sym
 .objs
 *.o
 *.depend
+*.a
 root
 
 !.keep-folder
