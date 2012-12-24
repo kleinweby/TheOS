@@ -71,4 +71,4 @@ void SerialLoggingProvider(const char* function, const char* filename, uint32_t 
 	_SerialPutchar('\n');
 }
 
-LoggingRegisterProvider(SerialLoggingProvider);
+LoggingRegisterProvider(Serial, SerialLoggingProvider);

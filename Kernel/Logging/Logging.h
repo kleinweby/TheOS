@@ -76,12 +76,16 @@ void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel
 // =============
 //
 
-typedef void(*LogProvider)(const char* function, const char* filename, uint32_t line, uint64_t timestamp, LogLevel logLevel, const char* format, va_list args);
+typedef void(*LogProviderLog)(const char* function, const char* filename, uint32_t line, uint64_t timestamp, LogLevel logLevel, const char* format, va_list args);
+
+typedef struct LogProvider {
+	char const* name;
+	LogProviderLog log;
+} LogProvider;
 
 //
 // Use this macro on the top level to staticly register a log provider at compile time
 //
-
-#define LoggingRegisterProvider(provider) LogProvider LogProvider_##provider __attribute__ ((section (".LoggingProviders"))) = &provider
+#define LoggingRegisterProvider(_name, provider) LogProvider LogProvider_##_name __attribute__ ((section (".LoggingProviders"))) = {.name = #_name, .log = &provider}
 
 #endif /* __LOGGING_H__ */

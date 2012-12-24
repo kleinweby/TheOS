@@ -51,6 +51,6 @@ void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel
 	uint32_t count = LoggingProvidersLength/sizeof(LogProvider);
 
 	for (uint32_t i = 0; i < count; i++) {
-		LoggingProviders[i](function, filename, line, timestamp, logLevel, format, args);
+		LoggingProviders[i].log(function, filename, line, timestamp, logLevel, format, args);
 	}
 }
