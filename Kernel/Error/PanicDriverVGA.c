@@ -93,8 +93,9 @@ void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState)
 	
 	if (cpuState) {
 		pprintf(VGAPutChar, "CPU State:\n");
-		pprintf(VGAPutChar, "  eax = %08x   ebx = %08x   ecx = %08x   edx =  %08x\n", cpuState->eax, cpuState->ebx, cpuState->ecx, cpuState->edx);
-		pprintf(VGAPutChar, "  ebp = %08x   esi = %08x   edi = %08x   eip = %p\n\n", cpuState->ebp, cpuState->esi, cpuState->edi, cpuState->eip);
+		pprintf(VGAPutChar, "  eax = %08x      ebx = %08x ecx = %08x   edx =  %08x\n", cpuState->eax, cpuState->ebx, cpuState->ecx, cpuState->edx);
+		pprintf(VGAPutChar, "  ebp = %08x      esi = %08x edi = %08x   eip = %p\n", cpuState->ebp, cpuState->esi, cpuState->edi, cpuState->eip);
+		pprintf(VGAPutChar, "   cs = %08x   eflags = %08x esp = %08x    ss =  %08x\n\n", cpuState->cs, cpuState->eflags, cpuState->esp, cpuState->ss);
 		
 		pprintf(VGAPutChar, "Backtrace:\n");
 	}
