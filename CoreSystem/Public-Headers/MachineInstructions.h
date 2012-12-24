@@ -22,56 +22,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides structues uses for multiboo
-//
+#ifndef MACHINE_INSTRUCTIONS_H
+#define MACHINE_INSTRUCTIONS_H
 
-#ifndef _MULTIBOOT_MULTIBOOT_H_
-#define _MULTIBOOT_MULTIBOOT_H_
+#ifdef __PLATFORM_I386__
+# include <CoreSystem/i386/MachineInstructions.h>
+#else
+# error Unknown Platform
+#endif
 
-#include "Error/Assert.h"
-
-#include <CoreSystem/CommonTypes.h>
-
-struct Multiboot {
-	uint32_t flags;
-	uint32_t mem_lower;
-	uint32_t mem_upper;
-	uint32_t bootdevice; // Seems wrong type
-	uint32_t cmdline; // Seems wrong type
-	uint32_t mods_count;
-	struct MultibootModule* mods_addr;
-	uint32_t syms[4];
-	uint32_t mmap_length;
-	struct mmap_entry* mmap_addr;
-	uint32_t drives_length;
-	pointer_t drives_addr;
-	uint32_t config_table;
-	uint32_t boot_loader_name;
-	uint32_t apm_table;
-	uint32_t vbe_control_info;
-	uint32_t vbe_mode_info;
-	uint16_t vbe_mode;
-	uint16_t vbe_interface_seg;
-	uint16_t vbe_interface_off;
-	uint16_t vbe_interface_len;
-} __attribute__ ((packed));
-
-struct MultibootMMapEntry {
-	uint32_t size;
-	uint64_t base_address;
-	uint64_t length;
-	uint32_t type;
-} __attribute__ ((packed));
-
-struct MultibootModule {
-	pointer_t startAddress;
-	pointer_t endAddress;
-	char* name;
-	uint32_t __reversed;
-} __attribute__ ((packed));
-
-#endif // _MULTIBOOT_MULTIBOOT_H_
+#endif /* MACHINE_INSTRUCTIONS_H */

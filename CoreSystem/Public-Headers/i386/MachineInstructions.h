@@ -22,56 +22,46 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides structues uses for multiboo
-//
+#ifndef X86_MACHINE_INSTRUCTIONS_H
+#define X86_MACHINE_INSTRUCTIONS_H
 
-#ifndef _MULTIBOOT_MULTIBOOT_H_
-#define _MULTIBOOT_MULTIBOOT_H_
+#include <CoreSystem/i386/Integers.h>
 
-#include "Error/Assert.h"
+static inline void outb(uint16_t port, uint8_t val )
+{
+    __asm__ volatile( "outb %0, %1"
+                  : : "a"(val), "Nd"(port) );
+}
 
-#include <CoreSystem/CommonTypes.h>
+static inline uint8_t inb(uint16_t port )
+{
+    uint8_t ret;
+    __asm__ volatile( "inb %1, %0"
+                  : "=a"(ret) : "Nd"(port) );
+    return ret;
+}
 
-struct Multiboot {
-	uint32_t flags;
-	uint32_t mem_lower;
-	uint32_t mem_upper;
-	uint32_t bootdevice; // Seems wrong type
-	uint32_t cmdline; // Seems wrong type
-	uint32_t mods_count;
-	struct MultibootModule* mods_addr;
-	uint32_t syms[4];
-	uint32_t mmap_length;
-	struct mmap_entry* mmap_addr;
-	uint32_t drives_length;
-	pointer_t drives_addr;
-	uint32_t config_table;
-	uint32_t boot_loader_name;
-	uint32_t apm_table;
-	uint32_t vbe_control_info;
-	uint32_t vbe_mode_info;
-	uint16_t vbe_mode;
-	uint16_t vbe_interface_seg;
-	uint16_t vbe_interface_off;
-	uint16_t vbe_interface_len;
-} __attribute__ ((packed));
+static inline void DisableInterrupts()
+{
+  __asm__ __volatile__ ("cli");
+}
 
-struct MultibootMMapEntry {
-	uint32_t size;
-	uint64_t base_address;
-	uint64_t length;
-	uint32_t type;
-} __attribute__ ((packed));
+static inline void EnableInterrupts()
+{
+  __asm__ __volatile__ ("sti");
+}
 
-struct MultibootModule {
-	pointer_t startAddress;
-	pointer_t endAddress;
-	char* name;
-	uint32_t __reversed;
-} __attribute__ ((packed));
+static inline void Halt()
+{
+  __asm__ __volatile__ ("hlt");
+}
 
-#endif // _MULTIBOOT_MULTIBOOT_H_
+static inline uint64_t TimeStampCounter(void) {
+  uint32_t lo, hi;
+
+  __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi) :: "ecx" );
+
+  return (uint64_t)hi << 32 | lo;
+}
+
+#endif /* MACHINE_INSTRUCTIONS_H */

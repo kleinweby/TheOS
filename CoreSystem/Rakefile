@@ -1,0 +1,5 @@
+require_relative '../BuildSupport/Common'
+
+rule 'CoreSystem.framework' => [] do |t|
+  create_framework 'CoreSystem', 'Public-Headers'
+end

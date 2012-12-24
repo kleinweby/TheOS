@@ -4,7 +4,8 @@ TOOLCHAIN="#{File.dirname(__FILE__)}/toolchain"
 
 ROOT="#{File.dirname(File.dirname(__FILE__))}/root"
 
-CFLAGS  = [ "-isysroot #{ROOT}" ]
+# -F should be relative to #{ROOT} ?!?
+CFLAGS  = [ "-isysroot #{ROOT}", "-F#{ROOT}/System/Frameworks"]
 LDFLAGS = []
 DEFINES = []
 

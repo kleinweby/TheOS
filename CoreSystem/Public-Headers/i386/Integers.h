@@ -22,56 +22,31 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides structues uses for multiboo
-//
+#ifndef SYS_I386_INTEGERS_H
+#define SYS_I386_INTEGERS_H
 
-#ifndef _MULTIBOOT_MULTIBOOT_H_
-#define _MULTIBOOT_MULTIBOOT_H_
+typedef signed char int8_t;
+typedef short int16_t;
+typedef int int32_t;
+typedef long long int64_t;
 
-#include "Error/Assert.h"
+static const int8_t kInt8Max = 127;
+static const int8_t kInt8Min = -kInt8Max;
+static const int16_t kInt16Max = 32767;
+static const int16_t kInt16Min = -kInt16Max;
+static const int32_t kInt32Max = 2147483647;
+static const int32_t kInt32Min = -kInt32Max;
+static const int64_t kInt64Max = 9223372036854775807LL;
+static const int64_t kInt64Min = -kInt64Max;
 
-#include <CoreSystem/CommonTypes.h>
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
 
-struct Multiboot {
-	uint32_t flags;
-	uint32_t mem_lower;
-	uint32_t mem_upper;
-	uint32_t bootdevice; // Seems wrong type
-	uint32_t cmdline; // Seems wrong type
-	uint32_t mods_count;
-	struct MultibootModule* mods_addr;
-	uint32_t syms[4];
-	uint32_t mmap_length;
-	struct mmap_entry* mmap_addr;
-	uint32_t drives_length;
-	pointer_t drives_addr;
-	uint32_t config_table;
-	uint32_t boot_loader_name;
-	uint32_t apm_table;
-	uint32_t vbe_control_info;
-	uint32_t vbe_mode_info;
-	uint16_t vbe_mode;
-	uint16_t vbe_interface_seg;
-	uint16_t vbe_interface_off;
-	uint16_t vbe_interface_len;
-} __attribute__ ((packed));
+static const uint8_t kUInt8Max = 255;
+static const uint16_t kUInt16Max = 65535;
+static const uint32_t kUInt32Max = 4294967295U;
+static const uint64_t kUInt64Max = 18446744073709551615ULL;
 
-struct MultibootMMapEntry {
-	uint32_t size;
-	uint64_t base_address;
-	uint64_t length;
-	uint32_t type;
-} __attribute__ ((packed));
-
-struct MultibootModule {
-	pointer_t startAddress;
-	pointer_t endAddress;
-	char* name;
-	uint32_t __reversed;
-} __attribute__ ((packed));
-
-#endif // _MULTIBOOT_MULTIBOOT_H_
+#endif // SYS_I386_INTEGERS_H
