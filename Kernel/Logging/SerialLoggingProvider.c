@@ -41,13 +41,14 @@ void SerialLoggingProvider(const char* function, const char* filename, uint32_t 
 {
 	#pragma unused(filename)
 	#pragma unused(line)
+	#pragma unused(function)
 	
 	char* level;
 
 	// Print level
 	switch(logLevel) {
 		case kLogLevelFatal:
-			level = "\033[0;31m[F]\033[0m";
+			level = "\033[1;31m[F]\033[0m";
 			break;
 		case kLogLevelError:
 			level = "\033[1;31m[E]\033[0m";
@@ -56,17 +57,17 @@ void SerialLoggingProvider(const char* function, const char* filename, uint32_t 
 			level = "\033[1;33m[W]\033[0m";
 			break;
 		case kLogLevelInfo:
-			level = "\033[1;34m[I]\033[0m";
+			level = "\033[0;34m[I]\033[0m";
 			break;
 		case kLogLevelVerbose:
-			level = "\033[10;34[V]\033[0m";
+			level = "\033[0;34m[V]\033[0m";
 			break;
 		case kLogLevelTrace:
-			level = "\033[11;34[T]\033[0m";
+			level = "\033[0;34m[T]\033[0m";
 			break;
 	}
 
-	pprintf(_SerialPutchar, "[%10d][%s]%s ", (uint32_t)timestamp, function, level);
+	pprintf(_SerialPutchar, "\033[0;37m[%10d]\033[0m%s ", (uint32_t)timestamp, level);
 	vpprintf(_SerialPutchar, format, args);
 	_SerialPutchar('\n');
 }
