@@ -36,7 +36,7 @@ void panic(char* message, ...)
 	panic_state(message, NULL);
 }
 
-void panic_state(char* message, void* cpuState)
+void panic_state(char* message, CPUState* cpuState)
 {
 	// Prevent any futher interrupts from waking up the kernel
 	DisableInterrupts();

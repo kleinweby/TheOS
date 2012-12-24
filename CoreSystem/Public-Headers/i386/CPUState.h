@@ -22,27 +22,23 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Panic.h"
+#ifndef _I386_CPUSTATE_H_
+#define _I386_CPUSTATE_H_
 
-#include <CoreSystem/MachineInstructions.h>
-#include <CoreSystem/String.h>
+typedef struct _CPUState {
+	uint32_t eip;
+	uint32_t edi;
+  	uint32_t esi;
+	uint32_t ebp;
+	uint32_t ebx;
+	uint32_t edx;
+	uint32_t ecx;
+	uint32_t eax;
 
-static void SerialWrite(uint16_t base, char chr) {
-  while ((inb(base+5)&0x20)==0);
-  outb(base,(uint8_t)chr);
-}
+	uint32_t cs;
+	uint32_t eflags;
+	uint32_t esp;
+	uint32_t ss;
+} CPUState;
 
-static void SerialPutchar(char chr) {
-	SerialWrite(0x3F8, chr);
-}
-
-void PanicDriverSerial(uint64_t timestamp, char* message, CPUState* cpuState)
-{
-	#pragma unused(timestamp)
-	
-	pprintf(SerialPutchar, "Panic");
-	pprintf(SerialPutchar, "%p\n", message);
-	pprintf(SerialPutchar, "%p\n", cpuState);
-}
-
-PanicRegisterDriver(PanicDriverSerial);
+#endif // _I386_CPUSTATE_H_

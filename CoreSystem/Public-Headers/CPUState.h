@@ -22,27 +22,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Panic.h"
+#ifndef _CPUSTATE_H_
+#define _CPUSTATE_H_
 
-#include <CoreSystem/MachineInstructions.h>
-#include <CoreSystem/String.h>
+#ifdef __PLATFORM_I386__
+# include <CoreSystem/i386/CPUState.h>
+#else
+# error Unknown Platform
+#endif
 
-static void SerialWrite(uint16_t base, char chr) {
-  while ((inb(base+5)&0x20)==0);
-  outb(base,(uint8_t)chr);
-}
-
-static void SerialPutchar(char chr) {
-	SerialWrite(0x3F8, chr);
-}
-
-void PanicDriverSerial(uint64_t timestamp, char* message, CPUState* cpuState)
-{
-	#pragma unused(timestamp)
-	
-	pprintf(SerialPutchar, "Panic");
-	pprintf(SerialPutchar, "%p\n", message);
-	pprintf(SerialPutchar, "%p\n", cpuState);
-}
-
-PanicRegisterDriver(PanicDriverSerial);
+#endif //_CPUSTATE_H_
