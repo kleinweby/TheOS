@@ -25,6 +25,7 @@
 #include "Panic.h"
 
 #include <CoreSystem/String.h>
+#include <CoreSystem/MachineInstructions.h>
 
 static uint16_t *videoBuffer = (unsigned short *)0xC00B8000;
 static uint8_t width = 80;
@@ -72,14 +73,30 @@ static void VGAClear()
 	for (uint16_t i = 0; i < width*height; i++) {
 		videoBuffer[i] = (uint16_t)(cursorPosition.attr << 8) | 0;
 	}
+	
+	// Disable cursor
+	outb(0x3D4, 0x0A);
+	uint8_t creg = inb(0x3D5);
+	creg |= (1<<5);
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, creg);
 }
 
 void PanicDriverVGA(uint64_t timestamp, char* message, void* cpuState)
 {
-	#pragma unused(timestamp, message, cpuState)
 	VGAClear();
 	
-	pprintf(VGAPutChar, "Panic");
+	pprintf(VGAPutChar, "Panic\n");
+	pprintf(VGAPutChar, "======\n");
+	pprintf(VGAPutChar, "Time: %d\n", timestamp);
+	pprintf(VGAPutChar, "Message: %s\n\n", message);
+	
+	if (cpuState) {
+		
+	}
+	else {
+		pprintf(VGAPutChar, "No cpu state was supplied!\n\n");
+	}
 }
 
 PanicRegisterDriver(PanicDriverVGA);
