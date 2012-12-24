@@ -27,13 +27,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Logging.h"
 
-void _SerialWrite(uint16_t base, char chr) {
+static void SerialWrite(uint16_t base, char chr) {
   while ((inb(base+5)&0x20)==0);
   outb(base,(uint8_t)chr);
 }
 
-void _SerialPutchar(char chr) {
-	_SerialWrite(0x3F8, chr);
+static void SerialPutchar(char chr) {
+	SerialWrite(0x3F8, chr);
 }
 
 void LoggingDriverSerial(const char* function, const char* filename, uint32_t line, uint64_t timestamp,
@@ -67,9 +67,9 @@ void LoggingDriverSerial(const char* function, const char* filename, uint32_t li
 			break;
 	}
 
-	pprintf(_SerialPutchar, "\033[0;37m[%10d]\033[0m%s ", (uint32_t)timestamp, level);
-	vpprintf(_SerialPutchar, format, args);
-	_SerialPutchar('\n');
+	pprintf(SerialPutchar, "\033[0;37m[%10d]\033[0m%s ", (uint32_t)timestamp, level);
+	vpprintf(SerialPutchar, format, args);
+	SerialPutchar('\n');
 }
 
 LoggingRegisterDriver(Serial, LoggingDriverSerial);
