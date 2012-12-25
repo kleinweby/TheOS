@@ -37,12 +37,27 @@ static void SerialPutchar(char chr) {
 }
 
 void PanicDriverSerial(uint64_t timestamp, char* message, CPUState* cpuState)
-{
-	#pragma unused(timestamp)
+{	
+	pprintf(SerialPutchar, "\033[0;37m[%10d]\033[1;31m[F] Panic\033[0m\n", (uint32_t)timestamp);
+	pprintf(SerialPutchar, "Message: %s\n", message);
 	
-	pprintf(SerialPutchar, "Panic");
-	pprintf(SerialPutchar, "%p\n", message);
-	pprintf(SerialPutchar, "%p\n", cpuState);
+	if (cpuState) {
+		pprintf(SerialPutchar, "CPU State:\n");
+		pprintf(SerialPutchar, "    eax =  %08x\n", cpuState->eax);
+		pprintf(SerialPutchar, "    ebx =  %08x\n", cpuState->ebx);
+		pprintf(SerialPutchar, "    ecx =  %08x\n", cpuState->ecx);
+		pprintf(SerialPutchar, "    edx =  %08x\n", cpuState->edx);
+		pprintf(SerialPutchar, "    ebp =  %08x\n", cpuState->ebp);
+		pprintf(SerialPutchar, "    esi =  %08x\n", cpuState->esi);
+		pprintf(SerialPutchar, "    edi =  %08x\n", cpuState->edi);
+		pprintf(SerialPutchar, "    eip = %p\n", cpuState->eip);
+		pprintf(SerialPutchar, "     cs =  %08x\n", cpuState->cs);
+		pprintf(SerialPutchar, " eflags =  %08x\n", cpuState->eflags);
+		pprintf(SerialPutchar, "    esp =  %08x\n", cpuState->esp);
+		pprintf(SerialPutchar, "    ss  =  %08x\n\n", cpuState->ss);
+		
+		pprintf(SerialPutchar, "Backtrace:\n");
+	}
 }
 
 PanicRegisterDriver(PanicDriverSerial);
