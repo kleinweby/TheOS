@@ -23,7 +23,7 @@ CFLAGS << '-I.' \
        << '-mno-sse3' << '-mno-3dnow'
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable' << '-Wno-pedantic' << '-Wno-missing-noreturn'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

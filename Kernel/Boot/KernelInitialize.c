@@ -24,6 +24,7 @@
 
 #include "Multiboot/Multiboot.h"
 #include "Logging/Logging.h"
+#include "Interrupts/Interrupts.h"
 
 void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {
@@ -31,4 +32,8 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	#pragma unused(header)
 	
 	LoggingInitialize();
+	
+	InterruptsInitialize();
+	
+	__asm__ volatile ("int $0");
 }

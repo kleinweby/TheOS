@@ -36,10 +36,77 @@ InterruptsLoadIDT:
 	; Return to the caller
 	ret
 
+[extern InterruptsHandler]
 InterruptsTrampolinCommon:
 	pushad
 	
+	; Call Interrupts Handler with cpu state struct
+	push esp
+	call InterruptsHandler
+	add esp, 4
+	
 	popad
+	; Pop error + interrupt number
+	add esp, 8
 	iretd
 
+%macro TrampolinStub 1
+[global InterruptsTrampolin%1]
+InterruptsTrampolin%1
+	; Push invalid error no
+	push dword 0
+	; Push Interrupt Number
+	push dword %1
+	jmp InterruptsTrampolinCommon
+%endmacro
+
+%macro TrampolinStubWithErrno 1
+[global InterruptsTrampolin%1]
+InterruptsTrampolin%1
+	; Push Interrupt Number
+	push dword %1
+	jmp InterruptsTrampolinCommon
+%endmacro
+
+; Exceptions
+TrampolinStub 0
+TrampolinStub 1
+TrampolinStub 2
+TrampolinStub 3
+TrampolinStub 4
+TrampolinStub 5
+TrampolinStub 6
+TrampolinStub 7
+TrampolinStubWithErrno 8
+TrampolinStub 9
+TrampolinStubWithErrno 10
+TrampolinStubWithErrno 11
+TrampolinStubWithErrno 12
+TrampolinStubWithErrno 13
+TrampolinStubWithErrno 14
+TrampolinStub 15
+TrampolinStub 16
+TrampolinStubWithErrno 17
+TrampolinStub 18
+ 
+; IRQs
+TrampolinStub 32
+TrampolinStub 33
+TrampolinStub 34
+TrampolinStub 35
+TrampolinStub 36
+TrampolinStub 37
+TrampolinStub 38
+TrampolinStub 39
+TrampolinStub 40
+TrampolinStub 41
+TrampolinStub 42
+TrampolinStub 43
+TrampolinStub 44
+TrampolinStub 45
+TrampolinStub 46
+TrampolinStub 47
+
+ 
+; Others: e.g. syscall
 

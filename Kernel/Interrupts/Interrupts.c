@@ -25,8 +25,10 @@
 #include "Interrupts.h"
 
 #include "Error/Assert.h"
+#include "Logging/Logging.h"
 
 #include <CoreSystem/CommonTypes.h>
+#include <CoreSystem/MachineInstructions.h>
 
 enum GateType {
   kGate32BitTaskType = 0x5,
@@ -56,5 +58,141 @@ struct _IDTHeader {
 
 static_assert(sizeof(struct _IDTHeader) == 6);
 
-struct _IDTEntry IDT[1];
+static const uint8_t kInterruptsCount = 48;
+struct _IDTEntry IDT[kInterruptsCount];
 struct _IDTHeader InterruptsIDTHeader = {.address = (uint32_t)&IDT, .size = sizeof(IDT)};
+
+extern void InterruptsLoadIDT();
+
+// All the trampolins from the nasm file
+extern void InterruptsTrampolin0();
+extern void InterruptsTrampolin1();
+extern void InterruptsTrampolin2();
+extern void InterruptsTrampolin3();
+extern void InterruptsTrampolin4();
+extern void InterruptsTrampolin5();
+extern void InterruptsTrampolin6();
+extern void InterruptsTrampolin7();
+extern void InterruptsTrampolin8();
+extern void InterruptsTrampolin9();
+extern void InterruptsTrampolin10();
+extern void InterruptsTrampolin11();
+extern void InterruptsTrampolin12();
+extern void InterruptsTrampolin13();
+extern void InterruptsTrampolin14();
+extern void InterruptsTrampolin15();
+extern void InterruptsTrampolin16();
+extern void InterruptsTrampolin17();
+extern void InterruptsTrampolin18();
+extern void InterruptsTrampolin32();
+extern void InterruptsTrampolin33();
+extern void InterruptsTrampolin34();
+extern void InterruptsTrampolin35();
+extern void InterruptsTrampolin36();
+extern void InterruptsTrampolin37();
+extern void InterruptsTrampolin38();
+extern void InterruptsTrampolin39();
+extern void InterruptsTrampolin40();
+extern void InterruptsTrampolin41();
+extern void InterruptsTrampolin42();
+extern void InterruptsTrampolin43();
+extern void InterruptsTrampolin44();
+extern void InterruptsTrampolin45();
+extern void InterruptsTrampolin46();
+extern void InterruptsTrampolin47();
+
+static void InterruptsInstallIDTEntry(uint32_t number, pointer_t tramp, 
+	uint16_t selector, enum GateType type, uint8_t storageSegment, uint8_t privilegLevel)
+{
+    struct _IDTEntry *entry = &IDT[number];
+
+	// memset(entry, 0, sizeof(struct _IDTEntry));
+
+    entry->handler_low = (uint16_t)tramp;
+    entry->handler_high = (uint32_t)tramp >> 16;
+
+    entry->selector = selector;
+    entry->storageSegment = storageSegment;
+    entry->_unused_zero = 0;
+    entry->isPresent = 1;
+	entry->privilegLevel = privilegLevel;
+	entry->type = type;
+}
+
+void InterruptsInitialize()
+{
+	LogTrace("Remap PIC interrupts");
+	//
+	// In real mode a few irq's are on places where
+	// exceptions lay, so we nee to remap this
+	//
+	
+	// Initialize master PIC
+	// outb(0x20, 0x11); // Init
+	// outb(0x21, 0x20); // Interrupt number
+	// outb(0x21, 0x04); // IRQ 2 is slave
+	// outb(0x21, 0x01); // ??
+	//  
+	// // Initialize slave PIC
+	// outb(0xa0, 0x11); // Ini
+	// outb(0xa1, 0x28); // Interrupt number
+	// outb(0xa1, 0x02); // IRQ 2 is slave
+	// outb(0xa1, 0x01); // ??
+ 
+ 	LogTrace("Setup IDT");
+ 
+ #define INSTALL_TRAMPOLIN(n) InterruptsInstallIDTEntry(n, InterruptsTrampolin##n, 0x08, kGate32BitInterruptType, 0, 0);
+
+	INSTALL_TRAMPOLIN(0);
+	INSTALL_TRAMPOLIN(1);
+	INSTALL_TRAMPOLIN(2);
+	INSTALL_TRAMPOLIN(3);
+	INSTALL_TRAMPOLIN(4);
+	INSTALL_TRAMPOLIN(5);
+	INSTALL_TRAMPOLIN(6);
+	INSTALL_TRAMPOLIN(7);
+	INSTALL_TRAMPOLIN(8);
+	INSTALL_TRAMPOLIN(9);
+	INSTALL_TRAMPOLIN(10);
+	INSTALL_TRAMPOLIN(11);
+	INSTALL_TRAMPOLIN(12);
+	INSTALL_TRAMPOLIN(13);
+	INSTALL_TRAMPOLIN(14);
+	INSTALL_TRAMPOLIN(15);
+	INSTALL_TRAMPOLIN(16);
+	INSTALL_TRAMPOLIN(17);
+	INSTALL_TRAMPOLIN(18);
+ 
+	INSTALL_TRAMPOLIN(32);
+	INSTALL_TRAMPOLIN(33);
+	INSTALL_TRAMPOLIN(34);
+	INSTALL_TRAMPOLIN(35);
+	INSTALL_TRAMPOLIN(36);
+	INSTALL_TRAMPOLIN(37);
+	INSTALL_TRAMPOLIN(38);
+	INSTALL_TRAMPOLIN(39);
+	INSTALL_TRAMPOLIN(40);
+	INSTALL_TRAMPOLIN(41);
+	INSTALL_TRAMPOLIN(42);
+	INSTALL_TRAMPOLIN(43);
+	INSTALL_TRAMPOLIN(44);
+	INSTALL_TRAMPOLIN(45);
+	INSTALL_TRAMPOLIN(46);
+	INSTALL_TRAMPOLIN(47);
+ 
+	// Load IDT
+ 	InterruptsLoadIDT();
+  
+	// Enable IRQs
+	// outb(0x20, 0x0);
+	// outb(0xa0, 0x0);
+	EnableInterrupts();
+	LogInfo("Interrupts enabled");
+}
+
+void InterruptsHandler(void* ptr)
+{
+	#pragma unused(ptr)
+	LogInfo("Interrupt");
+	while (true) Halt();
+}
