@@ -29,13 +29,32 @@
 
 void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
 {
-	multiboot->mmap_addr = (pointer_t)((uint32_t)multiboot->mmap_addr + offset);
+	LogTrace("Adjusting multiboot structure by %x", offset);
+	#define ADJUST(a) (a) = (pointer_t)((uint32_t)(a) + offset)
+	
+	ADJUST(multiboot->bootdevice);
+	ADJUST(multiboot->cmdline);
+	ADJUST(multiboot->mods_addr);
+	ADJUST(multiboot->mmap_addr);
+	ADJUST(multiboot->drives_addr);
+	ADJUST(multiboot->config_table);
+	ADJUST(multiboot->boot_loader_name);
+	
+	struct MultibootModule* module = multiboot->mods_addr;
+	for (uint32_t i = 0; i < multiboot->mods_count; i++) {
+		ADJUST(module[i].startAddress);
+		ADJUST(module[i].endAddress);
+		ADJUST(module[i].name);
+	}
+	
+	#undef ADJUST
 }
 
 void MultibootInitializePhyMem(struct Multiboot* multiboot)
 {
 	PhyMemInitialize();
 	
+	LogTrace("Account available ram reported by multiboot");
 	struct MultibootMMapEntry* entry;
 	
 	entry  = multiboot->mmap_addr;
