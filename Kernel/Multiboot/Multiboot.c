@@ -22,15 +22,35 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
+#include "Multiboot.h"
+
+#include "Memory/PhyMem.h"
 #include "Logging/Logging.h"
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
+void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
+{
+	multiboot->mmap_addr = (pointer_t)((uint32_t)multiboot->mmap_addr + offset);
+}
+
+void MultibootInitializePhyMem(struct Multiboot* multiboot)
+{
+	PhyMemInitialize();
 	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
+	struct MultibootMMapEntry* entry;
 	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header);
+	entry  = multiboot->mmap_addr;
+
+	while ((uint32_t)entry < (uint32_t)multiboot->mmap_addr + multiboot->mmap_length) {
+		if (entry->type == 1) {
+			for (pointer_t address = (pointer_t)(uint32_t)entry->base_address; 
+			     address < (pointer_t)(uint32_t)(entry->base_address + entry->length);
+			     address += kPhyMemPageSize) {
+				_PhyMemMarkFree(address);	
+			}
+		}
+		
+		entry = (struct MultibootMMapEntry*)((uint32_t)entry + entry->size + 4);
+	}
+	
+	LogPhyMem();
 }

@@ -46,7 +46,7 @@ struct Multiboot {
 	struct MultibootModule* mods_addr;
 	uint32_t syms[4];
 	uint32_t mmap_length;
-	struct mmap_entry* mmap_addr;
+	struct MultibootMMapEntry* mmap_addr;
 	uint32_t drives_length;
 	pointer_t drives_addr;
 	uint32_t config_table;
@@ -73,5 +73,16 @@ struct MultibootModule {
 	char* name;
 	uint32_t __reversed;
 } __attribute__ ((packed));
+
+//
+// Adjust Multiboot structure for a given offset
+//
+void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset);
+#define MultibootAdjust(multiboot, offset) multiboot = (pointer_t)((uint32_t)multiboot + offset); _MultibootAdjust(multiboot, offset)
+
+//
+// Initialize PhyMem from informations of the multiboot structure
+//
+void MultibootInitializePhyMem(struct Multiboot* multiboot);
 
 #endif // _MULTIBOOT_MULTIBOOT_H_

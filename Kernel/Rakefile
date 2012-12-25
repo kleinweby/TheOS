@@ -8,9 +8,15 @@ SRC.include([
   "Boot/KernelInitialize.c",
   "Boot/startup.nasm",
   
+  # Multiboot
+  "Multiboot/Multiboot.c",
+  
   #Logging
   "Logging/Logging.c",
   "Logging/LoggingDriverSerial.c",
+  
+  # PhyMem
+  "Memory/PhyMem.c"
 ])
 
 CFLAGS << '-I.' \
@@ -19,7 +25,7 @@ CFLAGS << '-I.' \
        << '-mno-sse3' << '-mno-3dnow'
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable' << '-Wno-pedantic'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

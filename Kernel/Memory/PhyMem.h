@@ -22,15 +22,28 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
+#ifndef _PHYMEM_H_
+#define _PHYMEM_H_
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header);
-}
+#include <CoreSystem/CommonTypes.h>
+
+static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
+
+//
+// Initializes the phy mem subsystem
+//
+void PhyMemInitialize();
+
+//
+// Initializetion routines. Be careful when using those
+// ====================================================
+//
+void _PhyMemMarkFree(pointer_t page);
+void _PhyMemMarkUsed(pointer_t page);
+
+//
+// Print phy mem layout
+//
+void LogPhyMem();
+
+#endif // _PHYMEM_H_
