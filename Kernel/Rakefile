@@ -11,6 +11,10 @@ SRC.include([
   #Logging
   "Logging/Logging.c",
   "Logging/LoggingDriverSerial.c",
+  
+  # Interrupts
+  "Interrupts/Interrupts.c",
+  "Interrupts/InterruptsASM.nasm"
 ])
 
 CFLAGS << '-I.' \
