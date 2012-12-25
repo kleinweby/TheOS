@@ -40,6 +40,7 @@ void PhyMemInitialize();
 //
 void _PhyMemMarkFree(pointer_t page);
 void _PhyMemMarkUsed(pointer_t page);
+void _PhyMemMarkUsedRange(pointer_t address, size_t size);
 
 //
 // Print phy mem layout

@@ -26,6 +26,7 @@
 
 #include "Logging/Logging.h"
 
+static const uint32_t kPageMask = ~(kPhyMemPageSize - 1);
 static const uint32_t kFreeBitmapPlanes = 4ULL*1024ULL*1024ULL*1024ULL /* 4GB */ / kPhyMemPageSize /* Page size */ / 32 /* 32 pages per 32bit uint_t value */;
 static uint32_t FreeBitmap[kFreeBitmapPlanes];
 
@@ -102,4 +103,14 @@ void _PhyMemMarkUsed(pointer_t page)
 		return;
 
 	FreeBitmap[planeNumber] &= ~(1 << BitNumberInPlaneFromAddress(page));
+}
+
+void _PhyMemMarkUsedRange(pointer_t address, size_t size)
+{
+	for(uint32_t addr = ((uint32_t)address & kPageMask); 
+	    addr < (uint32_t)address + size;
+		addr += kPhyMemPageSize) {
+		_PhyMemMarkUsed((pointer_t)addr);
+		LogVerbose("Mark %p", addr);
+	}
 }
