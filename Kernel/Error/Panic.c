@@ -33,7 +33,8 @@ LINKER_SYMBOL(PanicDriversLength, uint32_t);
 
 void panic(char* message, ...)
 {
-	panic_state(message, NULL);
+	CPUState state;
+	panic_state(message, &state);
 }
 
 void panic_state(char* message, CPUState* cpuState)
