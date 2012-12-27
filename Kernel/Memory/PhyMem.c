@@ -111,6 +111,5 @@ void _PhyMemMarkUsedRange(pointer_t address, size_t size)
 	    addr < (uint32_t)address + size;
 		addr += kPhyMemPageSize) {
 		_PhyMemMarkUsed((pointer_t)addr);
-		LogVerbose("Mark %p", addr);
 	}
 }

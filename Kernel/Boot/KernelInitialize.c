@@ -24,6 +24,12 @@
 
 #include "Multiboot/Multiboot.h"
 #include "Logging/Logging.h"
+#include "Memory/PhyMem.h"
+
+#include "LinkerHelper.h"
+
+LINKER_SYMBOL(KernelOffset, pointer_t);
+LINKER_SYMBOL(KernelLength, offset_t);
 
 void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
@@ -33,4 +39,6 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	LogVerbose("Magic %x, header: %p", magic, header);
 	MultibootInitializePhyMem(header);
+	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
+	LogPhyMem();
 }

@@ -30,7 +30,7 @@
 void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
 {
 	LogTrace("Adjusting multiboot structure by %x", offset);
-	#define ADJUST(a) (a) = (pointer_t)((uint32_t)(a) + offset)
+	#define ADJUST(a) (a) = OFFSET(a, offset)
 	
 	ADJUST(multiboot->bootdevice);
 	ADJUST(multiboot->cmdline);
@@ -71,5 +71,6 @@ void MultibootInitializePhyMem(struct Multiboot* multiboot)
 		entry = (struct MultibootMMapEntry*)((uint32_t)entry + entry->size + 4);
 	}
 	
-	LogPhyMem();
+	LogTrace("Account phys pages used by multiboot structure");
+	_PhyMemMarkUsedRange(multiboot, sizeof(struct Multiboot));
 }

@@ -20,7 +20,7 @@ SECTIONS
    .startup ALIGN(4096) : {
       *(.startup)
    }
-   PROVIDE_HIDDEN(_KernelStartupLength = _KernelStartupOffset - .);
+   PROVIDE_HIDDEN(_KernelStartupLength = (. - 0xC0000000) - _KernelStartupOffset);
 
    . += 0xC0000000;
 
@@ -28,7 +28,7 @@ SECTIONS
    .text : AT(ADDR(.text) - 0xC0000000) {
       *(.text)
    }
-   PROVIDE_HIDDEN(_KernelTextLength = _KernelTextOffset - .);
+   PROVIDE_HIDDEN(_KernelTextLength = (. - 0xC0000000) - _KernelTextOffset);
    
    PROVIDE_HIDDEN(_KernelDataOffset = .);
    .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
@@ -49,8 +49,8 @@ SECTIONS
    PROVIDE_HIDDEN(_LoggingDrivers = ADDR(.LoggingDrivers));
    PROVIDE_HIDDEN(_LoggingDriversLength = SIZEOF(.LoggingDrivers));
    
-   PROVIDE_HIDDEN(_KernelDataLength = _KernelDataOffset - .);
-   PROVIDE_HIDDEN(_KernelLength = _KernelOffset - .);
+   PROVIDE_HIDDEN(_KernelDataLength = (. - 0xC0000000) - _KernelDataOffset);
+   PROVIDE_HIDDEN(_KernelLength = (. - 0xC0000000) - _KernelOffset);
    
    /* for debug */
    .debug_abbrev 0 : { *(.debug_abbrev) }
