@@ -50,7 +50,7 @@ void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
 	#undef ADJUST
 }
 
-void MultibootInitializePhyMem(struct Multiboot* multiboot)
+void MultibootInitializePhyMem(struct Multiboot* multiboot, offset_t phyOffset)
 {
 	PhyMemInitialize();
 	
@@ -72,5 +72,6 @@ void MultibootInitializePhyMem(struct Multiboot* multiboot)
 	}
 	
 	LogTrace("Account phys pages used by multiboot structure");
-	_PhyMemMarkUsedRange(multiboot, sizeof(struct Multiboot));
+	// TODO: we need to adjust the other structure too
+	_PhyMemMarkUsedRange(OFFSET(multiboot, -phyOffset), sizeof(struct Multiboot));
 }

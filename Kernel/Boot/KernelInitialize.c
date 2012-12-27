@@ -38,7 +38,7 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
 	
 	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header);
+	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
 	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
 	LogPhyMem();
 }

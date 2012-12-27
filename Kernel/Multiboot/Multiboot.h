@@ -83,6 +83,9 @@ void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset);
 //
 // Initialize PhyMem from informations of the multiboot structure
 //
-void MultibootInitializePhyMem(struct Multiboot* multiboot);
+// @param phyOffset Describes the initial offset phy addr -> v addr
+//                  only valid during startup.
+//
+void MultibootInitializePhyMem(struct Multiboot* multiboot, offset_t phyOffset);
 
 #endif // _MULTIBOOT_MULTIBOOT_H_
