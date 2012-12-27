@@ -22,38 +22,29 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#ifndef _PHYMEM_H_
+#define _PHYMEM_H_
+
+#include <CoreSystem/CommonTypes.h>
+
+static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
+
 //
-// Abstract
-// =======
+// Initializes the phy mem subsystem
 //
-// This file provides commong types used in the system
+void PhyMemInitialize();
+
 //
+// Initializetion routines. Be careful when using those
+// ====================================================
+//
+void _PhyMemMarkFree(pointer_t page);
+void _PhyMemMarkUsed(pointer_t page);
+void _PhyMemMarkUsedRange(pointer_t address, size_t size);
 
+//
+// Print phy mem layout
+//
+void LogPhyMem();
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-static const pointer_t NULL = (pointer_t)0;
-
-static inline pointer_t OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+#endif // _PHYMEM_H_
