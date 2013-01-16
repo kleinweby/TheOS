@@ -55,7 +55,7 @@ static LogLevel CurrentLogLovel = kLogLevelTrace;
 // Note: These does not filter the messages based on the loglevel, this is done in the
 //     macros provided.
 //
-void _Log(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, ...);
+void _Log(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, ...) __attribute__ ((format (printf, 5, 6)));
 void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, va_list args);
 
 //
