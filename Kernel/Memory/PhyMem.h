@@ -47,4 +47,18 @@ void _PhyMemMarkUsedRange(pointer_t address, size_t size);
 //
 void LogPhyMem();
 
+// Alloc an physical memory page and returns the address of it.
+// 
+// When the allocation fails the address will be undefined.
+// 
+// Passing NULL as address pointer will cause a panic.
+// 
+// @param address Pointer to an pointer_t value that will contain the
+//                address of the allocated page.
+//                Note: 0x0 is an valid page address too. For error
+//                checking use the return value.
+// @return Returns true if the allocation succeeded. false otherwise.
+// 					
+bool PhyMemAlloc(pointer_t* address);
+
 #endif // _PHYMEM_H_

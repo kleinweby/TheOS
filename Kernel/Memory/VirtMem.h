@@ -22,30 +22,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
-#import "Memory/VirtMem.h"
+#ifndef _VIRTMEM_H_
+#define _VIRTMEM_H_
+#endif // _VIRTMEM_H_
 
-#import "KernelInfo.h"
-
-// TODO: make a dynamic heap
-char heap[10*1024*1024];
-
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	LogPhyMem();
-	
-	KAllocInitialize(heap, sizeof(heap));
-
-	
-	VirtMemInitialize();
-}
+//
+// Initializes the VirtMem subsystem but does
+// not activate it pending futhur setup by the caller
+// e.g. Additional mappings etc.
+//
+void VirtMemInitialize();

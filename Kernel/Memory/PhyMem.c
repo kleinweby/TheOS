@@ -115,3 +115,44 @@ void _PhyMemMarkUsedRange(pointer_t address, size_t size)
 		_PhyMemMarkUsed((pointer_t)addr);
 	}
 }
+
+bool PhyMemAlloc(pointer_t* address)
+{
+	uint32_t planeIndex;
+
+	if (address == NULL) {
+		// TODO: panic()
+
+		return false;
+	}
+
+	// Find a free page
+	for (planeIndex = 0; planeIndex < kFreeBitmapPlanes; planeIndex++) {
+		uint32_t currentPlane = FreeBitmap[planeIndex];
+		uint8_t bitInPlane;
+
+		// This plane has no free page avaiable, so proceed.
+		if (currentPlane == 0)
+			continue;
+
+		for (bitInPlane = 0; bitInPlane < 32; bitInPlane++) {
+			if ((((currentPlane >> bitInPlane) & 0x1) == 1))
+				break;
+		}
+
+		/*
+		 Because the currentPlane is not 0, there must be at least one bit set in it. Therfore now
+		 we have found this bit. =)
+		*/
+
+		// Calculate the address
+		*address = AddressFromPlaneAndBit(planeIndex, bitInPlane);
+
+		// Mark it as used
+		_PhyMemMarkUsed(*address);
+
+		return true;
+	}
+
+	return false;
+}
