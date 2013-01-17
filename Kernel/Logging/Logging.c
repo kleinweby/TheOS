@@ -25,6 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CoreSystem/MachineInstructions.h>
 
 #include "Logging.h"
+#import "KernelInfo.h"
 #include "LinkerHelper.h"
 
 LINKER_SYMBOL(LoggingDrivers, LogDriver*);
@@ -32,7 +33,7 @@ LINKER_SYMBOL(LoggingDriversLength, uint32_t);
 
 void LoggingInitialize()
 {
-	LogInfo("Logging initialized.");
+	LogInfo("TheOS %s", KernelVersion);
 }
 
 void _Log(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, ...)

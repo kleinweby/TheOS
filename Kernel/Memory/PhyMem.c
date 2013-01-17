@@ -52,6 +52,8 @@ static inline pointer_t AddressFromPlaneAndBit(uint32_t planeNumber, uint32_t bi
 
 void PhyMemInitialize()
 {
+	CurrentLogLovel = kLogLevelInfo;
+	
 	// Nothing is free
 	for (uint32_t i = 0; i < kFreeBitmapPlanes; i++)
 		FreeBitmap[i] = 0;
