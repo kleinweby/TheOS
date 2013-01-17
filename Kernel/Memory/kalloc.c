@@ -146,11 +146,14 @@ void* kalloc(size_t size)
 	chunk->size |= kChunkUsed;
 	
 	assert(chunk != heap && chunk != HeapEnd);
-	return chunk;
+	return OFFSET(chunk, sizeof(UsedChunk));
 }
 
 void free(void* ptr)
 {
+	// Adjust pointer
+	ptr = OFFSET(ptr, -sizeof(UsedChunk));
+	
 	UsedChunk* chunk = ptr;
 	assert(chunk->size & kChunkUsed);
 	
