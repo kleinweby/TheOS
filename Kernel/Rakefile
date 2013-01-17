@@ -1,6 +1,7 @@
 require_relative '../BuildSupport/Common'
 require 'rake/clean'
 require 'rake/loaders/makefile'
+require 'json'
 
 SRC=FileList[]
 
@@ -53,10 +54,6 @@ file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
 	sh "#{STRIP} #{t.name}"
 end
 
-file 'KernelInfo.c' => [ ] do |t|
-  sh "touch KernelInfo.c"
-end
-
 task 'install' => ['kernel'] do
   puts " [INSTALL] kernel"
   cp 'kernel', "#{ROOT}/kernel"
@@ -74,5 +71,65 @@ end
 task 'attach' => ['kernel.sym'] do
     sh "#{GDB} kernel.sym --eval-command=\"target remote tcp::1234\""
 end
+
+file 'KernelInfo.c' => [ 'KernelInfo.c.rake-defs' ] do |t|
+  defs = {}
+  open('KernelInfo.c.rake-defs') do |f|
+    defs = JSON.load(f)
+  end
+  
+  content = <<-eos
+
+char* KernelVersion = "#{defs['version']}";
+char* KernelGitVersion = "#{defs['gitVersion']}";
+
+  eos
+  
+  open(t.name, "w") do |f|
+    f.write(content)
+  end
+end
+
+# A KernelInfo Task
+class KernelInfoDefTask < Rake::FileTask
+  
+  def initialize(task_name, app)
+    super(task_name, app)
+    @actions << Proc.new do |t|
+      
+      open(name, "w") do |f|
+        JSON.dump({
+          'gitVersion' => `git rev-parse --short HEAD`.strip,
+          'version' => `git describe --always --dirty`.strip
+        }, f)
+      end
+    end
+  end
+  
+  def out_of_date?(stmp)
+    defs = {}
+    begin
+      open(name) do |f|
+        defs = JSON.load(f)
+      end if File.file?(name)
+    rescue
+      defs = {}
+    end
+    
+    # Check git version
+    gitVersion = `git rev-parse --short HEAD`.strip
+    version = `git describe --always --dirty`.strip
+    
+    hasChanged = false
+    
+    hasChanged = true unless defs['gitVersion'] == gitVersion
+    
+    hasChanged = true unless defs['version'] == version
+    
+    hasChanged
+  end
+end
+
+KernelInfoDefTask.define_task 'KernelInfo.c.rake-defs' => []
 
 DEPS.each{|file| Rake::MakefileLoader.new.load(file) if File.file?(file)}
