@@ -16,7 +16,9 @@ SRC.include([
   "Logging/LoggingDriverSerial.c",
   
   # PhyMem
-  "Memory/PhyMem.c"
+  "Memory/PhyMem.c",
+  # Kernel Info
+  "KernelInfo.c"
 ])
 
 CFLAGS << '-I.' \
@@ -49,6 +51,10 @@ file 'kernel' => [ *OBJ, LINKER_SCRIPT ]  do |t|
 	sh "#{OBJCOPY} --only-keep-debug #{t.name} #{t.name}.sym"
 	puts " [STRIP] #{t.name}"
 	sh "#{STRIP} #{t.name}"
+end
+
+file 'KernelInfo.c' => [ ] do |t|
+  sh "touch KernelInfo.c"
 end
 
 task 'install' => ['kernel'] do

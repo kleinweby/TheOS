@@ -22,20 +22,31 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
+//
+// Abstract 
+//
 
-#import "KernelInfo.h"
+#import <CoreSystem/CommonTypes.h>
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	LogPhyMem();
-}
+#import "LinkerHelper.h"
+
+//
+// A string used as kernel version
+//
+// This may be a full version string, or
+// is equal to KernelGitVersion when a full version
+// could not be produced
+extern char* KernelVersion;
+
+//
+// A short git hash identifier, describing the build
+// version of this theos kernel
+//
+extern char* KernelGitVersion;
+
+//
+// Some basic information about the compile-time
+// kernel layout
+//
+LINKER_SYMBOL(KernelOffset, pointer_t);
+LINKER_SYMBOL(KernelLength, offset_t);
