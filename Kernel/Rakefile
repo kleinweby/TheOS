@@ -18,6 +18,9 @@ SRC.include([
   
   # PhyMem
   "Memory/PhyMem.c",
+  
+  "Memory/kalloc.c",
+  
   # Kernel Info
   "KernelInfo.c"
 ])
