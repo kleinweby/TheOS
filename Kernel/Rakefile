@@ -92,16 +92,14 @@ end
 
 # A KernelInfo Task
 class KernelInfoDefTask < Rake::FileTask
+  @_currentDefs
   
   def initialize(task_name, app)
     super(task_name, app)
     @actions << Proc.new do |t|
       
       open(name, "w") do |f|
-        JSON.dump({
-          'gitVersion' => `git rev-parse --short HEAD`.strip,
-          'version' => `git describe --always --dirty`.strip
-        }, f)
+        JSON.dump(currentDefs(), f)
       end
     end
   end
@@ -116,17 +114,15 @@ class KernelInfoDefTask < Rake::FileTask
       defs = {}
     end
     
-    # Check git version
-    gitVersion = `git rev-parse --short HEAD`.strip
-    version = `git describe --always --dirty`.strip
-    
-    hasChanged = false
-    
-    hasChanged = true unless defs['gitVersion'] == gitVersion
-    
-    hasChanged = true unless defs['version'] == version
-    
-    hasChanged
+    defs != currentDefs()
+  end
+  
+  def currentDefs
+    @_currentDefs ||= {
+      'gitVersion' => `git rev-parse --short HEAD`.strip,
+      'version' => `git describe --always --dirty`.strip
+    } 
+    @_currentDefs
   end
 end
 
