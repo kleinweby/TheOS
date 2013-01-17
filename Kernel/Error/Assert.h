@@ -36,7 +36,8 @@
 // Asserts a given assumption expr at runtime
 //
 #define assert(expr) (__builtin_expect(!(expr), 0) ? panic("Assertion %s in %s at %s:%d failed.", #expr, __PRETTY_FUNCTION__, __FILE__, __LINE__) : (void)0)
-
+#undef assert
+#define assert(expr)
 //
 // Assert a given assumption expr at compile time
 //
