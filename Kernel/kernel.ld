@@ -41,13 +41,21 @@ SECTIONS
      *(.bss)
    }
    
-   /* Support for staticly declaring logging providers */
+   /* Support for staticly declaring logging drivers */
    .LoggingDrivers : {
       KEEP(*(.LoggingDrivers.*))
       KEEP(*(.LoggingDrivers))
    }
    PROVIDE_HIDDEN(_LoggingDrivers = ADDR(.LoggingDrivers));
    PROVIDE_HIDDEN(_LoggingDriversLength = SIZEOF(.LoggingDrivers));
+   
+   /* Support for staticly declaring panic drivers */
+   .PanicDrivers : {
+      KEEP(*(.PanicDrivers.*))
+      KEEP(*(.PanicDrivers))
+   }
+   PROVIDE_HIDDEN(_PanicDrivers = ADDR(.PanicDrivers));
+   PROVIDE_HIDDEN(_PanicDriversLength = SIZEOF(.PanicDrivers));
    
    PROVIDE_HIDDEN(_KernelDataLength = (. - 0xC0000000) - _KernelDataOffset);
    PROVIDE_HIDDEN(_KernelLength = (. - 0xC0000000) - _KernelOffset);
