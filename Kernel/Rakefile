@@ -21,6 +21,9 @@ SRC.include([
   
   "Utils/Object.h",
   
+  
+  "Memory/kalloc.c",
+  
   # Kernel Info
   "KernelInfo.c"
 ])
