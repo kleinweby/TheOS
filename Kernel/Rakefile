@@ -120,7 +120,7 @@ class KernelInfoDefTask < Rake::FileTask
   def currentDefs
     @_currentDefs ||= {
       'gitVersion' => `git rev-parse --short HEAD`.strip,
-      'version' => `git describe --always --dirty`.strip
+      'version' => `git describe --match 'version/*' --always --dirty`.strip().sub('version/', '')
     } 
     @_currentDefs
   end
