@@ -22,11 +22,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "VirtMem.h"
+typedef struct VMBackendContext* VMBackendContext;
 
-#import "VMBackend.h"
-
-void VirtMemInitialize()
-{
-	VMBackendInitialize();
-}
+//
+// Init the vm backend.
+//
+// This will create all page tables possibly
+// used by the kernel and a bare context to use during
+// kernel initialization. (To be percise it will only
+// be used until any other context was activated).
+//
+// This will generate an idenity mapping for the heap
+// and the kernel binary. Anything else you need to map
+// afterwards.
+//
+void VMBackendInitialize();

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "VirtMem.h"
+typedef struct VMContext VMContext;
 
-#import "VMBackend.h"
+#import "VMSection.h"
 
-void VirtMemInitialize()
-{
-	VMBackendInitialize();
-}
+struct VMContext {
+	// The backend for managing mappings
+	//VMBackendContext* backend;
+	
+	// All our sections
+	// ordered to their base
+	VMSection** sections;
+};

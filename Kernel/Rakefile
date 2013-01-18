@@ -21,7 +21,9 @@ SRC.include([
   
   # VirtMem
   "Memory/VirtMem.c",
-  
+  "Memory/VMBackend.c",
+  "Memory/VMHeapObject.c",
+  "Memory/VMObject.c",
   
   "Memory/kalloc.c",
   

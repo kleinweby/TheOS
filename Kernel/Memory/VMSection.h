@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,28 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "VirtMem.h"
+typedef struct VMSection VMSection;
 
-#import "VMBackend.h"
+#import "VMContext.h"
+#import "VMSection.h"
 
-void VirtMemInitialize()
-{
-	VMBackendInitialize();
-}
+// Describes the relation section->context
+struct VMSectionContext {
+	VMContext* context;
+	// The base of this section in the given context
+	offset_t base;
+};
+
+
+struct VMSection {
+	size_t size;
+	// A symbolic name describing the section
+	// E.g 'kernel', 'CoreSystem'/Library...
+	char* name;
+	
+	// Array sorted by pointer of context
+	struct VMSectionContext* contexts;
+	
+	// Array sorted by offset
+	VMObject* objects;
+};

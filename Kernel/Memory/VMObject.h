@@ -22,11 +22,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "VirtMem.h"
+#import <CoreSystem/CommonTypes.h>
 
-#import "VMBackend.h"
+typedef struct VMObject VMObject;
 
-void VirtMemInitialize()
-{
-	VMBackendInitialize();
-}
+#import "Memory/VMSection.h"
+
+struct VMObject {
+	offset_t base; // Relative to the section
+	size_t size;
+	
+	// The section we're in
+	VMSection* section;
+	
+	// We don't need to keep track of the contexts
+	// we're added, the section knows about them
+	
+	//
+	// Members
+	//
+	void (*addToContext)(VMObject* object, VMContext* context);
+	void (*removeFromContext)(VMObject* object, VMContext* context);
+	
+	char* (*description)(VMObject* object);
+	
+	void (*dealloc)(VMObject* object);
+};
+
+bool VMObjectInitialize(VMObject* obj,
+		VMSection* section,
+		offset_t base,
+		size_t size,
+		void (*addToContextImpl)(VMObject* object, VMContext* context),
+		void (*removeFromContextImpl)(VMObject* object, VMContext* context),
+		char* (*descriptionImpl)(VMObject* object),
+		void (*deallocImpl)(VMObject* object));

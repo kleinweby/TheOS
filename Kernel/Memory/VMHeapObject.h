@@ -22,11 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "VirtMem.h"
+#import "VMObject.h"
 
-#import "VMBackend.h"
+typedef struct VMHeapObject VMHeapObject;
 
-void VirtMemInitialize()
-{
-	VMBackendInitialize();
-}
+//
+// @param initialSize Describes how much to allocate right now
+//
+VMHeapObject* VMHeapObjectCreate(VMSection* section, offset_t base, size_t size);
