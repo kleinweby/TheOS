@@ -25,6 +25,7 @@
 #import "Object.h"
 
 #import "Error/Assert.h"
+#import "Memory/kalloc.h"
 
 bool ObjectInit(void* _obj, void (*Dealloc)(void* ptr))
 {
@@ -72,5 +73,6 @@ void _Release(Object obj)
 	
 	if (rc == 0) {
 		obj->Dealloc(obj);
+		free(obj);
 	}
 }

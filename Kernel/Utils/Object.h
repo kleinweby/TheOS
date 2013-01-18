@@ -83,6 +83,9 @@ DECLARE_CLASS(Object);
 // Call this at the beginning of the object creation
 // it will set the retaincount to 1.
 //
+// Dealloc will be called when rc reaches 0, after that the object
+// will be freed (don't do that in Dealloc).
+//
 bool ObjectInit(void* object, void (*Dealloc)(void* ptr)) __attribute__((nonnull));
 
 //
