@@ -26,7 +26,7 @@ SRC.include([
   "Memory/kalloc.c",
   
   # Kernel Info
-  "KernelInfo.c"
+  "KernelInfo.c",
   
   #Error
   "Error/Panic.c",
@@ -43,7 +43,7 @@ CFLAGS << '-I.' \
 CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
        << "-Wno-gnu" << "-Wno-variadic-macros"\
        << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
-       << '-Wno-missing-noreturn'
+       << '-Wno-missing-noreturn' << '-Wno-pedantic'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

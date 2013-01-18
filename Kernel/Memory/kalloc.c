@@ -145,7 +145,7 @@ void* kalloc(size_t size)
 	// Set used flag
 	chunk->size |= kChunkUsed;
 	
-	assert(chunk != heap && chunk != HeapEnd);
+	assert(chunk != heapStart && chunk != heapEnd);
 	return OFFSET(chunk, sizeof(UsedChunk));
 }
 
