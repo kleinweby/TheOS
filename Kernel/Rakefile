@@ -19,7 +19,7 @@ SRC.include([
   # PhyMem
   "Memory/PhyMem.c",
   
-  "Utils/Object.h",
+  "Utils/Object.c",
   
   
   "Memory/kalloc.c",
