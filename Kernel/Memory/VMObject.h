@@ -57,3 +57,6 @@ bool VMObjectInitialize(VMObject obj,
 		void (*removeFromContextImpl)(VMObject object, VMContext context),
 		char* (*descriptionImpl)(VMObject object),
 		void (*deallocImpl)(void* object));
+
+// Call this in subclasses
+void VMObjectDeallocImpl(void* object);

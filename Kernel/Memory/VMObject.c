@@ -33,3 +33,8 @@ bool VMObjectInitialize(VMObject obj,
 	
 	return true;
 }
+
+void VMObjectDeallocImpl(void* object)
+{
+	#pragma unused(object)
+}

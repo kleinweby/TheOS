@@ -80,5 +80,6 @@ static char* VMHeapObjectDescriptionImpl(VMObject object)
 
 static void VMHeapObjectDeallocImpl(void* object)
 {
-	#pragma unused(object)
+	
+	VMObjectDeallocImpl(object);
 }
