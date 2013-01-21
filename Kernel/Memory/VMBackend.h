@@ -22,7 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-typedef struct VMBackendContext* VMBackendContext;
+#import "Utils/Object.h"
+
+DECLARE_CLASS(VMBackendContext);
 
 //
 // Init the vm backend.

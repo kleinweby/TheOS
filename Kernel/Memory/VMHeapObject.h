@@ -22,11 +22,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#import "Utils/Object.h"
+
 #import "VMObject.h"
 
-typedef struct VMHeapObject VMHeapObject;
+DECLARE_CLASS(VMHeapObject);
 
 //
 // @param initialSize Describes how much to allocate right now
 //
-VMHeapObject* VMHeapObjectCreate(VMSection* section, offset_t base, size_t size);
+OBJECT_RETURNS_RETAINED
+VMHeapObject VMHeapObjectCreate(VMSection section, offset_t base, size_t size);

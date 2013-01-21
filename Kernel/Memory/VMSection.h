@@ -22,7 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-typedef struct VMSection VMSection;
+#import "Utils/Object.h"
+
+DECLARE_CLASS(VMSection);
 
 #import "VMContext.h"
 #import "VMSection.h"
@@ -35,7 +37,7 @@ struct VMSectionContext {
 };
 
 
-struct VMSection {
+DEFINE_CLASS(VMSection, Object,
 	size_t size;
 	// A symbolic name describing the section
 	// E.g 'kernel', 'CoreSystem'/Library...
@@ -46,4 +48,4 @@ struct VMSection {
 	
 	// Array sorted by offset
 	VMObject* objects;
-};
+);

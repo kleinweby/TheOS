@@ -50,9 +50,9 @@ struct _Object {
 // Call this (usually in the implementation) to define your
 // class and this member variables
 //
-#define DEFINE_CLASS(A, x)\
+#define DEFINE_CLASS(A, S, x)\
 struct _##A {\
-	struct _Object object;\
+	struct _##S super;\
 	x\
 }
 

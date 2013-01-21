@@ -22,15 +22,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-typedef struct VMContext VMContext;
+#import "Utils/Object.h"
+
+DECLARE_CLASS(VMContext);
 
 #import "VMSection.h"
 
-struct VMContext {
+
+DEFINE_CLASS(VMContext, Object,
 	// The backend for managing mappings
 	//VMBackendContext* backend;
 	
 	// All our sections
 	// ordered to their base
-	VMSection** sections;
-};
+	VMSection* sections;
+);

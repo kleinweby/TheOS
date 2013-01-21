@@ -24,16 +24,18 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-typedef struct VMObject VMObject;
+#import "Utils/Object.h"
+
+DECLARE_CLASS(VMObject);
 
 #import "Memory/VMSection.h"
 
-struct VMObject {
+DEFINE_CLASS(VMObject, Object,
 	offset_t base; // Relative to the section
 	size_t size;
 	
 	// The section we're in
-	VMSection* section;
+	VMSection section;
 	
 	// We don't need to keep track of the contexts
 	// we're added, the section knows about them
@@ -41,19 +43,17 @@ struct VMObject {
 	//
 	// Members
 	//
-	void (*addToContext)(VMObject* object, VMContext* context);
-	void (*removeFromContext)(VMObject* object, VMContext* context);
+	void (*addToContext)(VMObject object, VMContext context);
+	void (*removeFromContext)(VMObject object, VMContext context);
 	
-	char* (*description)(VMObject* object);
-	
-	void (*dealloc)(VMObject* object);
-};
+	char* (*description)(VMObject object);
+);
 
-bool VMObjectInitialize(VMObject* obj,
-		VMSection* section,
+bool VMObjectInitialize(VMObject obj,
+		VMSection section,
 		offset_t base,
 		size_t size,
-		void (*addToContextImpl)(VMObject* object, VMContext* context),
-		void (*removeFromContextImpl)(VMObject* object, VMContext* context),
-		char* (*descriptionImpl)(VMObject* object),
-		void (*deallocImpl)(VMObject* object));
+		void (*addToContextImpl)(VMObject object, VMContext context),
+		void (*removeFromContextImpl)(VMObject object, VMContext context),
+		char* (*descriptionImpl)(VMObject object),
+		void (*deallocImpl)(void* object));
