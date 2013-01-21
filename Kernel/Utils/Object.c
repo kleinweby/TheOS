@@ -22,27 +22,57 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
+#import "Object.h"
+
+#import "Error/Assert.h"
 #import "Memory/kalloc.h"
 
-#import "KernelInfo.h"
-
-// TODO: make a dynamic heap
-char heap[10*1024*1024];
-
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
+bool ObjectInit(void* _obj, void (*Dealloc)(void* ptr))
+{
+	assert(_obj != NULL);
+	assert(Dealloc != NULL);
 	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
+	Object obj = _obj;
 	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	LogPhyMem();
+	obj->retainCount = 1;
+	obj->Dealloc = Dealloc;
 	
-	KAllocInitialize(heap, sizeof(heap));
+	return true;
+}
 
+Object _Retain(Object obj)
+{
+	assert(obj != NULL);
+	
+	int32_t rc;
+		
+	rc = __sync_add_and_fetch(&obj->retainCount, 1);
+	
+	//
+	// The retaincount must be greater than 1 because
+	// before it would be >=1 and we added one, so
+	// it must be > 1 now
+	//
+	assert(rc > 1);
+	
+	return obj;
+}
+
+void _Release(Object obj)
+{
+	assert(obj != NULL);
+		
+	int32_t rc;
+		
+	rc = __sync_sub_and_fetch(&obj->retainCount, 1);
+		
+	//
+	// < 0 Would mean double free
+	//
+	assert(rc >= 0);
+	
+	if (rc == 0) {
+		obj->Dealloc(obj);
+		free(obj);
+	}
 }

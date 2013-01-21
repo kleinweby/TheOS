@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,27 +22,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
+#import <CoreSystem/CommonTypes.h>
 
-#import "KernelInfo.h"
+//
+// Initiztiales kalloc with a given heap
+//
+void KAllocInitialize(void* ptr, size_t size);
 
-// TODO: make a dynamic heap
-char heap[10*1024*1024];
+//
+// Allocates memory at least of the size specified
+//
+void* kalloc(size_t size);
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	LogPhyMem();
-	
-	KAllocInitialize(heap, sizeof(heap));
-
-}
+//
+// Frees the allocated memory
+//
+void free(void* ptr);
