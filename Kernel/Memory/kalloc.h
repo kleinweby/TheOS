@@ -27,7 +27,15 @@
 //
 // Initiztiales kalloc with a given heap
 //
-void KAllocInitialize(void* ptr, size_t size);
+void KallocInitialize(void* ptr, size_t size);
+
+//
+// Adds a new heap space to Kalloc.
+//
+// TODO: as this heap can probbably grow/shrink
+// we may need to provide some callbacks here
+//
+void KallocAddHeap(void* ptr, size_t size);
 
 //
 // Allocates memory at least of the size specified

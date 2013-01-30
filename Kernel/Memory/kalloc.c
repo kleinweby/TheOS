@@ -89,7 +89,7 @@ uint32_t heapsCount;
 // How many slot to store heaps do we have
 uint32_t heapsSlots;
 
-void KAllocInitialize(void* ptr, size_t size)
+void KallocInitialize(void* ptr, size_t size)
 {
 	Heap* heap = _KallocInitializeHeap(ptr, size);
 	
@@ -101,6 +101,19 @@ void KAllocInitialize(void* ptr, size_t size)
 	assert(heaps != NULL);
 	
 	heaps[heapsCount++] = heap;
+}
+
+void KallocAddHeap(void* ptr, size_t size)
+{
+	// TODO: Resizing the heaps array is unsupported
+	assert(heapsCount < heapsSlot);
+	
+	heapsCount++;
+	
+	// Now to keep the startup heap always at the end
+	// we do some magic here
+	heaps[heapsCount] = heaps[heapsCount-1];
+	heaps[heapsCount-1] = _KallocInitializeHeap(ptr, size);
 }
 
 static Heap* _KallocInitializeHeap(void* ptr, size_t size)
@@ -128,9 +141,7 @@ static Heap* _KallocInitializeHeap(void* ptr, size_t size)
 	chunk->next = heap->end;
 	heap->end->prev = chunk;
 	chunk->prev = &heap->start;
-	
-	LogVerbose("Avaiable %d", chunk->size);
-	
+		
 	return heap;
 }
 
