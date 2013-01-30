@@ -29,8 +29,11 @@
 
 #import "KernelInfo.h"
 
-// TODO: make a dynamic heap
-char heap[10*1024*1024];
+// This is the initial heap we use until we've
+// got a real heap.
+//
+// Note: Heap is still valid, after boot up
+char StartupHeap[4*1024];
 
 void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
@@ -43,6 +46,7 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
 	LogPhyMem();
 	
-	KAllocInitialize(heap, sizeof(heap));
+	KAllocInitialize(StartupHeap, sizeof(StartupHeap));
 
+	LogVerbose("Allocated %p", kalloc(100));
 }
