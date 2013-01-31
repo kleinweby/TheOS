@@ -24,6 +24,7 @@ SRC.include([
   "Memory/VMBackend.c",
   "Memory/VMHeapObject.c",
   "Memory/VMObject.c",
+  "Memory/VMLinearObject.c",
   
   "Utils/Object.c",
   

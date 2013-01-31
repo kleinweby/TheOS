@@ -22,9 +22,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#import <CoreSystem/CommonTypes.h>
+
 #import "Utils/Object.h"
+#import "Memory/PhyMem.h"
 
 DECLARE_CLASS(VMBackendContext);
+
+typedef uint32_t VMBackendMapOptions;
 
 //
 // Init the vm backend.
@@ -38,4 +43,64 @@ DECLARE_CLASS(VMBackendContext);
 // and the kernel binary. Anything else you need to map
 // afterwards.
 //
+// The vaddrs 0xF0000000-0xFFFFFFFF are reserved for use
+// within the vmbackend
+//
 void VMBackendInitialize();
+
+//
+// Returns the context used by the kernel.
+//
+// Note: only addresses above KERNEL_LOAD_ADDRESS
+// can be mapped in this, and will be avaiable in
+// all other contexts.
+//
+VMBackendContext VMBackendGetKernelContext();
+
+//
+// Creates a new backend context.
+//
+// @param defaultOptions Default options when options=0 in VMBackendContextMap
+// @returns Returns the new context or NULL if an error occour.
+//
+OBJECT_RETURNS_RETAINED
+VMBackendContext VMBackendContextCreate(VMBackendMapOptions defaultOptions);
+
+//
+// Maps a given vaddr to paddr in the context specified.
+//
+// This will fail when...
+//  ... vaddr already is mapped
+//  ... context is kernel context and vaddr < KERNEL_LOAD_ADDRESS
+//  ... context is not the kernel context and vaddr >= KERNEL_LOAD_ADDRESS
+//
+// @param context The backend context to operate on
+// @param vaddr The virtual address that will be mapped
+// @param paddr The destination physical addr
+// @param options The options for this mapping. (0=default)
+// @returns YES if successfull, otherwise NO
+//
+bool VMBackendContextMap(VMBackendContext context, pointer_t vaddr, page_t paddr, VMBackendMapOptions options);
+
+//
+// Unmaps a given vaddr in the context.
+//
+// This will fail when...
+//  ... vaddr already is not mapped
+//  ... context is kernel context and vaddr < KERNEL_LOAD_ADDRESS
+//  ... context is not the kernel context and vaddr >= KERNEL_LOAD_ADDRESS
+//
+// @param context The backend context to operate on
+// @param vaddr The virtual address that will be mapped
+// @returns YES if successfull, otherwise NO
+//
+bool VMBackendContextUnmap(VMBackendContext context, pointer_t vaddr);
+
+//
+// Translates a vaddr to the paddr in the context.
+//
+// @param context The backend context to operate on
+// @param vaddr The virtual address that will be translated
+// @returns Returns the page address or kPhyInvalidPage if there is no such mapping.
+//
+page_t VMBackendContextTranslate(VMBackendContext context, pointer_t vaddr);
