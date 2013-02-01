@@ -30,56 +30,20 @@
 #import "Error/Assert.h"
 #import <CoreSystem/CommonTypes.h>
 
-typedef struct {
-	/**
-	  Set isPresent to 1 when the page table is present and
-	  in memory.
-	 */
-	uint32_t isPresent:1;
-	/**
-	  Set isWriteable to 1 when the memory of the page table mapps
-	  is writeable.
-	 */
-	uint32_t isWriteable:1;
-	// The page directory is accecable by the userland
-	uint32_t user:1;
-	uint32_t writeThrough:1;
-	uint32_t cacheDisabled:1;
-	uint32_t wasAccessed:1;
-	uint32_t __unused:1;
-	uint32_t pageSize:1;
-	uint32_t __unused2:1;
-	
-	uint32_t userData:3;
-	uint32_t pageTableAddress:20;
-} __attribute__ ((packed)) PageDirectoryEntry;
+enum {
+	VMBackendOptionPresent = (1 << 0)
+};
 
-typedef union {
+typedef uint32_t PageDirectoryEntry;
+
+typedef struct {
 	PageDirectoryEntry entries[1024];
-	uint32_t rawEntries[1024];
 } PageDirectory;
 
-typedef struct {
-	// The page table is present in memory
-	uint32_t present:1;
-	// The page table is writeable
-	uint32_t writeable:1;
-	// The page table is accecable by the userland
-	uint32_t user:1;
-	uint32_t writeThrough:1;
-	uint32_t cacheDisabled:1;
-	uint32_t accessed:1;
-	uint32_t dirty:1;
-	uint32_t __unused:1;
-	uint32_t global:1;
-	
-	uint32_t userData:3;
-	uint32_t physicalAddress:20;
-} __attribute__ ((packed)) PageTableEntry;
+typedef uint32_t PageTableEntry;
 
-typedef union {
+typedef struct {
 	PageTableEntry entries[1024];
-	uint32_t rawEntries[1024];
 } PageTable;
 
 static inline uint32_t tableIndexFromAddress(pointer_t address)
@@ -95,6 +59,28 @@ static inline uint16_t entryIndexFromAddress(pointer_t address)
 static inline void invalidatePage(pointer_t address)
 {
 	__asm__ __volatile__ ("invlpg %0"::"m" (address));
+}
+
+static inline page_t EntryGetPAddr(uint32_t* entry)
+{
+	return (page_t)(*entry & 0xFFFFF000);
+}
+
+static inline void EntrySetPAddr(uint32_t* entry, page_t page)
+{
+	// Preserve the options
+	*entry = (uint32_t)page | (*entry&0xFFF);
+}
+
+static inline VMBackendMapOptions EntryGetOptions(uint32_t* entry)
+{
+	return *entry & 0xFF;
+}
+
+static inline void EntrySetOptions(uint32_t* entry, VMBackendMapOptions options)
+{
+	// Preserve paddr
+	*entry = (*entry & 0xFFFFF000) | options;
 }
 
 DEFINE_CLASS(VMBackendContext, Object,
@@ -201,13 +187,36 @@ bool VMBackendContextMap(VMBackendContext context, pointer_t vaddr, page_t paddr
 {
 	assert(context != NULL);
 	assert(vaddr > (pointer_t)0x0); // Don't map 0x0
+	assert(paddr != kPhyInvalidPage);
 	
 	if (options == 0)
 		options = context->defaultOptions;
 	
-	#pragma unused(paddr)
+	bool success = true;
 	
-	return true;
+	VMBackendContextBeginAccess(context);
+	
+	uint32_t tableIndex = tableIndexFromAddress(vaddr);
+	
+	// Table is not present, must create it now
+	if (EntryGetOptions(&context->pageDirectory->entries[tableIndex]) & VMBackendOptionPresent) {
+	}
+	
+	PageTable* table = OFFSET(context->pageTablesBase, tableIndex * sizeof(PageTable));
+	
+	PageTableEntry* entry = &table->entries[entryIndexFromAddress(vaddr)];
+	
+	if (EntryGetOptions(entry) & VMBackendOptionPresent) {
+		success = false;
+	}
+	else {
+		EntrySetPAddr(entry, paddr);
+		EntrySetOptions(entry, options);
+	}
+	
+	VMBackendContextEndAccess(context);
+		
+	return success;
 }
 
 bool VMBackendContextUnmap(VMBackendContext context, pointer_t vaddr)
@@ -215,7 +224,35 @@ bool VMBackendContextUnmap(VMBackendContext context, pointer_t vaddr)
 	assert(context != NULL);
 	assert(vaddr > (pointer_t)0x0);
 	
-	return true;
+	bool success = true;
+	
+	VMBackendContextBeginAccess(context);
+	
+	uint32_t tableIndex = tableIndexFromAddress(vaddr);
+	
+	// Table is not present,so cannot unmap
+	if (EntryGetOptions(&context->pageDirectory->entries[tableIndex]) & VMBackendOptionPresent) {
+		success=false;
+	}
+	else {
+		PageTable* table = OFFSET(context->pageTablesBase, tableIndex * sizeof(PageTable));
+		
+		PageTableEntry* entry = &table->entries[entryIndexFromAddress(vaddr)];
+	
+		if (!(EntryGetOptions(entry) & VMBackendOptionPresent)) {
+			success = false;
+		}
+		else {
+			// Just clear the whole thing, no need to do something
+			// bity here, as it doesnt matter as long as the present bit
+			// is cleared
+			entry = 0;
+		}
+	}
+	
+	VMBackendContextEndAccess(context);
+		
+	return success;
 }
 
 page_t VMBackendContextTranslate(VMBackendContext context, pointer_t vaddr)
@@ -228,11 +265,11 @@ page_t VMBackendContextTranslate(VMBackendContext context, pointer_t vaddr)
 	
 	uint32_t tableIndex = tableIndexFromAddress(vaddr);
 	
-	if (context->pageDirectory->entries[tableIndex].isPresent) {
+	if (EntryGetOptions(&context->pageDirectory->entries[tableIndex]) & VMBackendOptionPresent) {
 		PageTable* table = OFFSET(context->pageTablesBase, tableIndex * sizeof(PageTable));
 		
-		if (table->entries[entryIndexFromAddress(vaddr)].present)
-			page = (page_t)(table->entries[entryIndexFromAddress(vaddr)].physicalAddress << 12);
+		if (EntryGetOptions(&table->entries[entryIndexFromAddress(vaddr)]) & VMBackendOptionPresent)
+			page = EntryGetPAddr(&table->entries[entryIndexFromAddress(vaddr)]);
 	}
 	
 	VMBackendContextEndAccess(context);
@@ -268,12 +305,8 @@ static void VMBackendContextBeginAccess(VMBackendContext context)
 			// Map the kernel directory here.
 			PageDirectoryEntry* entry = &VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(base)];
 			
-			entry->isWriteable = 1;
-			entry->user = 0;
-			entry->pageSize = 0;
-			entry->pageTableAddress = (uint32_t)(VMBackendContextTranslate(VMKernelBackendContext,
-			                          context->pageDirectory)) >> 12;
-			entry->isPresent = 1;
+			EntrySetPAddr(entry, VMBackendContextTranslate(VMKernelBackendContext, context->pageDirectory));
+			EntrySetOptions(entry, VMBackendOptionPresent|VMBackendOptionWriteable);
 			
 			// Now invalidate the entries
 			for (pointer_t ptr = base;
@@ -305,7 +338,7 @@ static void VMBackendContextEndAccess(VMBackendContext context)
 		}
 		else {
 			// Simply declare non present
-			VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(context->pageTablesBase)].isPresent = 0;
+			VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(context->pageTablesBase)] = 0;
 			
 			// Now invalidate the entries
 			for (pointer_t ptr = context->pageTablesBase;

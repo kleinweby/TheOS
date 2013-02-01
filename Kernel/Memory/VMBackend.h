@@ -29,7 +29,23 @@
 
 DECLARE_CLASS(VMBackendContext);
 
+//
+// Options for a mapped page
+//
 typedef uint32_t VMBackendMapOptions;
+enum {
+	VMBackendOptionWriteable = (1 << 1),
+	VMBackendOptionUser = (1 << 2),
+	VMBackendOptionWriteThrough = (1 << 3),
+	VMBackendOptionCacheDisabled = (1 << 4),
+	// The options can only be queried.
+	VMBackendOptionWasAccessed = (1 << 5),
+	// The options can only be queried.
+	VMBackendOptionDirty = (1 << 6),
+	// TODO: page size
+	// Only usable when specifing default options
+	VMBackendOptionGlobal = (1 << 8)
+};
 
 //
 // Init the vm backend.
