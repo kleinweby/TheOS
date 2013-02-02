@@ -13,15 +13,15 @@ SECTIONS
       LONG(1 << 1 | 1 << 0); /* Flags */
       LONG(-((1 << 1 | 1 << 0) + 0x1BADB002)); /* Checksum */
    }
-   
-   PROVIDE_HIDDEN(_KernelOffset = .);
-   
+      
    PROVIDE_HIDDEN(_KernelStartupOffset = .);
    .startup ALIGN(4096) : {
       *(.startup)
    }
-   PROVIDE_HIDDEN(_KernelStartupLength = (. - 0xC0000000) - _KernelStartupOffset);
+   PROVIDE_HIDDEN(_KernelStartupLength = . - _KernelStartupOffset);
 
+   . = ALIGN(0x1000);
+   PROVIDE_HIDDEN(_KernelOffset = .);
    . += 0xC0000000;
 
    PROVIDE_HIDDEN(_KernelTextOffset = .);

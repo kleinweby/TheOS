@@ -51,3 +51,40 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	VirtMemInitialize();
 }
+
+//
+// Map a continues space in page directory
+// used during startup
+//
+extern uint32_t alloc_page() __attribute__ ((section (".startup")));
+void MapContinues(uint32_t* pageDirectory, uint32_t paddr, uint32_t vaddr, uint32_t size) __attribute__ ((section (".startup")));
+void MapContinues(uint32_t* pageDirectory, uint32_t paddr, uint32_t vaddr, uint32_t size)
+{
+	// Sanitise paddr, vaddr and size
+	paddr = paddr & 0xFFFFF000;
+	vaddr = vaddr & 0xFFFFF000;
+	size = (size + 0x1000) & 0xFFFFF000;
+	
+	uint32_t tableIndex = (vaddr >> 22) & 0x3FF;
+	uint32_t entryIndex = (vaddr >> 12) & 0x3FF;
+	
+	for (; tableIndex < 1024 && size > 0; tableIndex++) {
+		// Add table when needed
+		if (!(pageDirectory[tableIndex] & (1 << 0))) {
+			uint32_t tableAddr = alloc_page();
+			
+			pageDirectory[tableIndex] = tableAddr | (1<<1) | (1 << 0);
+		}
+		
+		uint32_t* table = (uint32_t*)(pageDirectory[tableIndex] & 0xFFFFF000);
+		
+		for (; entryIndex < 1024 && size > 0; entryIndex++) {
+			// paddr | writable | present
+			table[entryIndex] = paddr | (1 << 1) | (1 << 0);
+			
+			size -= 0x1000;
+			paddr += 0x1000;
+			vaddr += 0x1000;
+		}
+	}
+}

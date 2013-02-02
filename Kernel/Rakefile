@@ -86,7 +86,7 @@ end
 
 task 'debug' => ['kernel'] do
     puts "Connect with gdb on tcp::1234. Execution is halted."
-    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -serial stdio -kernel kernel"
+    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -monitor stdio -kernel kernel"
 end
 
 task 'attach' => ['kernel.sym'] do
