@@ -6,8 +6,10 @@ require 'json'
 SRC=FileList[]
 
 SRC.include([
+  "Boot/Bootstrap.c",
+  "Boot/BootstrapASM.nasm",
   "Boot/KernelInitialize.c",
-  "Boot/startup.nasm",
+  #"Boot/startup.nasm",
   
   # Multiboot
   "Multiboot/Multiboot.c",
@@ -49,7 +51,7 @@ CFLAGS << '-I.' \
 CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
        << "-Wno-gnu" << "-Wno-variadic-macros"\
        << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
-       << '-Wno-missing-noreturn' << '-Wno-pedantic'
+       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

@@ -50,3 +50,8 @@ extern char* KernelGitVersion;
 //
 LINKER_SYMBOL(KernelOffset, pointer_t);
 LINKER_SYMBOL(KernelLength, offset_t);
+// Note: the bootstrap section will be deleted
+// when the vm subsystem is up and running
+LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
+LINKER_SYMBOL(KernelBootstrapLength, offset_t);
+

@@ -22,35 +22,37 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
-#import "Memory/VirtMem.h"
+#import <CoreSystem/CommonTypes.h>
 
-#import "KernelInfo.h"
-#import "Bootstrap.h"
-
-// This is the initial heap we use until we've
-// got a real heap.
 //
-// Note: Heap is still valid, after boot up
-char StartupHeap[4*1024];
+// Bootstrap
+// =========
+//
+// Bootstrap is responsible for setting up the temporary
+// higher-half kernel mechanism.
+//
+// For that we create a temporary mapping which will later
+// replaced by the VM-subsystem.
+//
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	// This will also make a temporary bootstrap mapping
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	_PhyMemMarkUsedRange(KernelBootstrapOffset, KernelBootstrapLength);
-	LogPhyMem();
-	
-	KallocInitialize(StartupHeap, sizeof(StartupHeap));
-	
-	VirtMemInitialize();
-}
+#define BOOTSTRAP_SECTION  __attribute__ ((section (".bootstrap")))
+
+//
+// This temporarly maps paddr->vaddr for size.
+//
+// Note: during bootstrap the offset between paddr and
+// vaddr should always be KERNEL_LOAD_ADDRESS as we're
+// not able to manage the vspace.
+//
+void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size) BOOTSTRAP_SECTION;
+
+//
+// This registers the pages used by bootstrap to the pmem subsystem
+//
+void BootstrapPhyMemInitialize() BOOTSTRAP_SECTION;
+
+//
+// This releases all the resources used by the bootstrap mechanism.
+// (Except for the this method it self)
+//
+void BootstrapRelease();

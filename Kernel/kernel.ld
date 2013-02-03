@@ -1,7 +1,7 @@
 OUTPUT_FORMAT(elf32-i386)
 /**/
 
-ENTRY(startup);
+ENTRY(BootstrapASMEntry);
 
 SECTIONS
 {
@@ -14,11 +14,11 @@ SECTIONS
       LONG(-((1 << 1 | 1 << 0) + 0x1BADB002)); /* Checksum */
    }
       
-   PROVIDE_HIDDEN(_KernelStartupOffset = .);
-   .startup ALIGN(4096) : {
-      *(.startup)
+   PROVIDE_HIDDEN(_KernelBootstrapOffset = .);
+   .bootstrap ALIGN(4096) : {
+      *(.bootstrap)
    }
-   PROVIDE_HIDDEN(_KernelStartupLength = . - _KernelStartupOffset);
+   PROVIDE_HIDDEN(_KernelBootstrapLength = . - _KernelBootstrapOffset);
 
    . = ALIGN(0x1000);
    PROVIDE_HIDDEN(_KernelOffset = .);

@@ -26,11 +26,14 @@
 
 #include "Memory/PhyMem.h"
 #include "Logging/Logging.h"
+#import "Boot/Bootstrap.h"
 
 void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
 {
 	LogTrace("Adjusting multiboot structure by %x", offset);
 	#define ADJUST(a) (a) = OFFSET(a, offset)
+	
+	BooststrapMap((uint32_t)multiboot - offset, (uint32_t)multiboot, sizeof(multiboot));
 	
 	ADJUST(multiboot->bootdevice);
 	ADJUST(multiboot->cmdline);
