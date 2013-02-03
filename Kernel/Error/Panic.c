@@ -34,10 +34,13 @@ LINKER_SYMBOL(PanicDriversLength, uint32_t);
 void panic(char* message, ...)
 {
 	CPUState state;
-	panic_state(message, &state);
+	va_list args;
+	va_start(args, message);
+	panic_state(message, &state, args);
+	va_end(args);
 }
 
-void panic_state(char* message, CPUState* cpuState)
+void panic_state(char* message, CPUState* cpuState, va_list args)
 {
 	// Prevent any futher interrupts from waking up the kernel
 	DisableInterrupts();
@@ -46,7 +49,7 @@ void panic_state(char* message, CPUState* cpuState)
 	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
 
 	for (uint32_t i = 0; i < count; i++) {
-		PanicDrivers[i](timestamp, message, cpuState);
+		PanicDrivers[i](timestamp, message, cpuState, args);
 	}
 	
 	// Halt the kernel

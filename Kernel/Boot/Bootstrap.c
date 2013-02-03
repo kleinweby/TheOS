@@ -64,9 +64,6 @@ void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size)
 	// Sanitise paddr, vaddr and size
 	paddr = paddr & 0xFFFFF000;
 	vaddr = vaddr & 0xFFFFF000;
-	// Advance to next page boundary
-	if (size & 0xFFF)
-		size = (size+0x1000)&0xFFFFF000;
 	
 	uint32_t tableIndex = (vaddr >> 22) & 0x3FF;
 	uint32_t entryIndex = (vaddr >> 12) & 0x3FF;
@@ -114,6 +111,13 @@ void BootstrapPhyMemInitialize()
 			_PhyMemMarkUsedRange((page_t)(BootstrapPageDirectory[i] & 0xFFFFF000), 0x1000);
 		}
 	}
+}
+
+void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr)
+{
+	uint32_t tableIndex = (vaddr >> 22) & 0x3FF;
+	
+	BootstrapPageDirectory[tableIndex] = paddr | (1<<1) | (1 << 0);
 }
 
 void BootstrapRelease()

@@ -96,7 +96,7 @@ VMBackendContext VMBackendContextCreate(VMBackendMapOptions defaultOptions);
 // @param options The options for this mapping. (0=default)
 // @returns YES if successfull, otherwise NO
 //
-bool VMBackendContextMap(VMBackendContext context, pointer_t vaddr, page_t paddr, VMBackendMapOptions options);
+bool VMBackendContextMap(VMBackendContext context, page_t paddr, pointer_t vaddr, VMBackendMapOptions options);
 
 //
 // Unmaps a given vaddr in the context.

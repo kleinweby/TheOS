@@ -27,6 +27,7 @@
 
 #include <CoreSystem/CommonTypes.h>
 #include <CoreSystem/CPUState.h>
+#include <CoreSystem/VariadicArguments.h>
 
 //
 // Causes the kernel to panic with a given message.
@@ -40,14 +41,14 @@ void panic(char* message, ...) __attribute__((noreturn));
 // cpu state. This will be called in some way be panic to capture the
 // cpu state.
 //
-void panic_state(char* message, CPUState* cpuState) __attribute__((noreturn));
+void panic_state(char* message, CPUState* cpuState, va_list args) __attribute__((noreturn));
 
 //
 // Panic drivers
 // =============
 //
 
-typedef void(*PanicDriver)(uint64_t timestamp, char* message, CPUState* cpuState);
+typedef void(*PanicDriver)(uint64_t timestamp, char* message, CPUState* cpuState, va_list args);
 
 //
 // Use this macro on the top level to staticly register a panic driver at compile time

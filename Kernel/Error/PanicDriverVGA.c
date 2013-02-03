@@ -82,14 +82,16 @@ static void VGAClear()
 	outb(0x3D5, creg);
 }
 
-void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState)
+void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState, va_list args)
 {
 	VGAClear();
 	
 	pprintf(VGAPutChar, "Panic\n");
 	pprintf(VGAPutChar, "======\n");
 	pprintf(VGAPutChar, "Time: %d\n", timestamp);
-	pprintf(VGAPutChar, "Message: %s\n\n", message);
+	pprintf(VGAPutChar, "Message:");
+	vpprintf(VGAPutChar, message, args);
+	pprintf(VGAPutChar, "\n\n");
 	
 	if (cpuState) {
 		pprintf(VGAPutChar, "CPU State:\n");

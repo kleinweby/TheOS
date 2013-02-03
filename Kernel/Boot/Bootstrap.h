@@ -52,6 +52,11 @@ void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size) BOOTSTRAP_SECT
 void BootstrapPhyMemInitialize() BOOTSTRAP_SECTION;
 
 //
+// This is used to map a page directory to a given vaddr
+//
+void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr) BOOTSTRAP_SECTION;
+
+//
 // This releases all the resources used by the bootstrap mechanism.
 // (Except for the this method it self)
 //

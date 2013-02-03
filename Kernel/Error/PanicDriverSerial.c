@@ -36,10 +36,11 @@ static void SerialPutchar(char chr) {
 	SerialWrite(0x3F8, chr);
 }
 
-void PanicDriverSerial(uint64_t timestamp, char* message, CPUState* cpuState)
+void PanicDriverSerial(uint64_t timestamp, char* message, CPUState* cpuState, va_list args)
 {	
 	pprintf(SerialPutchar, "\033[0;37m[%10d]\033[1;31m[F] Panic\033[0m\n", (uint32_t)timestamp);
-	pprintf(SerialPutchar, "Message: %s\n", message);
+	pprintf(SerialPutchar, "Message:");
+	vpprintf(SerialPutchar, message, args);
 	
 	if (cpuState) {
 		pprintf(SerialPutchar, "CPU State:\n");

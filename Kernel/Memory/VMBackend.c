@@ -24,6 +24,8 @@
 
 #import "VMBackend.h"
 
+#import "Boot/Bootstrap.h"
+
 #import "Logging/Logging.h"
 #import "Memory/PhyMem.h"
 #import "Memory/Kalloc.h"
@@ -86,19 +88,21 @@ static inline void EntrySetOptions(uint32_t* entry, VMBackendMapOptions options)
 DEFINE_CLASS(VMBackendContext, Object,
 	VMBackendMapOptions defaultOptions;
 
-	// Pointer to the page directory (vaddr)
-	PageDirectory* pageDirectory;
+	// the page directory (paddr)
+	page_t paddrPageDirectory;
 
 	// Access controll
 	int32_t accessCounter;
 	// Base when the page tables can be accessed
 	PageTable* pageTablesBase;
+	PageDirectory* pageDirectory;
 );
 
 static void VMBackendContextDealloc(void* object);
 
 // These ensure that the context can be accesses (e.g. the tables are mapped)
 static void VMBackendContextBeginAccess(VMBackendContext context);
+static void VMBackendContextMapPageDirectory(page_t paddr, pointer_t vaddr);
 static void VMBackendContextEndAccess(VMBackendContext context);
 
 //
@@ -132,34 +136,7 @@ void VMBackendInitialize()
 	LogVerbose("Create initial mapping...");
 }
 
-//
-// The Kernel Context
-// ==================
-//
-VMBackendContext VMBackendGetKernelContext()
-{
-	return VMKernelBackendContext;
-}
-
-static void VMBackendCreateKernelContext()
-{
-	// We need 1024-firstIndex tables allocated now, to
-	// alway insert them
-	// TODO: this is quite memory intensive, maybe we should figure out a way to
-	// lessen that. But thisway we avoid, changing all processes, when we
-	// ad a directory entry afterwards
-	for (uint32_t i = KernelDirectory.firstIndex; i < 1024; i++) {
-		PhyMemAlloc((pointer_t*)&KernelDirectory.tables[i - KernelDirectory.firstIndex]);
-		//memset(KernelDirectory.tables[i - KernelDirectory.firstIndex], 0, sizeof(PageTable));
-	}
-}
-
-//
-// Backend Contexts
-// ================
-//
-
-VMBackendContext VMBackendContextCreate(VMBackendMapOptions defaultOptions)
+static VMBackendContext VMBackendContextCreateBase(VMBackendMapOptions defaultOptions)
 {
 	VMBackendContext context = kalloc(sizeof(struct _VMBackendContext));
 	
@@ -172,7 +149,83 @@ VMBackendContext VMBackendContextCreate(VMBackendMapOptions defaultOptions)
 	}
 	
 	context->defaultOptions = defaultOptions;
+		
+	if (!PhyMemAlloc(&context->paddrPageDirectory)) {
+		Release(context);
+		return NULL;
+	}
+		
+	return context;
+}
+
+//
+// The Kernel Context
+// ==================
+//
+VMBackendContext VMBackendGetKernelContext()
+{
+	return VMKernelBackendContext;
+}
+
+static void VMBackendCreateKernelContext()
+{
+	VMKernelBackendContext = VMBackendContextCreateBase(VMBackendOptionGlobal|VMBackendOptionWriteable);
 	
+	assert(VMKernelBackendContext != NULL);
+	
+	VMKernelBackendContext->pageTablesBase = (PageTable*)0xFFC00000;
+	VMKernelBackendContext->pageDirectory = (PageDirectory*)0xFFFFF000;
+	
+	// temporary to insert context into itself
+	BooststrapMap((uint32_t)VMKernelBackendContext->paddrPageDirectory, (uint32_t)VMKernelBackendContext->pageDirectory, 0x1000);
+	
+	PageDirectory* d = VMKernelBackendContext->pageDirectory;
+
+	// Now we preallocate all tables above KERNEL_LOAD_ADDRESS so that these can be copied
+	// into the other contexts but we can keep mapping pages
+	for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
+		 i < 1023; // Not 1024, because the pd is mapped there
+		 i++) {
+		page_t page;
+		assert(PhyMemAlloc(&page));
+		
+		EntrySetPAddr(&d->entries[i], page);
+		EntrySetOptions(&d->entries[i], VMBackendOptionWriteable|VMBackendOptionGlobal|VMBackendOptionPresent);
+	}
+	
+	// Add pd as last entry
+	EntrySetPAddr(&d->entries[1023], VMKernelBackendContext->paddrPageDirectory);
+	EntrySetOptions(&d->entries[1023], VMBackendOptionWriteable|VMBackendOptionGlobal|VMBackendOptionPresent);
+		
+	// Now make the page tables accibile
+	// Now the pd itself is at 0xFFFFE000, and the other tables can be accessed before
+	BoostrapMapPageDirectory((uint32_t)VMKernelBackendContext->paddrPageDirectory, 
+							 (uint32_t)VMKernelBackendContext->pageTablesBase);
+}
+
+//
+// Backend Contexts
+// ================
+//
+
+VMBackendContext VMBackendContextCreate(VMBackendMapOptions defaultOptions)
+{
+	VMBackendContext context = VMBackendContextCreateBase(defaultOptions);
+	
+	if (context == NULL)
+		return NULL;
+	
+	VMBackendContextBeginAccess(context);
+	
+	// Clear new page directory
+	for (uint32_t i = 0; i < 1024; i++) {
+		context->pageDirectory->entries[i] = 0;
+	}
+	
+	// TODO: insert kernel directory
+	
+	VMBackendContextEndAccess(context);
+		
 	return context;
 }
 
@@ -183,7 +236,7 @@ void VMBackendContextDealloc(void* _context)
 	#pragma unused(context)
 }
 
-bool VMBackendContextMap(VMBackendContext context, pointer_t vaddr, page_t paddr, VMBackendMapOptions options)
+bool VMBackendContextMap(VMBackendContext context, page_t paddr, pointer_t vaddr, VMBackendMapOptions options)
 {
 	assert(context != NULL);
 	assert(vaddr > (pointer_t)0x0); // Don't map 0x0
@@ -211,11 +264,12 @@ bool VMBackendContextMap(VMBackendContext context, pointer_t vaddr, page_t paddr
 	}
 	else {
 		EntrySetPAddr(entry, paddr);
-		EntrySetOptions(entry, options);
+		// Always add the present option
+		EntrySetOptions(entry, options|VMBackendOptionPresent);
 	}
 	
 	VMBackendContextEndAccess(context);
-		
+	
 	return success;
 }
 
@@ -279,6 +333,9 @@ page_t VMBackendContextTranslate(VMBackendContext context, pointer_t vaddr)
 
 static void VMBackendContextBeginAccess(VMBackendContext context)
 {
+	if (context == VMKernelBackendContext)
+		return;
+	
 	int32_t accessCounter;
 		
 	accessCounter = __sync_add_and_fetch(&context->accessCounter, 1);
@@ -288,41 +345,42 @@ static void VMBackendContextBeginAccess(VMBackendContext context)
 	
 	// We're the first, so make it accible
 	if (accessCounter == 1) {
-		if (context == VMKernelBackendContext) {
-			// Page directory will be mapped as last
-			// page table.
-			context->pageTablesBase = (PageTable*)0xFFC00000;
-		}
-		else {
-			// Find a spot to temporarly put our context
-			pointer_t base = (pointer_t)0xF0000000;
-			for (; base < (pointer_t)0xFFC00000 &&
-				 VMBackendContextTranslate(VMKernelBackendContext, base) != kPhyInvalidPage;
-			 	base = OFFSET(base, 0x400000));
+		// Find a spot to temporarly put our context
+		pointer_t base = (pointer_t)0xF0000000;
+		for (; base < (pointer_t)0xFFC00000 &&
+			 VMBackendContextTranslate(VMKernelBackendContext, base) != kPhyInvalidPage;
+		 	base = OFFSET(base, 0x400000));
 				
-			assert(base != (pointer_t)0xFFC00000); // Whoops, nothing free?!
+		assert(base != (pointer_t)0xFFC00000); // Whoops, nothing free?!
 			
-			// Map the kernel directory here.
-			PageDirectoryEntry* entry = &VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(base)];
+		VMBackendContextMapPageDirectory(context->paddrPageDirectory, base);
+		
+		// Save the current base
+		context->pageTablesBase = base;
+		context->pageDirectory = OFFSET(base, 0x3FE000);
+	}
+}
+
+static void VMBackendContextMapPageDirectory(page_t paddr, pointer_t vaddr)
+{
+	PageDirectoryEntry* entry = &VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(vaddr)];
 			
-			EntrySetPAddr(entry, VMBackendContextTranslate(VMKernelBackendContext, context->pageDirectory));
-			EntrySetOptions(entry, VMBackendOptionPresent|VMBackendOptionWriteable);
+	EntrySetPAddr(entry, paddr);
+	EntrySetOptions(entry, VMBackendOptionPresent|VMBackendOptionWriteable);
 			
-			// Now invalidate the entries
-			for (pointer_t ptr = base;
-			     ptr < OFFSET(base, 0x400000); 
-			     ptr = OFFSET(ptr, kPhyMemPageSize)) {
-				invalidatePage(ptr);
-			}
-			
-			// Save the current base
-			context->pageTablesBase = base;
-		}
+	// Now invalidate the entries
+	for (pointer_t ptr = vaddr;
+	     ptr < OFFSET(vaddr, 0x400000); 
+	     ptr = OFFSET(ptr, kPhyMemPageSize)) {
+		invalidatePage(ptr);
 	}
 }
 
 static void VMBackendContextEndAccess(VMBackendContext context)
 {
+	if (context == VMKernelBackendContext)
+		return;
+	
 	int32_t accessCounter;
 		
 	accessCounter = __sync_sub_and_fetch(&context->accessCounter, 1);
@@ -332,23 +390,18 @@ static void VMBackendContextEndAccess(VMBackendContext context)
 	
 	// We're the first, so make it accible
 	if (accessCounter == 0) {
-		if (context == VMKernelBackendContext) {
-			// Just clear the base
-			context->pageTablesBase = NULL;
+		// Simply declare non present
+		VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(context->pageTablesBase)] = 0;
+		
+		// Now invalidate the entries
+		for (pointer_t ptr = context->pageTablesBase;
+		     ptr < OFFSET(context->pageTablesBase, 0x400000); 
+		     ptr = OFFSET(ptr, kPhyMemPageSize)) {
+			invalidatePage(ptr);
 		}
-		else {
-			// Simply declare non present
-			VMKernelBackendContext->pageDirectory->entries[tableIndexFromAddress(context->pageTablesBase)] = 0;
 			
-			// Now invalidate the entries
-			for (pointer_t ptr = context->pageTablesBase;
-			     ptr < OFFSET(context->pageTablesBase, 0x400000); 
-			     ptr = OFFSET(ptr, kPhyMemPageSize)) {
-				invalidatePage(ptr);
-			}
-			
-			// And clear the base
-			context->pageTablesBase = NULL;
-		}
+		// And clear the base
+		context->pageTablesBase = NULL;
+		context->pageDirectory = NULL;
 	}
 }
