@@ -163,7 +163,7 @@ public:
 // can be mapped in this, and will be avaiable in
 // all other contexts.
 //
-GlobalPtr<Context> GetKernelContext();
+Ptr<Context> GetKernelContext();
 
 }
 }

@@ -37,7 +37,7 @@ public:
 	~KernelContext();
 };
 
-GlobalPtr<KernelContext> KernelBackendContext;
+GlobalPtr<Context> KernelContext;
 
 static inline uint32_t tableIndexFromAddress(pointer_t address)
 {
@@ -82,7 +82,7 @@ static inline void EntrySetOptions(uint32_t* entry, VMBackendMapOptions options)
 
 void Initialize()
 {
-	KernelBackendContext = new KernelContext();
+	KernelContext = new class KernelContext();
 }
 
 Context::Context(VMBackendMapOptions options, bool initialize) : VM::Backend::Context(options)
@@ -100,13 +100,13 @@ Context::Context(VMBackendMapOptions options, bool initialize) : VM::Backend::Co
 		}
 	
 		// Insert kernel tables
-		KernelBackendContext->beginAccess();
+		KernelContext->beginAccess();
 		for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
 			 i < 1024;
 			 i++) {
-			this->pageDirectory->entries[i] = KernelBackendContext->pageDirectory->entries[i];
+			this->pageDirectory->entries[i] = KernelContext->pageDirectory->entries[i];
 		}
-		KernelBackendContext->endAccess();
+		KernelContext->endAccess();
 	
 		this->endAccess();
 	}
@@ -210,12 +210,12 @@ bool Context::makeAccessible()
 	// Find a spot to temporarly put our context
 	pointer_t base = (pointer_t)0xF0000000;
 	for (; base < (pointer_t)0xFFC00000 &&
-		 KernelBackendContext->translate(base) != kPhyInvalidPage;
+		 KernelContext->translate(base) != kPhyInvalidPage;
 	 	base = OFFSET(base, 0x400000));
 				
 	assert(base != (pointer_t)0xFFC00000); // Whoops, nothing free?!
 			
-	KernelBackendContext->mapPageDirectory(this->paddrPageDirectory, base);
+	KernelContext->mapPageDirectory(this->paddrPageDirectory, base);
 		
 	// Save the current base
 	this->pageTablesBase = (PageTable*)base;
@@ -242,7 +242,7 @@ void Context::mapPageDirectory(page_t paddr, pointer_t vaddr)
 void Context::endAccessible()
 {
 	// Simply declare non present
-	KernelBackendContext->pageDirectory->entries[tableIndexFromAddress(this->pageTablesBase)] = 0;
+	KernelContext->pageDirectory->entries[tableIndexFromAddress(this->pageTablesBase)] = 0;
 		
 	// Now invalidate the entries
 	for (pointer_t ptr = this->pageTablesBase;

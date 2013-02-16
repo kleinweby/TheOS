@@ -70,6 +70,7 @@ public:
 	Context(VMBackendMapOptions options) : Context(options, true) {}
 };
 
+extern GlobalPtr<Context> KernelContext;
 
 } // namespace X86
 } // namespace Backend

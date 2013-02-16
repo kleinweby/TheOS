@@ -63,7 +63,9 @@ void Initialize()
 //
 Ptr<Context> VMBackendGetKernelContext()
 {
-	return NULL;
+	// Casting is a bit tricky here, so
+	// just pass down the raw pointer
+	return Native::KernelContext;
 }
 
 //

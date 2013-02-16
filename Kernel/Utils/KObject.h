@@ -52,6 +52,7 @@ protected:
 	// Reference to the object
 	T* object;
 public:
+	
 	void operator=(T* other)
 	{
 		if (this->object != NULL)
@@ -71,12 +72,12 @@ public:
 		this->object = other;
 	}
 	
-	T operator*() 
+	T* operator*() const
 	{
-		return *this->object;
+		return this->object;
 	}
 	
-	T* operator->()
+	T* operator->() const
 	{
 		return this->object;
 	}
@@ -89,10 +90,25 @@ public:
 	{
 	}
 	
-	Ptr(T* obj) 
+	Ptr(T* obj)
 	{
 		obj->Retain();
 		this->object = obj;
+	}
+
+	//
+	// We need to use a template constructor here
+	// for the following case:
+	//
+	// B is subclass of A
+	// Ptr<B> test1 = ...
+	// Ptr<A> test2 = test1;
+	// Without the last step would not produce a
+	// compatible cast.
+	//
+	template <class TOther>
+	Ptr(GlobalPtr<TOther> const& obj) : Ptr(*obj)
+	{
 	}
 	
 	~Ptr()
