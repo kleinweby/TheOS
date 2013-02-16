@@ -24,6 +24,10 @@
 
 #import <CoreSystem/CommonTypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Bootstrap
 // =========
@@ -61,3 +65,7 @@ void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr) BOOTSTRAP_SECTION;
 // (Except for the this method it self)
 //
 void BootstrapRelease();
+
+#ifdef __cplusplus
+}
+#endif

@@ -29,6 +29,10 @@
 #include <CoreSystem/Integers.h>
 #include <CoreSystem/VariadicArguments.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Inizalize the logging subsystem.
 //
@@ -87,5 +91,9 @@ typedef struct LogDriver {
 // Use this macro on the top level to staticly register a log provider at compile time
 //
 #define LoggingRegisterDriver(_name, driver) LogDriver LogDriver_##_name __attribute__ ((section (".LoggingDrivers"))) = {.name = #_name, .log = &driver}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LOGGING_H__ */

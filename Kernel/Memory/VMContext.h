@@ -27,13 +27,41 @@
 DECLARE_CLASS(VMContext);
 
 #import "VMSection.h"
+#import "VMBackend.h"
 
 
 DEFINE_CLASS(VMContext, Object,
 	// The backend for managing mappings
-	//VMBackendContext* backend;
+	VMBackendContext backend;
 	
 	// All our sections
 	// ordered to their base
 	VMSection* sections;
 );
+
+//
+// Create a new VMContext
+//
+OBJECT_RETURNS_RETAINED
+VMContext VMContextCreate();
+
+//
+// Create a new VMContext with a given backend
+//
+OBJECT_RETURNS_RETAINED
+VMContext VMContextCreateWithBackend(VMBackendContext backend);
+
+//
+// Adds a section to this context at a given offset.
+//
+void VMContextAddSection(VMContext context, VMSection section, offset_t offset);
+
+//
+// Removes a section from this context
+//
+void VMContextRemoveSection(VMContext context, VMSection section);
+
+//
+// Switches to the given context
+//
+void VMContextSwitch(VMContext context);

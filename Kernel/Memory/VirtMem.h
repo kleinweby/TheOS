@@ -31,4 +31,7 @@
 // not activate it pending futhur setup by the caller
 // e.g. Additional mappings etc.
 //
+#ifdef __cplusplus
+extern "C"
+#endif
 void VirtMemInitialize();

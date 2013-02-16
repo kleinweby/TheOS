@@ -27,6 +27,10 @@
 
 #include <CoreSystem/CommonTypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Describes a physical page
 //
@@ -66,5 +70,9 @@ void LogPhyMem();
 // @return Returns true if the allocation succeeded. false otherwise.
 // 					
 bool PhyMemAlloc(page_t* address);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _PHYMEM_H_

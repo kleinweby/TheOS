@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,37 +22,30 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Panic.h"
+#import "KObject.h"
+#import "Memory/kalloc.h"
+#import "Error/Panic.h"
 
-#include "LinkerHelper.h"
-
-#include <CoreSystem/MachineInstructions.h>
-
-LINKER_SYMBOL(PanicDrivers, PanicDriver*);
-LINKER_SYMBOL(PanicDriversLength, uint32_t);
-
-void panic(const char* message, ...)
+void* KObject::operator new(size_t size)
 {
-	CPUState state;
-	va_list args;
-	va_start(args, message);
-	panic_state(message, &state, args);
-	va_end(args);
+	return kalloc(size);
 }
 
-void panic_state(const char* message, CPUState* cpuState, va_list args)
+void* KObject::operator new[](size_t size)
 {
-	// Prevent any futher interrupts from waking up the kernel
-	DisableInterrupts();
-	
-	uint64_t timestamp = TimeStampCounter() >> 24;
-	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
+	return kalloc(size);
+}
 
-	for (uint32_t i = 0; i < count; i++) {
-		PanicDrivers[i](timestamp, message, cpuState, args);
-	}
-	
-	// Halt the kernel
-	while(true)
-		Halt();
+void  KObject::operator delete(void* ptr)
+{
+	free(ptr);
+}
+
+void  KObject::operator delete[](void* ptr)
+{
+	free(ptr);
+}
+
+extern "C" void __cxa_pure_virtual() {
+	panic("Call to pure virtual");
 }

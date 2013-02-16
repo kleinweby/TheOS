@@ -5,6 +5,8 @@ require 'json'
 
 SRC=FileList[]
 
+PLATFORM_DIR="Arch/x86"
+
 SRC.include([
   "Boot/Bootstrap.c",
   "Boot/BootstrapASM.nasm",
@@ -22,14 +24,17 @@ SRC.include([
   "Memory/PhyMem.c",
   
   # VirtMem
-  "Memory/VirtMem.c",
+  "Memory/VirtMem.cc",
   "Memory/VMBackend.c",
-  "Memory/VMHeapObject.c",
-  "Memory/VMObject.c",
-  "Memory/VMLinearObject.c",
+  #{}"Memory/VMHeapObject.c",
+  #{}"Memory/VMObject.c",
+  #{}"Memory/VMLinearObject.c",
+  #{}"Memory/VMContext.c",
+  
+  "#{PLATFORM_DIR}/VM/Backend.cc",
   
   "Utils/Object.c",
-  
+  "Utils/KObject.cc",
   
   "Memory/kalloc.c",
   
@@ -45,7 +50,8 @@ SRC.include([
 CFLAGS << '-I.' \
        << '-ffreestanding' << '-mno-sse' << '-mno-red-zone' \
        << '-mno-mmx' << '-mno-sse' << '-mno-sse2' \
-       << '-mno-sse3' << '-mno-3dnow'
+       << '-mno-sse3' << '-mno-3dnow' \
+       << "-I#{PLATFORM_DIR}"
 
 # Relax some warnings
 CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,37 +22,55 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Panic.h"
+#import "Memory/VMBackend.h"
+#import "Boot/Bootstrap.h"
 
-#include "LinkerHelper.h"
+namespace VM {
+namespace Backend {
+namespace X86 {
 
-#include <CoreSystem/MachineInstructions.h>
+typedef uint32_t PageDirectoryEntry;
 
-LINKER_SYMBOL(PanicDrivers, PanicDriver*);
-LINKER_SYMBOL(PanicDriversLength, uint32_t);
+typedef struct {
+	PageDirectoryEntry entries[1024];
+} PageDirectory;
 
-void panic(const char* message, ...)
-{
-	CPUState state;
-	va_list args;
-	va_start(args, message);
-	panic_state(message, &state, args);
-	va_end(args);
-}
+typedef uint32_t PageTableEntry;
 
-void panic_state(const char* message, CPUState* cpuState, va_list args)
-{
-	// Prevent any futher interrupts from waking up the kernel
-	DisableInterrupts();
+typedef struct {
+	PageTableEntry entries[1024];
+} PageTable;
+
+void Initialize();
+
+// The Context used for paging on X86
+class Context : public VM::Backend::Context {
+protected:
+	// Base when the page tables can be accessed
+	PageTable* pageTablesBase;
+	PageDirectory* pageDirectory;
 	
-	uint64_t timestamp = TimeStampCounter() >> 24;
-	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
+	// the page directory (paddr)
+	page_t paddrPageDirectory;
 
-	for (uint32_t i = 0; i < count; i++) {
-		PanicDrivers[i](timestamp, message, cpuState, args);
-	}
+	void mapPageDirectory(page_t paddr, pointer_t vaddr);
+
+	// Overrided from abstract superclass
+	virtual bool map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options);
+	virtual bool unmap(pointer_t vaddr);
+	virtual page_t translate(pointer_t vaddr);
+	virtual void activate();
+	virtual bool makeAccessible();
+	virtual void endAccessible();
 	
-	// Halt the kernel
-	while(true)
-		Halt();
-}
+	// Call with false, to not initialize die pd. This
+	// is only used in the KernelContext Subclass
+	Context(VMBackendMapOptions options, bool initialize);
+public:
+	Context(VMBackendMapOptions options) : Context(options, true) {}
+};
+
+
+} // namespace X86
+} // namespace Backend
+} // namespace VM

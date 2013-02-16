@@ -27,7 +27,7 @@
 DECLARE_CLASS(VMSection);
 
 #import "VMContext.h"
-#import "VMSection.h"
+#import "VMObject.h"
 
 // Describes the relation section->context
 struct VMSectionContext {

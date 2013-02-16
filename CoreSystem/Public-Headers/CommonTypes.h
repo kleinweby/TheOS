@@ -42,16 +42,20 @@ typedef uint32_t offset_t;
 static const offset_t kOffsetMax = kUInt32Max;
 
 typedef void* pointer_t;
-static const pointer_t NULL = (pointer_t)0;
+#define NULL (0)
 
-static inline pointer_t OFFSET(pointer_t ptr, offset_t off) {
+
+static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
 	return (pointer_t)((uint32_t)ptr + off);
 }
+#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
 
+#ifndef __cplusplus
 typedef uint8_t bool;
 
 static const bool true = (bool)1;
 static const bool false = (bool)0;
+#endif
 
 static const bool YES = (bool)1;
 static const bool NO = (bool)0;

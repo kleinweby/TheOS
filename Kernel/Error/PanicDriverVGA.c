@@ -82,7 +82,7 @@ static void VGAClear()
 	outb(0x3D5, creg);
 }
 
-void PanicDriverVGA(uint64_t timestamp, char* message, CPUState* cpuState, va_list args)
+void PanicDriverVGA(uint64_t timestamp, const char* message, CPUState* cpuState, va_list args)
 {
 	VGAClear();
 	

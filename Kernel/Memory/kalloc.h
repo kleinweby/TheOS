@@ -24,6 +24,10 @@
 
 #import <CoreSystem/CommonTypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Initiztiales kalloc with a given heap
 //
@@ -46,3 +50,7 @@ void* kalloc(size_t size);
 // Frees the allocated memory
 //
 void free(void* ptr);
+
+#ifdef __cplusplus
+}
+#endif
