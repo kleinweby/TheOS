@@ -95,11 +95,18 @@ Context::Context(VMBackendMapOptions options, bool initialize) : VM::Backend::Co
 		this->beginAccess();
 	
 		// Clear new page directory
-		for (uint32_t i = 0; i < 1024; i++) {
+		for (uint32_t i = 0; i < (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF); i++) {
 			this->pageDirectory->entries[i] = 0;
 		}
 	
-		// TODO: insert kernel directory
+		// Insert kernel tables
+		KernelBackendContext->beginAccess();
+		for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
+			 i < 1024;
+			 i++) {
+			this->pageDirectory->entries[i] = KernelBackendContext->pageDirectory->entries[i];
+		}
+		KernelBackendContext->endAccess();
 	
 		this->endAccess();
 	}
