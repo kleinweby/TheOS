@@ -22,7 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Memory/VMBackend.h"
+#import "VM/Backend.h"
 #import "Boot/Bootstrap.h"
 
 namespace VM {

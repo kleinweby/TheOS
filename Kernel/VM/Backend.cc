@@ -22,7 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "VMBackend.h"
+#import "Backend.h"
 
 #import "Boot/Bootstrap.h"
 
@@ -31,7 +31,7 @@
 #import "Memory/Kalloc.h"
 #import "Error/Assert.h"
 #import <CoreSystem/CommonTypes.h>
-#import "VM/Backend.h"
+#import "Arch/x86/VM/Backend.h"
 
 using namespace VM::Backend;
 
