@@ -33,8 +33,16 @@ SRC.include([
   "VM/Backend.cc",
   "#{PLATFORM_DIR}/VM/Backend.cc",
   
+  "VM/VM.cc",
+  "VM/Region.cc",
+  "VM/Context.cc",
+  "VM/Layer.cc",
+  "VM/Store.cc",
+  "VM/FixedStore.cc",
+  
   "Utils/Object.c",
   "Utils/KObject.cc",
+  "Utils/Array.cc",
   
   "Memory/kalloc.c",
   
@@ -57,7 +65,7 @@ CFLAGS << '-I.' \
 CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
        << "-Wno-gnu" << "-Wno-variadic-macros"\
        << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
-       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded'
+       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded' << '-Wno-unneeded-internal-declaration'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

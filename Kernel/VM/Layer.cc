@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,27 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
+#import "Layer.h"
+#import "Region.h"
+#import "Store.h"
+#import "PageFault.h"
 
-#import <CoreSystem/CommonTypes.h>
-
-#import "LinkerHelper.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
-
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
-
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
-
-#ifdef __cplusplus
+namespace VM {
+	
+Layer::Layer(Ptr<Layer> _parent)
+{
+	this->parent = _parent;
 }
-#endif
+
+Layer::Layer(Ptr<Store> _store)
+{
+	this->store = _store;
+}
+
+bool Layer::handleFault(pointer_t vaddr, FaultType type, Region region)
+{
+	#pragma unused(vaddr, type, region)
+	return false;
+}
+
+} // namespace VM

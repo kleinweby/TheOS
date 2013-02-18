@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,49 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
-
 #import <CoreSystem/CommonTypes.h>
 
-#import "LinkerHelper.h"
+#import "VM/FixedStore.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
-
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
-
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
-
-#ifdef __cplusplus
+FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable, bool _free) : Store(numberOfPages * kPhyMemPageSize)
+{
+	this->writeable = _writeable;
+	this->free = _free;
+	this->startPage = _startPage;
+	this->pages = NULL;
+	this->numberOfPages = _numberOfPages;
 }
-#endif
+	
+FixedStore::FixedStore(page_t* _pages, size_t _numberOfPages, bool _writeable, bool _free) : Store(numberOfPages * kPhyMemPageSize)
+{
+	this->writeable = _writeable;
+	this->free = _free;
+	this->startPage = kPhyInvalidPage;
+	this->pages = _pages; // TODO: private copy needed
+	this->numberOfPages = _numberOfPages;
+}
+	
+FixedStore::~FixedStore()
+{
+	if (this->free) {
+		// TODO: release pmem pages
+	}
+}
+	
+bool FixedStore::isWriteable(uint32_t vaddr) const
+{
+	#pragma unused(vaddr)
+	return this->writeable;
+}
+
+page_t FixedStore::getPageAddress(uint32_t vaddr)
+{
+	if (this->pages)
+		return this->pages[vaddr/kPhyMemPageSize];
+	else
+		return OFFSET(this->startPage, vaddr&kPhyPageMask);
+}
+
+} // namespace VM

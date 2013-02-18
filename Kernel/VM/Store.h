@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,49 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
-
 #import <CoreSystem/CommonTypes.h>
 
-#import "LinkerHelper.h"
+#import "Utils/KObject.h"
+#import "Memory/PhyMem.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
+class Store : public KObject {
+protected:
+	size_t size;
+public:
+	//
+	// Creates a new store with the size.
+	// If the object this store represents does not
+	// fill the complete size, the remainder will
+	// be null filled.
+	//
+	Store(size_t size);
+	virtual ~Store();
+	
+	//
+	// Get the size of this store
+	//
+	size_t getSize() const;
+	
+	//
+	// Checks wheter a page at vaddr is writable
+	// This way a private copy does not need to be make
+	// and the page of this store can be reused. 
+	//
+	// Note: areas where it is not allowed to write
+	// (due to permissons) can still be writeable at store
+	// level.
+	// The read onlyness will be enforced in VM::Region 
+	//
+	virtual bool isWriteable(uint32_t vaddr) const = 0;
+	
+	//
+	// Get the paddr for the page at address
+	//
+	// @param addess is relative to the start of this store
+	//
+	virtual page_t getPageAddress(uint32_t vaddr) = 0;
+};
 
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
-
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
-
 #import <CoreSystem/CommonTypes.h>
 
-#import "LinkerHelper.h"
+#import "VM/Store.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
+class FixedStore : public Store {
+private:
+	bool writeable;
+	bool free;
+	
+	page_t startPage;
+	page_t* pages;
+	size_t numberOfPages;
+protected:
+public:
+	//
+	// Constructor for a continigous pmem space
+	//
+	FixedStore(page_t startPage, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	//
+	// Constructor for a non continigous pmem space
+	//
+	FixedStore(page_t* pages, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	// Desctructor
+	virtual ~FixedStore();
+	
+	// Primitives of base class
+	virtual bool isWriteable(uint32_t vaddr) const;
+	virtual page_t getPageAddress(uint32_t vaddr);
+};
 
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
-
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

@@ -61,7 +61,7 @@ void Initialize()
 // The Kernel Context
 // ==================
 //
-Ptr<Context> VMBackendGetKernelContext()
+Ptr<Context> GetKernelContext()
 {
 	// Casting is a bit tricky here, so
 	// just pass down the raw pointer

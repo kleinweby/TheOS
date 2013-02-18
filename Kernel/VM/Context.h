@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,48 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
-
 #import <CoreSystem/CommonTypes.h>
 
-#import "LinkerHelper.h"
+#import "Utils/KObject.h"
+#import "Backend.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
+class Region;
 
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
+class Context : public KObject {
+	// The backend we use to do the actuall mapping
+	Ptr<Backend::Context> backend;
 
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
+protected:
+	void addRegion(Ptr<Region> region);
+	void removeRegion(Ptr<Region> region);
 
-#ifdef __cplusplus
-}
-#endif
+public:
+	//
+	// Create a new context with a private backend
+	//
+	Context();
+	
+	//
+	// Create a new context with a given backend
+	//
+	Context(Ptr<Backend::Context> backend);
+	
+	//
+	// Copy a context.
+	//
+	Context(Ptr<Context>& context);
+	
+	//
+	// Destructor
+	//
+	virtual ~Context();
+	
+	//
+	// Get the backend used to map.
+	//
+	Ptr<Backend::Context> getBackend() const;
+};
+	
+} // namespace VM

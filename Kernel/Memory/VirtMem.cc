@@ -24,14 +24,10 @@
 
 #include "VirtMem.h"
 
-#import "VM/Backend.h"
-
-//static VMContext VMKernelContext;
+#import "VM/VM.h"
 
 extern "C" void VirtMemInitialize()
 {
-	VM::Backend::Initialize();
-	
-	//VMKernelContext = VMContextCreateWithBackend(VMBackendGetKernelContext());
+	VM::Initialize();
 }
 

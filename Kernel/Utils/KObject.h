@@ -67,9 +67,9 @@ public:
 	{
 		if (this->object != NULL)
 			this->object->Release();
-		if (other != NULL)
+		if (*other != NULL)
 			other->Retain();
-		this->object = other;
+		this->object = *other;
 	}
 	
 	T* operator*() const
@@ -88,6 +88,7 @@ class Ptr : public GlobalPtr<T> {
 public:
 	Ptr()
 	{
+		this->object = NULL;
 	}
 	
 	Ptr(T* obj)

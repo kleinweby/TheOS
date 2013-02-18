@@ -10,4 +10,5 @@ A layer provide some pages out of the region.
 Layer fetch pages they don't have them self from
 thier parent.
 
-The uppermost layer hast do map everything.
+The uppermost layer is a VM:Store which represents
+the way to retrieve non-existint pages (File/Anon/Fixed...)

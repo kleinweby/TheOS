@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,43 +22,49 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract 
-//
-
 #import <CoreSystem/CommonTypes.h>
 
-#import "LinkerHelper.h"
+#import "Utils/KObject.h"
+#import "VM/PageFault.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// A string used as kernel version
-//
-// This may be a full version string, or
-// is equal to KernelGitVersion when a full version
-// could not be produced
-extern char* KernelVersion;
+class Store;
+class Region;
 
-//
-// A short git hash identifier, describing the build
-// version of this theos kernel
-//
-extern char* KernelGitVersion;
+class Layer : public KObject {
+	//
+	// Lookup for pages not provided by this
+	// layer will be:
+	// Store -> Parent -> FAIL
+	//
+	// This way, a non root layer can get a
+	// swap storage to page out if needed
+	//
+	Ptr<Layer> parent;
+	Ptr<Store> store;
+	
+public:
+	//
+	// Construct a new layer with a parent
+	//
+	Layer(Ptr<Layer> parent);
+	
+	//
+	// Construct a new layer with a store
+	//
+	Layer(Ptr<Store> store);
+	
+	//
+	// Ask the layer to handle a fault in the region at
+	// address.
+	//
+	// Note: mapping should only allow the faulted type.
+	// So when a read fault occour, only map the page
+	// readonly if it makes sense. For zero filled pages
+	// it would make no sense, as we expect writes soon.
+	//
+	bool handleFault(pointer_t vaddr, FaultType type, Region region);
+};
 
-//
-// Some basic information about the compile-time
-// kernel layout
-//
-LINKER_SYMBOL(KernelOffset, pointer_t);
-LINKER_SYMBOL(KernelLength, offset_t);
-// Note: the bootstrap section will be deleted
-// when the vm subsystem is up and running
-LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
-LINKER_SYMBOL(KernelBootstrapLength, offset_t);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

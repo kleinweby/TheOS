@@ -38,6 +38,7 @@ typedef void* page_t;
 
 static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
 static const page_t kPhyInvalidPage = (void*)0xFFFFFFFF;
+static const uint32_t kPhyPageMask = 0xFFFFF000;
 
 //
 // Initializes the phy mem subsystem

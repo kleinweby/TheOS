@@ -28,7 +28,8 @@
 
 void* KObject::operator new(size_t size)
 {
-	return kalloc(size);
+	void* obj = kalloc(size);
+	return obj;
 }
 
 void* KObject::operator new[](size_t size)

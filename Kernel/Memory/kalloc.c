@@ -152,7 +152,7 @@ void* kalloc(size_t size)
 	for (uint32_t i = 0; i < heapsCount && ptr == NULL; i++) {
 		ptr = kalloc_heap(heaps[i], size);
 	}
-	
+		
 	return ptr;
 }
 
@@ -189,7 +189,7 @@ void* kalloc_heap(Heap* heap, size_t size)
 		else if (ChunkSize(chunk) >= size + sizeof(FreeChunk)) {
 			FreeChunk* c = OFFSET(chunk, size);
 
-			c->size = chunk->size - size | kChunkFree;
+			c->size = (ChunkSize(chunk) - size) | kChunkFree;
 			c->prev = chunk->prev;
 			c->next = chunk->next;
 			chunk->prev->next = c;
@@ -237,9 +237,9 @@ void free_heap(Heap* heap, void* ptr)
 	FreeChunk* next;
 	
 	// Find free next Chunk
-	next = ptr+ChunkSize(chunk);
+	next = OFFSET(ptr, ChunkSize(chunk));
 	while (next->size & kChunkUsed)
-		next = next + ChunkSize(next);
+		next = OFFSET(next, ChunkSize(next));
 	
 	// Found the next free chunk
 	// Is that adjacent at our end?
