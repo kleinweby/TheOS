@@ -47,6 +47,11 @@ void  KObject::operator delete[](void* ptr)
 	free(ptr);
 }
 
+KObject::~KObject()
+{
+}
+
+
 extern "C" void __cxa_pure_virtual() {
 	panic("Call to pure virtual");
 }

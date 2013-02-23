@@ -53,4 +53,6 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	KallocInitialize(StartupHeap, sizeof(StartupHeap));
 	
 	VirtMemInitialize();
+	
+	LogInfo("booted");
 }

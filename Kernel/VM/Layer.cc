@@ -28,15 +28,22 @@
 #import "PageFault.h"
 
 namespace VM {
-	
+
 Layer::Layer(Ptr<Layer> _parent)
 {
+	this->store = NULL;
 	this->parent = _parent;
 }
 
 Layer::Layer(Ptr<Store> _store)
 {
+	this->parent = NULL;
 	this->store = _store;
+}
+
+Layer::~Layer()
+{
+	
 }
 
 bool Layer::handleFault(pointer_t vaddr, FaultType type, Region region)

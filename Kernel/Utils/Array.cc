@@ -22,24 +22,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Array.h"
-
-Array::Array()
-{
-	
-}
-
-Array(size_t sizeHint)
-{
-	
-}
-
-Ptr<T> get(uint32_t i)
-{
-	
-}
-
-void set(uint32_t, Ptr<t> obj)
-{
-	
-}
+// #import "Array.h"
+// 
+// Array::Array()
+// {
+// 	
+// }
+// 
+// Array(size_t sizeHint)
+// {
+// 	
+// }
+// 
+// Ptr<T> get(uint32_t i)
+// {
+// 	
+// }
+// 
+// void set(uint32_t, Ptr<t> obj)
+// {
+// 	
+// }

@@ -79,6 +79,11 @@ public:
 	Region(Ptr<Region>& region, offset_t offset, Ptr<Context> context);
 	
 	//
+	// Destructor
+	//
+	virtual ~Region();
+	
+	//
 	// Set the region type.
 	// Obviously this will only affect region copies
 	// after the type was set.

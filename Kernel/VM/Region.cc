@@ -46,6 +46,10 @@ Region::Region(Ptr<Region>& _region, offset_t _offset, Ptr<Context> _context)
 	this->type = _region->type;
 }
 
+Region::~Region()
+{
+}
+
 void Region::setType(RegionType _type)
 {
 	this->type = _type;

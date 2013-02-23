@@ -24,6 +24,7 @@
 
 #import <CoreSystem/CommonTypes.h>
 #import "Error/Assert.h"
+#import "Logging/Logging.h"
 
 //
 // Ptr and GlobalPtr
@@ -86,16 +87,22 @@ public:
 template <class T>
 class Ptr : public GlobalPtr<T> {
 public:
-	Ptr()
-	{
-		this->object = NULL;
-	}
+	Ptr() : Ptr(NULL)
+	{}
 	
 	Ptr(T* obj)
-	{
-		obj->Retain();
+	{		
+		// Allow initializing with 0
+		if (obj != NULL)
+			obj->Retain();
 		this->object = obj;
 	}
+
+	// Copy constructor
+	// NOTE: this will not be created by the template copy constructor
+	// (Dont know why)
+	Ptr(Ptr<T> const& obj) : Ptr(*obj)
+	{}
 
 	//
 	// We need to use a template constructor here
@@ -109,12 +116,12 @@ public:
 	//
 	template <class TOther>
 	Ptr(GlobalPtr<TOther> const& obj) : Ptr(*obj)
-	{
-	}
+	{}
 	
 	~Ptr()
-	{
-		this->object->Release();
+	{		
+		if (this->object != NULL)
+			this->object->Release();
 	}
 };
 
@@ -137,12 +144,14 @@ public:
 		this->retainCount = 0;
 	}
 	
+	virtual ~KObject();
+	
 	void Retain()
 	{
 		int32_t rc;
 		
 		rc = __sync_add_and_fetch(&this->retainCount, 1);
-	
+
 		//
 		// The rc may be 1 after this, as newly created objects
 		// have an rc = 0, and the rc system only kicks in when
@@ -156,7 +165,7 @@ public:
 		int32_t rc;
 		
 		rc = __sync_sub_and_fetch(&this->retainCount, 1);
-		
+
 		//
 		// < 0 Would mean double free
 		//

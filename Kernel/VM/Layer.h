@@ -56,6 +56,11 @@ public:
 	Layer(Ptr<Store> store);
 	
 	//
+	// Destructor
+	//
+	virtual ~Layer();
+	
+	//
 	// Ask the layer to handle a fault in the region at
 	// address.
 	//
