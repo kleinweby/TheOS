@@ -47,13 +47,14 @@ void Initialize()
 void SetupKernelContext()
 {
 	KernelContext = new Context(Backend::GetKernelContext());
-	Ptr<Store> store;
 	Ptr<Layer> layer;
-	Ptr<Region> region;
 	
-	store = new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize);
-	layer = new Layer(store);
-	region = new Region(layer, KERNEL_LOAD_ADDRESS, KernelContext);
+	// TODO: we should make different regions, for text, data, rodata etc.
+	// Create a layer with the parts the bootloader loaded for us
+	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
+	// And create a region in the kernel context
+	// Region is retained by KernelContext
+	new Region(layer, KERNEL_LOAD_ADDRESS, KernelContext);
 }
 
 } // namespace VM
