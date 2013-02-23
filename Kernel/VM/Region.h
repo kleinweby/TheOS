@@ -46,6 +46,31 @@ enum class RegionType : unsigned short {
 	Shared
 };
 
+//
+// Describes the permissions for regions.
+// Note that some flags imply others or
+// prohibit others.
+//
+// This depends on the underlaying architecture
+//
+// Therfore you should avoid specifing Write
+// and Execute at the same time.
+//
+enum class RegionPermission : unsigned short {
+	//
+	// This region is readable
+	//
+	Read = (1 << 0),
+	//
+	// This region is writeable
+	//
+	Write = (1 << 0),
+	//
+	// This region is executable
+	//
+	Execute = (1 << 0)
+};
+
 class Region : public KObject {
 
 protected:
@@ -59,6 +84,8 @@ protected:
 
 	// The type of this region
 	RegionType type;
+	// The permissions of this region
+	RegionPermission permissions;
 public:
 	//
 	// Default constructor
