@@ -26,23 +26,23 @@
 #import "Memory/kalloc.h"
 #import "Error/Panic.h"
 
-void* KObject::operator new(size_t size)
+void* operator new(size_t size)
 {
 	void* obj = kalloc(size);
 	return obj;
 }
 
-void* KObject::operator new[](size_t size)
+void* operator new[](size_t size)
 {
 	return kalloc(size);
 }
 
-void  KObject::operator delete(void* ptr)
+void  operator delete(void* ptr)
 {
 	free(ptr);
 }
 
-void  KObject::operator delete[](void* ptr)
+void  operator delete[](void* ptr)
 {
 	free(ptr);
 }
