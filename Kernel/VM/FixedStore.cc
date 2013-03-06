@@ -26,6 +26,9 @@
 
 #import "VM/FixedStore.h"
 
+#import "Utils/Memutils.h"
+#import "Logging/Logging.h"
+
 namespace VM {
 
 FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable, bool _free) : Store(numberOfPages * kPhyMemPageSize)
@@ -65,6 +68,12 @@ page_t FixedStore::getPageAddress(uint32_t vaddr)
 		return this->pages[vaddr/kPhyMemPageSize];
 	else
 		return OFFSET(this->startPage, vaddr&kPhyPageMask);
+}
+
+void FixedStore::writeback(uint32_t vaddr, page_t page)
+{
+	LogWarning("Writeback on fixed store.");
+	#pragma unused(vaddr, page)
 }
 
 } // namespace VM

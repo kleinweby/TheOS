@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2013, Christian Speich
+// Copyright (c) 2012, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,54 +22,17 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Layer.h"
-#import "Region.h"
-#import "Store.h"
-#import "PageFault.h"
+#include <CoreSystem/CommonTypes.h>
 
-namespace VM {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-Layer::Layer(Ptr<Layer> _parent)
-{
-	this->store = NULL;
-	this->parent = _parent;
+int memcmp(const void *s1, const void *s2, size_t n);
+void *memset(void *b, int c, size_t len);
+void *memmove(void *s1, const void *s2, size_t n);
+void *memcpy(void * s1, const void * s2, size_t n);
+
+#ifdef __cplusplus
 }
-
-Layer::Layer(Ptr<Store> _store)
-{
-	this->parent = NULL;
-	this->store = _store;
-}
-
-Layer::~Layer()
-{
-	
-}
-
-bool Layer::handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region)
-{
-	#pragma unused(vaddr, type, region)
-	return false;
-}
-
-size_t Layer::getSize()
-{
-	if (this->parent)
-		return this->parent->getSize();
-	
-	return this->store->getSize();
-}
-
-size_t Layer::getRealSize()
-{
-	size_t size = 0x0;
-	
-	for (size_t i = 0; i < this->getSize()/kPhyMemPageSize; i++) {
-		if (this->pages[i] != kPhyInvalidPage)
-			size += kPhyMemPageSize;
-	}
-	
-	return size;
-}
-
-} // namespace VM
+#endif

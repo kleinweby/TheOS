@@ -65,6 +65,18 @@ public:
 	// @param addess is relative to the start of this store
 	//
 	virtual page_t getPageAddress(uint32_t vaddr) = 0;
+	
+	//
+	// Writes back the content held by the layer to the
+	// store underlaying it. This may be used when isWriteable
+	// returned false, and we want to make a change permanent.
+	//
+	// @param vaddr address in this store
+	// @param page the phy page to write back
+	//             this page is not used by this store after this
+	//             call returns.
+	//
+	virtual void writeback(uint32_t vaddr, page_t page) = 0;
 };
 
 } // namespace VM

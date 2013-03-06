@@ -54,6 +54,7 @@ public:
 	// Primitives of base class
 	virtual bool isWriteable(uint32_t vaddr) const;
 	virtual page_t getPageAddress(uint32_t vaddr);
+	virtual void writeback(uint32_t vaddr, page_t page);
 };
 
 } // namespace VM

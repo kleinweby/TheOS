@@ -82,6 +82,11 @@ public:
 	{
 		return this->object;
 	}
+	
+	operator bool() const
+	{
+		return this->object == NULL;
+	}
 };
 
 template <class T>

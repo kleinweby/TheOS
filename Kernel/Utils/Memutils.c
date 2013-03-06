@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2013, Christian Speich
+// Copyright (c) 2012, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,54 +22,46 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Layer.h"
-#import "Region.h"
-#import "Store.h"
-#import "PageFault.h"
+#import "Memutils.h"
 
-namespace VM {
-
-Layer::Layer(Ptr<Layer> _parent)
+int memcmp(const void *_s1, const void *_s2, size_t n)
 {
-	this->store = NULL;
-	this->parent = _parent;
-}
-
-Layer::Layer(Ptr<Store> _store)
-{
-	this->parent = NULL;
-	this->store = _store;
-}
-
-Layer::~Layer()
-{
+	const char *s1 = _s1;
+	const char *s2 = _s2;
 	
-}
-
-bool Layer::handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region)
-{
-	#pragma unused(vaddr, type, region)
-	return false;
-}
-
-size_t Layer::getSize()
-{
-	if (this->parent)
-		return this->parent->getSize();
-	
-	return this->store->getSize();
-}
-
-size_t Layer::getRealSize()
-{
-	size_t size = 0x0;
-	
-	for (size_t i = 0; i < this->getSize()/kPhyMemPageSize; i++) {
-		if (this->pages[i] != kPhyInvalidPage)
-			size += kPhyMemPageSize;
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		if (*s1 < *s2)
+			return -1;
+		else if (*s1 > *s2)
+			return 1;
 	}
 	
-	return size;
+	return 0;
 }
 
-} // namespace VM
+void *memset(void *_b, int c, size_t len)
+{
+	int *b = _b;
+	
+	for (size_t i = 0; i < len/sizeof(c); i++, b++)
+		*b = c;
+	
+	return _b;
+}
+
+// void *memmove(void *s1, const void *s2, size_t n)
+// {
+// 	
+// }
+
+void *memcpy(void *restrict _s1, const void *restrict _s2, size_t n)
+{
+	char *s1 = _s1;
+	const char *s2 = _s2;
+	
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		*s1 = *s2;
+	}
+	
+	return _s1;
+}

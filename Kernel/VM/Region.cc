@@ -70,4 +70,23 @@ size_t Region::getSize() const
 	return this->size;
 }
 
+bool Region::handleFault(uint32_t vaddr, FaultType _type)
+{
+	// TODO: check permissions
+	// TODO: check vaddr in bounds
+	return this->layer->handleFault(vaddr, _type, this);
+}
+
+bool Region::fireFault(FaultType _type)
+{
+	bool success = true;
+	
+	for (uint32_t vaddr = this->offset; vaddr < this->offset+this->size; vaddr += kPhyMemPageSize) {
+		if (!this->handleFault(vaddr, _type))
+			success = false;
+	}
+	
+	return success;
+}
+
 } // namespace VM

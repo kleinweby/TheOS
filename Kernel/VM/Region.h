@@ -25,6 +25,7 @@
 #import <CoreSystem/CommonTypes.h>
 
 #import "Utils/KObject.h"
+#import "VM/PageFault.h"
 
 namespace VM {
 
@@ -132,6 +133,17 @@ public:
 	// Removes the region from the context
 	//
 	void removeFromContext();
+	
+	//
+	// Handle a page fault at address
+	//
+	bool handleFault(uint32_t vaddr, FaultType type);
+	
+	//
+	// You can call this at any time, to cause a fault
+	// on the whole region
+	//
+	bool fireFault(FaultType type);
 };
 
 } //namespace VM
