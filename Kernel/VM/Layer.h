@@ -25,6 +25,7 @@
 #import <CoreSystem/CommonTypes.h>
 
 #import "Utils/KObject.h"
+#import "Utils/Result.h"
 #import "VM/PageFault.h"
 #import "Memory/PhyMem.h"
 
@@ -80,7 +81,7 @@ public:
 	// But never grant more rights than the region allows
 	// (unless the underlaying architecture requires it).
 	//
-	bool handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region);
+	Result<> handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region);
 	
 	//
 	// Gets the size of this layer

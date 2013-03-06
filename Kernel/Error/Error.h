@@ -22,54 +22,10 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Layer.h"
-#import "Region.h"
-#import "Store.h"
-#import "PageFault.h"
+#pragma once
 
-namespace VM {
+#import "Utils/KObject.h"
 
-Layer::Layer(Ptr<Layer> _parent)
+class Error : public KObject
 {
-	this->store = NULL;
-	this->parent = _parent;
-}
-
-Layer::Layer(Ptr<Store> _store)
-{
-	this->parent = NULL;
-	this->store = _store;
-}
-
-Layer::~Layer()
-{
-	
-}
-
-Result<> Layer::handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region)
-{
-	#pragma unused(vaddr, type, region)
-	return false;
-}
-
-size_t Layer::getSize()
-{
-	if (this->parent)
-		return this->parent->getSize();
-	
-	return this->store->getSize();
-}
-
-size_t Layer::getRealSize()
-{
-	size_t size = 0x0;
-	
-	for (size_t i = 0; i < this->getSize()/kPhyMemPageSize; i++) {
-		if (this->pages[i] != kPhyInvalidPage)
-			size += kPhyMemPageSize;
-	}
-	
-	return size;
-}
-
-} // namespace VM
+};

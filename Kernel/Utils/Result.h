@@ -22,54 +22,73 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Layer.h"
-#import "Region.h"
-#import "Store.h"
-#import "PageFault.h"
+#pragma once
 
-namespace VM {
+#import <CoreSystem/CommonTypes.h>
+#import "Utils/KObject.h"
+#import "Error/Error.h"
 
-Layer::Layer(Ptr<Layer> _parent)
-{
-	this->store = NULL;
-	this->parent = _parent;
-}
+enum class ResultType : short {
+	Success,
+	Error,
+	TryAgain
+};
 
-Layer::Layer(Ptr<Store> _store)
-{
-	this->parent = NULL;
-	this->store = _store;
-}
-
-Layer::~Layer()
-{
+template<class T = Error>
+class Result {
+private:
+	// Disallow dynamic instances
+	void* operator new(size_t) = delete;
+	void* operator new[](size_t) = delete;
+	void operator delete(void *) = delete;
+	void operator delete[](void*) = delete;
+protected:
+	ResultType resultType;
+	// Use kobject here to be able to store a
+	// waiting object here
+	Ptr<KObject> object;
 	
-}
-
-Result<> Layer::handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region)
-{
-	#pragma unused(vaddr, type, region)
-	return false;
-}
-
-size_t Layer::getSize()
-{
-	if (this->parent)
-		return this->parent->getSize();
-	
-	return this->store->getSize();
-}
-
-size_t Layer::getRealSize()
-{
-	size_t size = 0x0;
-	
-	for (size_t i = 0; i < this->getSize()/kPhyMemPageSize; i++) {
-		if (this->pages[i] != kPhyInvalidPage)
-			size += kPhyMemPageSize;
+public:
+	Result() : Result(ResultType::Success) {}
+	Result(ResultType _resultType)
+	{
+		this->resultType = _resultType;
 	}
 	
-	return size;
-}
-
-} // namespace VM
+	Result(Ptr<T> _object) : Result(ResultType::Success)
+	{
+		this->object = _object;
+	}
+	
+	Result(bool succeeded) : Result(succeeded ? ResultType::Success : ResultType::Error) {}
+	
+	operator bool() const
+	{
+		return this->isSuccess();
+	}
+	
+	inline bool isSuccess() const
+	{
+		return resultType == ResultType::Success;
+	}
+	
+	inline bool isError() const
+	{
+		return resultType == ResultType::Error;
+	}
+	
+	inline bool isTryAgain() const
+	{
+		return resultType == ResultType::TryAgain;
+	}
+	
+	operator T() const
+	{
+		return (T)this->object;
+	}
+	
+	operator Ptr<Error>() const
+	{
+		return (Ptr<Error>)this->object;
+	}
+};
