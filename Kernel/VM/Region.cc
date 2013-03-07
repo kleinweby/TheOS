@@ -37,7 +37,8 @@ Region::Region(Ptr<Layer> _layer, offset_t _offset, Ptr<Context> _context)
 	this->context = _context;
 	this->size = _layer->getSize();
 	
-	this->context->addRegion(this);
+	// We can not call this here, until we get retained by the context
+	//this->context->addRegion(this);
 }
 	
 // Copy constructor
@@ -48,12 +49,12 @@ Region::Region(Ptr<Region>& _region, offset_t _offset, Ptr<Context> _context)
 	this->size = _region->size;
 	this->type = _region->type;
 	
-	this->context->addRegion(this);
+	// We can not call this here, until we get retained by the context
+	//this->context->addRegion(this);
 }
 
 Region::~Region()
 {
-	this->context->removeRegion(this);
 }
 
 void Region::setType(RegionType _type)

@@ -50,14 +50,14 @@ Ptr<Backend::Context> Context::getBackend() const
 	return this->backend;
 }
 
-void addRegion(Ptr<Region> region)
+void Context::addRegion(Ptr<Region> region)
 {
-	
+	#pragma unused(region)
 }
 
-void removeRegion(Ptr<Region> region)
+void Context::removeRegion(Ptr<Region> region)
 {
-	
+	#pragma unused(region)
 }
 	
 } // namespace VM
