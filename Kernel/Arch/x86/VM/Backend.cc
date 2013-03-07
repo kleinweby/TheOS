@@ -91,6 +91,8 @@ static inline void EntrySetOptions(uint32_t* entry, VMBackendMapOptions options)
 
 void Initialize()
 {
+	CurrentLogLovel = kLogLevelInfo;
+	
 	KernelContext = new class KernelContext();
 }
 

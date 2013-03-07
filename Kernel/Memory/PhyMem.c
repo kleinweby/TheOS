@@ -116,6 +116,15 @@ void _PhyMemMarkUsedRange(pointer_t address, size_t size)
 	}
 }
 
+void _PhyMemMarkFreeRange(page_t address, size_t size)
+{
+	for(uint32_t addr = ((uint32_t)address & kPageMask); 
+	    addr < (uint32_t)address + size;
+		addr += kPhyMemPageSize) {
+		_PhyMemMarkFree((pointer_t)addr);
+	}
+}
+
 bool PhyMemAlloc(pointer_t* address)
 {
 	uint32_t planeIndex;

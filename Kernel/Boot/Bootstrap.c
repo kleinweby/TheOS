@@ -24,11 +24,16 @@
 
 #import "Bootstrap.h"
 #import "Memory/PhyMem.h"
+#import "Logging/Logging.h"
 
 uint32_t* BootstrapPageDirectory BOOTSTRAP_SECTION;
 void Bootstrap() BOOTSTRAP_SECTION;
 uint32_t BootstrapAllocNextPage BOOTSTRAP_SECTION;
+uint32_t BootstrapAllocBeginPage BOOTSTRAP_SECTION;
 uint32_t BootstrapAllocPage() BOOTSTRAP_SECTION;
+
+uint32_t BootstrapAllocFirstPage;
+uint32_t BootstrapAllocLastPage;
 
 extern void _KernelBootstrapOffset;
 extern void _KernelBootstrapLength;
@@ -43,6 +48,7 @@ void Bootstrap()
 	if (BootstrapAllocNextPage & 0xFFF)
 		BootstrapAllocNextPage = (BootstrapAllocNextPage+0x1000)&0xFFFFF000;
 	
+	BootstrapAllocBeginPage = BootstrapAllocNextPage;
 	BootstrapPageDirectory = (uint32_t*)(BootstrapAllocPage());
 	
 	// Identity map pd
@@ -57,9 +63,14 @@ void Bootstrap()
 	BooststrapMap((uint32_t)&_KernelOffset,
 				  (uint32_t)&_KernelOffset + KERNEL_LOAD_ADDRESS,
 				  (uint32_t)&_KernelLength);
+				  	
+	// Map somthing where the kernel context later will be
+	// so that the needed table gets allocated which we can not do
+	// later
+	BooststrapMap((uint32_t)BootstrapPageDirectory, 0xFFFFF000, 0x1000);
 }
 
-void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size)
+void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t _size)
 {
 	// Sanitise paddr, vaddr and size
 	paddr = paddr & 0xFFFFF000;
@@ -67,6 +78,7 @@ void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size)
 	
 	uint32_t tableIndex = (vaddr >> 22) & 0x3FF;
 	uint32_t entryIndex = (vaddr >> 12) & 0x3FF;
+	int32_t size = (int32_t)_size;
 	
 	for (; tableIndex < 1024 && size > 0; tableIndex++) {
 		// Add table when needed
@@ -105,12 +117,10 @@ uint32_t BootstrapAllocPage()
 
 void BootstrapPhyMemInitialize()
 {
-	_PhyMemMarkUsedRange(BootstrapPageDirectory, 0x1000);
-	for (uint32_t i = 0; i < 1024; i++) {
-		if (BootstrapPageDirectory[i] & (1 << 0)) {
-			_PhyMemMarkUsedRange((page_t)(BootstrapPageDirectory[i] & 0xFFFFF000), 0x1000);
-		}
-	}
+	BootstrapAllocFirstPage = BootstrapAllocBeginPage;
+	BootstrapAllocLastPage = BootstrapAllocNextPage;
+	
+	_PhyMemMarkUsedRange((page_t)BootstrapAllocFirstPage, BootstrapAllocLastPage-BootstrapAllocFirstPage);
 }
 
 void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr)
@@ -122,5 +132,5 @@ void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr)
 
 void BootstrapRelease()
 {
-	
+	_PhyMemMarkFreeRange((page_t)BootstrapAllocFirstPage, BootstrapAllocLastPage-BootstrapAllocFirstPage);
 }
