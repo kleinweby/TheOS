@@ -52,6 +52,8 @@ bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region
 {
 	Ptr<Backend::Context> backend = region->getContext()->getBackend();
 	
+	// TODO: first we need to check out local cache
+	
 	if (this->store) {
 		bool reuse = true;
 		
@@ -66,12 +68,27 @@ bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region
 		else
 			panic("Not implemented");
 		
-		backend->map(paddr, (pointer_t)(vaddr + region->getOffset()), 0);
+		if (paddr != kPhyInvalidPage) {
+			backend->map(paddr, (pointer_t)(vaddr + region->getOffset()), 0);
+		
+			return true;
+		}
 	}
 	
 	if (this->parent) {
-		
+		// We have a parent, and want to write
+		// In this case we need to copy the underlaying page
+		// (If we could write to it directly, we would not exist)
+		if (permissions & RegionPermission::Write) {
+			panic("Not implemented");
+		}
+		// We don't need to write, so go up the layer chain
+		// and let them do the caching/mapping
+		else {
+			return this->parent->handleFault(vaddr, permissions, region);
+		}
 	}
+	
 	return false;
 }
 
