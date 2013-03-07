@@ -52,7 +52,12 @@ FixedStore::FixedStore(page_t* _pages, size_t _numberOfPages, bool _writeable, b
 FixedStore::~FixedStore()
 {
 	if (this->free) {
-		// TODO: release pmem pages
+		if (this->pages) {
+			for (uint32_t i = 0; i < this->numberOfPages; i++)
+				_PhyMemMarkFree(this->pages[i]);
+		}
+		else
+			_PhyMemMarkFreeRange(this->startPage, this->numberOfPages * kPhyMemPageSize);
 	}
 }
 	
