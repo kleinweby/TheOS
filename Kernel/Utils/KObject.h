@@ -87,6 +87,11 @@ public:
 	{
 		return this->object != NULL;
 	}
+	
+	operator T*() const
+	{
+		return this->object;
+	}
 };
 
 template <class T>
