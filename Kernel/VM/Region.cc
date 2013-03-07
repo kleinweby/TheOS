@@ -78,8 +78,8 @@ Ptr<Context> Region::getContext() const
 
 bool Region::handleFault(uint32_t vaddr, RegionPermission _permissions)
 {
+	assert(this->offset <= vaddr && vaddr < this->offset+this->size);
 	// TODO: check permissions
-	// TODO: check vaddr in bounds
 
 	return this->layer->handleFault(vaddr - this->offset, _permissions, this);
 }
