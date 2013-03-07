@@ -39,6 +39,7 @@ protected:
 	void addRegion(Ptr<Region> region);
 	void removeRegion(Ptr<Region> region);
 
+	friend class Region;
 public:
 	//
 	// Create a new context with a private backend

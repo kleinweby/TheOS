@@ -36,6 +36,8 @@ Region::Region(Ptr<Layer> _layer, offset_t _offset, Ptr<Context> _context)
 	this->offset = _offset;
 	this->context = _context;
 	this->size = _layer->getSize();
+	
+	this->context->addRegion(this);
 }
 	
 // Copy constructor
@@ -45,10 +47,13 @@ Region::Region(Ptr<Region>& _region, offset_t _offset, Ptr<Context> _context)
 	this->context = _context;
 	this->size = _region->size;
 	this->type = _region->type;
+	
+	this->context->addRegion(this);
 }
 
 Region::~Region()
 {
+	this->context->removeRegion(this);
 }
 
 void Region::setType(RegionType _type)
@@ -74,6 +79,11 @@ size_t Region::getSize() const
 Ptr<Context> Region::getContext() const
 {
 	return this->context;
+}
+
+void Region::removeFromContext()
+{
+	this->context->removeRegion(this);
 }
 
 bool Region::handleFault(uint32_t vaddr, RegionPermission _permissions)

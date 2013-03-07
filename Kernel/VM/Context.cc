@@ -49,5 +49,15 @@ Ptr<Backend::Context> Context::getBackend() const
 {
 	return this->backend;
 }
+
+void addRegion(Ptr<Region> region)
+{
+	
+}
+
+void removeRegion(Ptr<Region> region)
+{
+	
+}
 	
 } // namespace VM
