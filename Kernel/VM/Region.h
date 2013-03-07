@@ -26,6 +26,7 @@
 
 #import "Utils/KObject.h"
 #import "VM/PageFault.h"
+#import "VM/Permission.h"
 
 namespace VM {
 
@@ -47,35 +48,6 @@ enum class RegionType : unsigned short {
 	Shared
 };
 
-//
-// Describes the permissions for regions.
-// Note that some flags imply others or
-// prohibit others.
-//
-// This depends on the underlaying architecture
-//
-// Therfore you should avoid specifing Write
-// and Execute at the same time.
-//
-enum RegionPermission : int {
-	//
-	// This region is readable
-	//
-	Read = (1 << 0),
-	//
-	// This region is writeable
-	//
-	Write = (1 << 0),
-	//
-	// This region is executable
-	//
-	Execute = (1 << 0)
-};
-
-// To make it work properly
-inline RegionPermission operator|(RegionPermission a, RegionPermission b)
-{return static_cast<RegionPermission>(static_cast<int>(a) | static_cast<int>(b));}
-
 class Region : public KObject {
 
 protected:
@@ -90,7 +62,7 @@ protected:
 	// The type of this region
 	RegionType type;
 	// The permissions of this region
-	RegionPermission permissions;
+	Permission permissions;
 public:
 	//
 	// Default constructor
@@ -99,7 +71,7 @@ public:
 	// @param offset The offset in the context.
 	// @param context The context the region will be added to
 	//
-	Region(Ptr<Layer> layer, offset_t offset, Ptr<Context> context);
+	Region(Ptr<Layer> layer, offset_t offset, Permission permissions, Ptr<Context> context);
 	
 	//
 	// Copy constructor
@@ -108,7 +80,7 @@ public:
 	// @param offset The offset in the context.
 	// @param context The context the region will be added to
 	//
-	Region(Ptr<Region>& region, offset_t offset, Ptr<Context> context);
+	Region(Ptr<Region>& region, offset_t offset, Permission permissions, Ptr<Context> context);
 	
 	//
 	// Destructor
@@ -146,13 +118,13 @@ public:
 	//
 	// Handle a page fault at address
 	//
-	bool handleFault(uint32_t vaddr, RegionPermission permissions);
+	bool handleFault(uint32_t vaddr, Permission permissions);
 	
 	//
 	// You can call this at any time, to cause a fault
 	// on the whole region
 	//
-	bool fault(RegionPermission permissions);
+	bool fault(Permission permissions);
 };
 
 } //namespace VM

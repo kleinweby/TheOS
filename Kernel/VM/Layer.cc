@@ -48,7 +48,7 @@ Layer::~Layer()
 	
 }
 
-bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region> region)
+bool Layer::handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> region)
 {
 	Ptr<Backend::Context> backend = region->getContext()->getBackend();
 	
@@ -58,7 +58,7 @@ bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region
 		bool reuse = true;
 		
 		// We need write permissions, but the store does not allow us to write directly
-		if ((permissions & RegionPermission::Write) && !(this->store->isWriteable(vaddr)))
+		if ((permissions & Permission::Write) && !(this->store->isWriteable(vaddr)))
 			reuse = false;
 		
 		page_t paddr;
@@ -79,7 +79,7 @@ bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region
 		// We have a parent, and want to write
 		// In this case we need to copy the underlaying page
 		// (If we could write to it directly, we would not exist)
-		if (permissions & RegionPermission::Write) {
+		if (permissions & Permission::Write) {
 			panic("Not implemented");
 		}
 		// We don't need to write, so go up the layer chain

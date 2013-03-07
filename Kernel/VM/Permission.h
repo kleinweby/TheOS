@@ -22,48 +22,31 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "VM.h"
-#import "Backend.h"
-#import "Context.h"
-#import "FixedStore.h"
-#import "Layer.h"
-#import "Region.h"
-#import "KernelInfo.h"
-#import "Logging/Logging.h"
+#pragma once
 
 namespace VM {
 
-GlobalPtr<Context> KernelContext;
+//
+// Describes permissions used by the VM subsytem
+// The underlaying architecture may not be able to represent all combinations
+//	
+enum Permission : int {
+	//
+	// This region is readable
+	//
+	Read = (1 << 0),
+	//
+	// This region is writeable
+	//
+	Write = (1 << 0),
+	//
+	// This region is executable
+	//
+	Execute = (1 << 0)
+};
 
-void SetupKernelContext();
+// to allow Permission a = Permission::Read | Permission::Write;
+inline Permission operator|(Permission a, Permission b)
+{return static_cast<Permission>(static_cast<int>(a) | static_cast<int>(b));}
 
-void Initialize()
-{
-	Backend::Initialize();
-	
-	SetupKernelContext();
 }
-
-void SetupKernelContext()
-{
-	KernelContext = new Context(Backend::GetKernelContext());
-	Ptr<Layer> layer;
-	Ptr<Region> region;
-	
-	// TODO: we should make different regions, for text, data, rodata etc.
-	// Create a layer with the parts the bootloader loaded for us
-	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
-	// And create a region in the kernel context
-	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
-	// We need to fault this manually, as the fault handling code would not be present
-	region->fault(Permission::Read | Permission::Write | Permission::Execute);
-
-	ActivateContext(KernelContext);
-}
-
-void ActivateContext(Ptr<Context> context)
-{
-	context->getBackend()->activate();
-}
-
-} // namespace VM

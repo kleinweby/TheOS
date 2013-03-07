@@ -29,25 +29,27 @@
 namespace VM {
 
 // Default constructor
-Region::Region(Ptr<Layer> _layer, offset_t _offset, Ptr<Context> _context)
+Region::Region(Ptr<Layer> _layer, offset_t _offset, Permission _permissions, Ptr<Context> _context)
 {
 	this->type = RegionType::Private;
 	this->layer = _layer;
 	this->offset = _offset;
 	this->context = _context;
 	this->size = _layer->getSize();
+	this->permissions = _permissions;
 	
 	// We can not call this here, until we get retained by the context
 	//this->context->addRegion(this);
 }
 	
 // Copy constructor
-Region::Region(Ptr<Region>& _region, offset_t _offset, Ptr<Context> _context)
+Region::Region(Ptr<Region>& _region, offset_t _offset, Permission _permissions, Ptr<Context> _context)
 {	
 	this->offset = _offset;
 	this->context = _context;
 	this->size = _region->size;
 	this->type = _region->type;
+	this->permissions = _permissions;
 	
 	// We can not call this here, until we get retained by the context
 	//this->context->addRegion(this);
@@ -87,7 +89,7 @@ void Region::removeFromContext()
 	this->context->removeRegion(this);
 }
 
-bool Region::handleFault(uint32_t vaddr, RegionPermission _permissions)
+bool Region::handleFault(uint32_t vaddr, Permission _permissions)
 {
 	assert(this->offset <= vaddr && vaddr < this->offset+this->size);
 	// TODO: check permissions
@@ -95,7 +97,7 @@ bool Region::handleFault(uint32_t vaddr, RegionPermission _permissions)
 	return this->layer->handleFault(vaddr - this->offset, _permissions, this);
 }
 
-bool Region::fault(RegionPermission _permissions)
+bool Region::fault(Permission _permissions)
 {
 	bool success = true;
 

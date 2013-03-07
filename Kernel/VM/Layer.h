@@ -75,7 +75,7 @@ public:
 	//
 	// permissions - the permissions the layer should map
 	//
-	bool handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region> region);
+	bool handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> region);
 	
 	//
 	// Gets the size of this layer
