@@ -308,7 +308,6 @@ KernelContext::KernelContext() : Context(VMBackendOptionGlobal|VMBackendOptionWr
 	BoostrapMapPageDirectory((uint32_t)this->paddrPageDirectory, 
 							 (uint32_t)this->pageTablesBase);
 	
-	LogVerbose("Will clean");				 
 	// Clean the entries
 	for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
 		 i < 1023; // Not 1024, because the pd is mapped there
@@ -321,7 +320,6 @@ KernelContext::KernelContext() : Context(VMBackendOptionGlobal|VMBackendOptionWr
 		}
 		//memset(&table[i], 0, 0x1000);
 	}
-	LogVerbose("Cleaned");
 }
 
 KernelContext::~KernelContext()
