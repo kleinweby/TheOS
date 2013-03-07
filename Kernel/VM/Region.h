@@ -57,7 +57,7 @@ enum class RegionType : unsigned short {
 // Therfore you should avoid specifing Write
 // and Execute at the same time.
 //
-enum class RegionPermission : unsigned short {
+enum RegionPermission : int {
 	//
 	// This region is readable
 	//
@@ -71,6 +71,10 @@ enum class RegionPermission : unsigned short {
 	//
 	Execute = (1 << 0)
 };
+
+// To make it work properly
+inline RegionPermission operator|(RegionPermission a, RegionPermission b)
+{return static_cast<RegionPermission>(static_cast<int>(a) | static_cast<int>(b));}
 
 class Region : public KObject {
 
@@ -130,6 +134,11 @@ public:
 	size_t getSize() const;
 	
 	//
+	// Get the context
+	//
+	Ptr<Context> getContext() const;
+	
+	//
 	// Removes the region from the context
 	//
 	void removeFromContext();
@@ -137,13 +146,13 @@ public:
 	//
 	// Handle a page fault at address
 	//
-	bool handleFault(uint32_t vaddr, FaultType type);
+	bool handleFault(uint32_t vaddr, RegionPermission permissions);
 	
 	//
 	// You can call this at any time, to cause a fault
 	// on the whole region
 	//
-	bool fireFault(FaultType type);
+	bool fault(RegionPermission permissions);
 };
 
 } //namespace VM

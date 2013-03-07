@@ -54,10 +54,16 @@ void SetupKernelContext()
 	// Create a layer with the parts the bootloader loaded for us
 	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
 	// And create a region in the kernel context
-	region = new Region(layer, KERNEL_LOAD_ADDRESS, KernelContext);
+	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, KernelContext);
 	// We need to fault this manually, as the fault handling code would not be present
-	region->fireFault(FaultType::Write);
-	region->fireFault(FaultType::Execute);
+	region->fault(RegionPermission::Read | RegionPermission::Write | RegionPermission::Execute);
+
+	ActivateContext(KernelContext);
+}
+
+void ActivateContext(Ptr<Context> context)
+{
+	context->getBackend()->activate();
 }
 
 } // namespace VM

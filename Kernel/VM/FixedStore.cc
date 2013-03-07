@@ -31,7 +31,7 @@
 
 namespace VM {
 
-FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable, bool _free) : Store(numberOfPages * kPhyMemPageSize)
+FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable, bool _free) : Store(_numberOfPages * kPhyMemPageSize)
 {
 	this->writeable = _writeable;
 	this->free = _free;
@@ -40,7 +40,7 @@ FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable
 	this->numberOfPages = _numberOfPages;
 }
 	
-FixedStore::FixedStore(page_t* _pages, size_t _numberOfPages, bool _writeable, bool _free) : Store(numberOfPages * kPhyMemPageSize)
+FixedStore::FixedStore(page_t* _pages, size_t _numberOfPages, bool _writeable, bool _free) : Store(_numberOfPages * kPhyMemPageSize)
 {
 	this->writeable = _writeable;
 	this->free = _free;

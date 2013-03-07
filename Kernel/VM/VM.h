@@ -27,7 +27,10 @@
 #import "Utils/KObject.h"
 
 namespace VM {
+class Context;
 
 void Initialize();
+
+void ActivateContext(Ptr<Context> context);
 
 } // namespace VM

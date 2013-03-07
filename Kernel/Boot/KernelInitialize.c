@@ -48,6 +48,7 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
 	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
 	_PhyMemMarkUsedRange(KernelBootstrapOffset, KernelBootstrapLength);
+	BootstrapPhyMemInitialize();
 	LogPhyMem();
 	
 	KallocInitialize(StartupHeap, sizeof(StartupHeap));

@@ -26,6 +26,8 @@
 #import "Region.h"
 #import "Store.h"
 #import "PageFault.h"
+#import "Backend.h"
+#import "Context.h"
 
 namespace VM {
 
@@ -46,16 +48,38 @@ Layer::~Layer()
 	
 }
 
-Result<> Layer::handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region)
+bool Layer::handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region> region)
 {
-	#pragma unused(vaddr, type, region)
+	Ptr<Backend::Context> backend = region->getContext()->getBackend();
+	
+	if (this->store) {
+		bool reuse = true;
+		
+		// We need write permissions, but the store does not allow us to write directly
+		if ((permissions & RegionPermission::Write) && !(this->store->isWriteable(vaddr)))
+			reuse = false;
+		
+		page_t paddr;
+		
+		if (reuse)
+			paddr = this->store->getPageAddress(vaddr);
+		else
+			panic("Not implemented");
+		
+		backend->map(paddr, (pointer_t)(vaddr + region->getOffset()), 0);
+	}
+	
+	if (this->parent) {
+		
+	}
 	return false;
 }
 
 size_t Layer::getSize()
 {
-	if (this->parent)
+	if (this->parent) {
 		return this->parent->getSize();
+	}
 	
 	return this->store->getSize();
 }

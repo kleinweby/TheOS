@@ -85,7 +85,7 @@ public:
 	
 	operator bool() const
 	{
-		return this->object == NULL;
+		return this->object != NULL;
 	}
 };
 

@@ -26,13 +26,12 @@
 
 #import "Utils/KObject.h"
 #import "Utils/Result.h"
-#import "VM/PageFault.h"
+#import "VM/Region.h"
 #import "Memory/PhyMem.h"
 
 namespace VM {
 
 class Store;
-class Region;
 
 class Layer : public KObject {
 	//
@@ -74,14 +73,9 @@ public:
 	// Ask the layer to handle a fault in the region at
 	// address.
 	//
-	// Note: mapping should only allow the faulted type.
-	// So when a read fault occour, only map the page
-	// readonly if it makes sense. For zero filled pages
-	// it would make no sense, as we expect writes soon.
-	// But never grant more rights than the region allows
-	// (unless the underlaying architecture requires it).
+	// permissions - the permissions the layer should map
 	//
-	Result<> handleFault(uint32_t vaddr, FaultType type, Ptr<Region> region);
+	bool handleFault(uint32_t vaddr, RegionPermission permissions, Ptr<Region> region);
 	
 	//
 	// Gets the size of this layer

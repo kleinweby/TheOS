@@ -57,6 +57,7 @@ SECTIONS
    PROVIDE_HIDDEN(_PanicDrivers = ADDR(.PanicDrivers));
    PROVIDE_HIDDEN(_PanicDriversLength = SIZEOF(.PanicDrivers));
    
+   . = ALIGN(0x1000);
    PROVIDE_HIDDEN(_KernelDataLength = (. - 0xC0000000) - _KernelDataOffset);
    PROVIDE_HIDDEN(_KernelLength = (. - 0xC0000000) - _KernelOffset);
    

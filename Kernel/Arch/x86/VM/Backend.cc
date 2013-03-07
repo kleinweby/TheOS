@@ -23,6 +23,7 @@
 //
 
 #import "Backend.h"
+#import "Utils/Memutils.h"
 
 // Use platform independet parts
 using namespace VM::Backend;
@@ -35,6 +36,14 @@ class KernelContext : public Context {
 public:
 	KernelContext();
 	~KernelContext();
+	
+	virtual bool makeAccessible()
+	{
+		return true;
+	}
+
+	virtual void endAccessible()
+	{}
 };
 
 GlobalPtr<Context> KernelContext;
@@ -120,6 +129,8 @@ bool Context::map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options)
 	if (options == 0)
 		options = this->defaultOptions;
 	
+	LogTrace("Map %p to %p options %x", paddr, vaddr, options);
+	
 	bool success = true;
 	
 	this->beginAccess();
@@ -186,7 +197,7 @@ bool Context::unmap(pointer_t vaddr)
 page_t Context::translate(pointer_t vaddr)
 {
 	assert(vaddr >= 0x0);
-		
+	
 	page_t page = kPhyInvalidPage;
 	
 	this->beginAccess();
@@ -272,6 +283,10 @@ KernelContext::KernelContext() : Context(VMBackendOptionGlobal|VMBackendOptionWr
 	
 	PageDirectory* d = this->pageDirectory;
 
+	for (uint32_t i = 0; i < (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF); i++) {
+		d->entries[i] = 0;
+	}
+
 	// Now we preallocate all tables above KERNEL_LOAD_ADDRESS so that these can be copied
 	// into the other contexts but we can keep mapping pages
 	for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
@@ -292,6 +307,21 @@ KernelContext::KernelContext() : Context(VMBackendOptionGlobal|VMBackendOptionWr
 	// Now the pd itself is at 0xFFFFE000, and the other tables can be accessed before
 	BoostrapMapPageDirectory((uint32_t)this->paddrPageDirectory, 
 							 (uint32_t)this->pageTablesBase);
+	
+	LogVerbose("Will clean");				 
+	// Clean the entries
+	for (uint32_t i = (KERNEL_LOAD_ADDRESS >> 22 & 0x03FF);
+		 i < 1023; // Not 1024, because the pd is mapped there
+		 i++) {
+			 
+		PageTable* table = OFFSET(this->pageTablesBase, i * sizeof(PageTable));
+			 
+		for (uint32_t j = 0; j < 1024; j++) {
+			table->entries[j] = 0; 
+		}
+		//memset(&table[i], 0, 0x1000);
+	}
+	LogVerbose("Cleaned");
 }
 
 KernelContext::~KernelContext()

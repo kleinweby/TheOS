@@ -41,10 +41,10 @@ int memcmp(const void *_s1, const void *_s2, size_t n)
 
 void *memset(void *_b, int c, size_t len)
 {
-	int *b = _b;
+	char *b = _b;
 	
-	for (size_t i = 0; i < len/sizeof(c); i++, b++)
-		*b = c;
+	for (size_t i = 0; i < len; i++)
+		*b = (char)c;
 	
 	return _b;
 }

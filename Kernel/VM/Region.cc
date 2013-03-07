@@ -35,6 +35,7 @@ Region::Region(Ptr<Layer> _layer, offset_t _offset, Ptr<Context> _context)
 	this->layer = _layer;
 	this->offset = _offset;
 	this->context = _context;
+	this->size = _layer->getSize();
 }
 	
 // Copy constructor
@@ -70,19 +71,25 @@ size_t Region::getSize() const
 	return this->size;
 }
 
-bool Region::handleFault(uint32_t vaddr, FaultType _type)
+Ptr<Context> Region::getContext() const
+{
+	return this->context;
+}
+
+bool Region::handleFault(uint32_t vaddr, RegionPermission _permissions)
 {
 	// TODO: check permissions
 	// TODO: check vaddr in bounds
-	return this->layer->handleFault(vaddr, _type, this);
+
+	return this->layer->handleFault(vaddr - this->offset, _permissions, this);
 }
 
-bool Region::fireFault(FaultType _type)
+bool Region::fault(RegionPermission _permissions)
 {
 	bool success = true;
-	
+
 	for (uint32_t vaddr = this->offset; vaddr < this->offset+this->size; vaddr += kPhyMemPageSize) {
-		if (!this->handleFault(vaddr, _type))
+		if (!this->handleFault(vaddr, _permissions))
 			success = false;
 	}
 	
