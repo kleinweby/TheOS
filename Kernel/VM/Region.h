@@ -79,7 +79,7 @@ inline RegionPermission operator|(RegionPermission a, RegionPermission b)
 class Region : public KObject {
 
 protected:
-	Ptr<Context> context; // The parent context for this region
+	Context* context; // The parent context for this region (weak to avoid cycles)
 	Ptr<Layer> layer; // The layer providing content for this region
 	
 	// The offset in the context (start address)
