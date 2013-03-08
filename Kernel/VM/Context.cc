@@ -23,6 +23,7 @@
 //
 
 #import "Context.h"
+#import "Region.h"
 
 namespace VM {
 
@@ -52,7 +53,7 @@ Ptr<Backend::Context> Context::getBackend() const
 
 void Context::addRegion(Ptr<Region> region)
 {
-	#pragma unused(region)
+	this->regions.set(region->getOffset(), region);
 }
 
 void Context::removeRegion(Ptr<Region> region)

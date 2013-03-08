@@ -26,6 +26,7 @@
 
 #import "Utils/KObject.h"
 #import "Backend.h"
+#import "Utils/Dictionary.h"
 
 namespace VM {
 
@@ -34,6 +35,8 @@ class Region;
 class Context : public KObject {
 	// The backend we use to do the actuall mapping
 	Ptr<Backend::Context> backend;
+	
+	Dictionary<uint32_t, Ptr<Region>> regions;
 
 protected:
 	void addRegion(Ptr<Region> region);

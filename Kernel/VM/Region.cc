@@ -38,8 +38,7 @@ Region::Region(Ptr<Layer> _layer, offset_t _offset, Permission _permissions, Ptr
 	this->size = _layer->getSize();
 	this->permissions = _permissions;
 	
-	// We can not call this here, until we get retained by the context
-	//this->context->addRegion(this);
+	this->context->addRegion(this);
 }
 	
 // Copy constructor
@@ -51,8 +50,7 @@ Region::Region(Ptr<Region>& _region, offset_t _offset, Permission _permissions, 
 	this->type = _region->type;
 	this->permissions = _permissions;
 	
-	// We can not call this here, until we get retained by the context
-	//this->context->addRegion(this);
+	this->context->addRegion(this);
 }
 
 Region::~Region()
