@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,73 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#pragma once
 
+#import <CoreSystem/CommonTypes.h>
+#import "Utils/KObject.h"
+#import "Error/Error.h"
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+enum class ResultType : short {
+	Success,
+	Error,
+	TryAgain
+};
 
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+template<class T = Error>
+class Result {
+private:
+	// Disallow dynamic instances
+	void* operator new(size_t) = delete;
+	void* operator new[](size_t) = delete;
+	void operator delete(void *) = delete;
+	void operator delete[](void*) = delete;
+protected:
+	ResultType resultType;
+	// Use kobject here to be able to store a
+	// waiting object here
+	Ptr<KObject> object;
+	
+public:
+	Result() : Result(ResultType::Success) {}
+	Result(ResultType _resultType)
+	{
+		this->resultType = _resultType;
+	}
+	
+	Result(Ptr<T> _object) : Result(ResultType::Success)
+	{
+		this->object = _object;
+	}
+	
+	Result(bool succeeded) : Result(succeeded ? ResultType::Success : ResultType::Error) {}
+	
+	operator bool() const
+	{
+		return this->isSuccess();
+	}
+	
+	inline bool isSuccess() const
+	{
+		return resultType == ResultType::Success;
+	}
+	
+	inline bool isError() const
+	{
+		return resultType == ResultType::Error;
+	}
+	
+	inline bool isTryAgain() const
+	{
+		return resultType == ResultType::TryAgain;
+	}
+	
+	operator T() const
+	{
+		return (T)this->object;
+	}
+	
+	operator Ptr<Error>() const
+	{
+		return (Ptr<Error>)this->object;
+	}
+};

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,43 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import "Context.h"
+#import "Region.h"
 
+namespace VM {
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
+Context::Context() : Context(Backend::Context::create(0))
+{
+	
 }
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
 
-#ifndef __cplusplus
-typedef uint8_t bool;
+Context::Context(Ptr<Backend::Context> _backend)
+{
+	this->backend = _backend;
+}
 
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
+Context::Context(Ptr<Context>& context)
+{
+	#pragma unused(context)
+}
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+Context::~Context()
+{
+}
 
-#endif /* COMMON_TYPES_H */
+Ptr<Backend::Context> Context::getBackend() const
+{
+	return this->backend;
+}
+
+void Context::addRegion(Ptr<Region> region)
+{
+	this->regions.set(region->getOffset(), region);
+}
+
+void Context::removeRegion(Ptr<Region> region)
+{
+	#pragma unused(region)
+}
+	
+} // namespace VM

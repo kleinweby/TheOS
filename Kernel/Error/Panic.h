@@ -22,42 +22,45 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#ifndef _PANIC_H_
+#define _PANIC_H_
 
+#include <CoreSystem/CommonTypes.h>
+#include <CoreSystem/CPUState.h>
+#include <CoreSystem/VariadicArguments.h>
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+//
+// Causes the kernel to panic with a given message.
+//
+// Obviously this never returns
+//
+void panic(const char* message, ...) __attribute__((noreturn));
 
-#endif /* COMMON_TYPES_H */
+//
+// This causes the kernel to panic with a given computed message and
+// cpu state. This will be called in some way be panic to capture the
+// cpu state.
+//
+void panic_state(const char* message, CPUState* cpuState, va_list args) __attribute__((noreturn));
+
+//
+// Panic drivers
+// =============
+//
+
+typedef void(*PanicDriver)(uint64_t timestamp, const char* message, CPUState* cpuState, va_list args);
+
+//
+// Use this macro on the top level to staticly register a panic driver at compile time
+//
+#define PanicRegisterDriver(driver) PanicDriver PanicDriver_##driver __attribute__ ((section (".PanicDrivers"))) = &driver
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _PANIC_H_

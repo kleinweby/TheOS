@@ -29,6 +29,10 @@
 #include <CoreSystem/Integers.h>
 #include <CoreSystem/VariadicArguments.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Inizalize the logging subsystem.
 //
@@ -55,7 +59,7 @@ static LogLevel CurrentLogLovel = kLogLevelTrace;
 // Note: These does not filter the messages based on the loglevel, this is done in the
 //     macros provided.
 //
-void _Log(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, ...);
+void _Log(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, ...) __attribute__ ((format (printf, 5, 6)));
 void _Log_va(const char* function, const char* filename, uint32_t line, LogLevel logLevel, const char* format, va_list args);
 
 //
@@ -87,5 +91,9 @@ typedef struct LogDriver {
 // Use this macro on the top level to staticly register a log provider at compile time
 //
 #define LoggingRegisterDriver(_name, driver) LogDriver LogDriver_##_name __attribute__ ((section (".LoggingDrivers"))) = {.name = #_name, .log = &driver}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LOGGING_H__ */

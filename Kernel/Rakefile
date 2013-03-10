@@ -1,16 +1,52 @@
 require_relative '../BuildSupport/Common'
 require 'rake/clean'
 require 'rake/loaders/makefile'
+require 'json'
 
 SRC=FileList[]
 
+PLATFORM_DIR="Arch/x86"
+
 SRC.include([
-  "Boot/KernelInitialize.c",
-  "Boot/startup.nasm",
+  "Boot/Bootstrap.c",
+  "Boot/BootstrapASM.nasm",
+  "Boot/KernelInitialize.cc",
+  #"Boot/startup.nasm",
+  
+  # Multiboot
+  "Multiboot/Multiboot.c",
   
   #Logging
   "Logging/Logging.c",
   "Logging/LoggingDriverSerial.c",
+  
+  # PhyMem
+  "Memory/PhyMem.c",
+  
+  "VM/Backend.cc",
+  "#{PLATFORM_DIR}/VM/Backend.cc",
+  
+  "VM/VM.cc",
+  "VM/Region.cc",
+  "VM/Context.cc",
+  "VM/Layer.cc",
+  "VM/Store.cc",
+  "VM/FixedStore.cc",
+  
+  "Utils/Object.c",
+  "Utils/KObject.cc",
+  "Utils/Array.cc",
+  "Utils/Memutils.cc",
+  
+  "Memory/kalloc.c",
+  
+  # Kernel Info
+  "KernelInfo.c",
+  
+  #Error
+  "Error/Panic.c",
+  "Error/PanicDriverSerial.c",
+  "Error/PanicDriverVGA.c",
   
   # Interrupts
   "Interrupts/Interrupts.c",
@@ -20,10 +56,14 @@ SRC.include([
 CFLAGS << '-I.' \
        << '-ffreestanding' << '-mno-sse' << '-mno-red-zone' \
        << '-mno-mmx' << '-mno-sse' << '-mno-sse2' \
-       << '-mno-sse3' << '-mno-3dnow'
+       << '-mno-sse3' << '-mno-3dnow' \
+       << "-I#{PLATFORM_DIR}"
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable' << '-Wno-pedantic' << '-Wno-missing-noreturn'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
+       << "-Wno-gnu" << "-Wno-variadic-macros"\
+       << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
+       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded' << '-Wno-unneeded-internal-declaration'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'
@@ -60,11 +100,67 @@ end
 
 task 'debug' => ['kernel'] do
     puts "Connect with gdb on tcp::1234. Execution is halted."
-    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -serial stdio -kernel kernel"
+    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -monitor stdio -kernel kernel"
 end
 
 task 'attach' => ['kernel.sym'] do
     sh "#{GDB} kernel.sym --eval-command=\"target remote tcp::1234\""
 end
+
+file 'KernelInfo.c' => [ 'KernelInfo.c.rake-defs' ] do |t|
+  defs = {}
+  open('KernelInfo.c.rake-defs') do |f|
+    defs = JSON.load(f)
+  end
+  
+  content = <<-eos
+
+char* KernelVersion = "#{defs['version']}";
+char* KernelGitVersion = "#{defs['gitVersion']}";
+
+  eos
+  
+  open(t.name, "w") do |f|
+    f.write(content)
+  end
+end
+
+# A KernelInfo Task
+class KernelInfoDefTask < Rake::FileTask
+  @_currentDefs
+  
+  def initialize(task_name, app)
+    super(task_name, app)
+    @actions << Proc.new do |t|
+      
+      open(name, "w") do |f|
+        JSON.dump(currentDefs(), f)
+      end
+    end
+  end
+  
+  def out_of_date?(stmp)
+    defs = {}
+    begin
+      open(name) do |f|
+        defs = JSON.load(f)
+      end if File.file?(name)
+    rescue
+      defs = {}
+    end
+    
+    defs != currentDefs()
+  end
+  
+  def currentDefs
+    @_currentDefs ||= {
+      'gitVersion' => `git rev-parse --short HEAD`.strip,
+      'version' => `git describe --match 'version/*' --always --dirty`.strip().sub('version/', '')
+    } 
+    @_currentDefs
+  end
+end
+
+KernelInfoDefTask.define_task 'KernelInfo.c.rake-defs' => []
 
 DEPS.each{|file| Rake::MakefileLoader.new.load(file) if File.file?(file)}

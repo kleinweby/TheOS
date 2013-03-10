@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,71 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import <CoreSystem/CommonTypes.h>
 
+#import "Utils/KObject.h"
+#import "Utils/Result.h"
+#import "VM/Region.h"
+#import "Memory/PhyMem.h"
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+namespace VM {
 
-#include <CoreSystem/Integers.h>
+class Store;
 
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
+class Layer : public KObject {
+	//
+	// Lookup for pages not provided by this
+	// layer will be:
+	// Store -> Parent -> FAIL
+	//
+	// This way, a non root layer can get a
+	// swap storage to page out if needed
+	//
+	Ptr<Layer> parent;
+	Ptr<Store> store;
+	
+	//
+	// Addresses for the phy pages by this
+	// layer.
+	// TODO: maybe a map would be better here?
+	// probbably depends on the ratio covered by
+	// this layer.
+	//
+	page_t* pages;
+public:
+	//
+	// Construct a new layer with a parent
+	//
+	Layer(Ptr<Layer> parent);
+	
+	//
+	// Construct a new layer with a store
+	//
+	Layer(Ptr<Store> store);
+	
+	//
+	// Destructor
+	//
+	virtual ~Layer();
+	
+	//
+	// Ask the layer to handle a fault in the region at
+	// address.
+	//
+	// permissions - the permissions the layer should map
+	//
+	bool handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> region);
+	
+	//
+	// Gets the size of this layer
+	//
+	virtual size_t getSize();
+	
+	//
+	// Get the real size of this layer
+	// This means only the phy pages directly hold by this layer.
+	//
+	virtual size_t getRealSize();
+};
 
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+} // namespace VM

@@ -29,6 +29,8 @@
 // This file provides macros for asserting assumtions like.
 //
 
+#import "Error/Panic.h"
+
 #ifndef _ERROR_ASSERT_H_
 #define _ERROR_ASSERT_H_
 

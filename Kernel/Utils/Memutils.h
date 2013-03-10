@@ -22,42 +22,17 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#include <CoreSystem/CommonTypes.h>
 
-
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+int memcmp(const void *s1, const void *s2, size_t n);
+void *memset(void *b, int c, size_t len);
+void *memmove(void *s1, const void *s2, size_t n);
+void *memcpy(void * s1, const void * s2, size_t n);
 
-#endif /* COMMON_TYPES_H */
+#ifdef __cplusplus
+}
+#endif

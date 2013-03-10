@@ -22,42 +22,57 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import "Object.h"
 
+#import "Error/Assert.h"
+#import "Memory/kalloc.h"
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
+bool ObjectInit(void* _obj, void (*Dealloc)(void* ptr))
+{
+	assert(_obj != NULL);
+	assert(Dealloc != NULL);
+	
+	Object obj = _obj;
+	
+	obj->retainCount = 1;
+	obj->Dealloc = Dealloc;
+	
+	return true;
 }
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
 
-#ifndef __cplusplus
-typedef uint8_t bool;
+Object _Retain(Object obj)
+{
+	assert(obj != NULL);
+	
+	int32_t rc;
+		
+	rc = __sync_add_and_fetch(&obj->retainCount, 1);
+	
+	//
+	// The retaincount must be greater than 1 because
+	// before it would be >=1 and we added one, so
+	// it must be > 1 now
+	//
+	assert(rc > 1);
+	
+	return obj;
+}
 
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+void _Release(Object obj)
+{
+	assert(obj != NULL);
+		
+	int32_t rc;
+		
+	rc = __sync_sub_and_fetch(&obj->retainCount, 1);
+		
+	//
+	// < 0 Would mean double free
+	//
+	assert(rc >= 0);
+	
+	if (rc == 0) {
+		obj->Dealloc(obj);
+		free(obj);
+	}
+}

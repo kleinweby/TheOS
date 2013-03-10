@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,35 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import <CoreSystem/CommonTypes.h>
 
-
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+//
+// Initiztiales kalloc with a given heap
+//
+void KallocInitialize(void* ptr, size_t size);
 
-#endif /* COMMON_TYPES_H */
+//
+// Adds a new heap space to Kalloc.
+//
+// TODO: as this heap can probbably grow/shrink
+// we may need to provide some callbacks here
+//
+void KallocAddHeap(void* ptr, size_t size);
+
+//
+// Allocates memory at least of the size specified
+//
+void* kalloc(size_t size);
+
+//
+// Frees the allocated memory
+//
+void free(void* ptr);
+
+#ifdef __cplusplus
+}
+#endif

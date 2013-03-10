@@ -22,42 +22,46 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import "Memutils.h"
 
-
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
+int memcmp(const void *_s1, const void *_s2, size_t n)
+{
+	const char *s1 = _s1;
+	const char *s2 = _s2;
+	
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		if (*s1 < *s2)
+			return -1;
+		else if (*s1 > *s2)
+			return 1;
+	}
+	
+	return 0;
 }
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
 
-#ifndef __cplusplus
-typedef uint8_t bool;
+void *memset(void *_b, int c, size_t len)
+{
+	char *b = _b;
+	
+	for (size_t i = 0; i < len; i++)
+		*b = (char)c;
+	
+	return _b;
+}
 
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
+// void *memmove(void *s1, const void *s2, size_t n)
+// {
+// 	
+// }
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+void *memcpy(void *restrict _s1, const void *restrict _s2, size_t n)
+{
+	char *s1 = _s1;
+	const char *s2 = _s2;
+	
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		*s1 = *s2;
+	}
+	
+	return _s1;
+}

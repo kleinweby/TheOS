@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,52 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import <CoreSystem/CommonTypes.h>
 
+#import "Utils/KObject.h"
+#import "Backend.h"
+#import "Utils/Dictionary.h"
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+namespace VM {
 
-#include <CoreSystem/Integers.h>
+class Region;
 
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
+class Context : public KObject {
+	// The backend we use to do the actuall mapping
+	Ptr<Backend::Context> backend;
+	
+	Dictionary<uint32_t, Ptr<Region>> regions;
 
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
+protected:
+	void addRegion(Ptr<Region> region);
+	void removeRegion(Ptr<Region> region);
 
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+	friend class Region;
+public:
+	//
+	// Create a new context with a private backend
+	//
+	Context();
+	
+	//
+	// Create a new context with a given backend
+	//
+	Context(Ptr<Backend::Context> backend);
+	
+	//
+	// Copy a context.
+	//
+	Context(Ptr<Context>& context);
+	
+	//
+	// Destructor
+	//
+	virtual ~Context();
+	
+	//
+	// Get the backend used to map.
+	//
+	Ptr<Backend::Context> getBackend() const;
+};
+	
+} // namespace VM

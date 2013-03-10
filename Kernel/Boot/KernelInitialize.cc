@@ -22,42 +22,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include "Multiboot/Multiboot.h"
+#include "Logging/Logging.h"
+#include "Memory/PhyMem.h"
+#import "Memory/kalloc.h"
+#import "VM/VM.h"
+
+#import "KernelInfo.h"
+#import "Bootstrap.h"
+
+// This is the initial heap we use until we've
+// got a real heap.
 //
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+// Note: Heap is still valid, after boot up
+char StartupHeap[4*1024];
 
-
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
+extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
+{	
+	LoggingInitialize();
+	
+	// This will also make a temporary bootstrap mapping
+	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
+	
+	LogVerbose("Magic %x, header: %p", magic, header);
+	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
+	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
+	_PhyMemMarkUsedRange(KernelBootstrapOffset, KernelBootstrapLength);
+	BootstrapPhyMemInitialize();
+	LogPhyMem();
+	
+	KallocInitialize(StartupHeap, sizeof(StartupHeap));
+	
+	VM::Initialize();
+	BootstrapRelease();
+	
+	LogInfo("booted");
+	LogPhyMem();
 }
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */

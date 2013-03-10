@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,39 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import <CoreSystem/CommonTypes.h>
 
+#import "VM/Store.h"
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+namespace VM {
 
-#include <CoreSystem/Integers.h>
+class FixedStore : public Store {
+private:
+	bool writeable;
+	bool free;
+	
+	page_t startPage;
+	page_t* pages;
+	size_t numberOfPages;
+protected:
+public:
+	//
+	// Constructor for a continigous pmem space
+	//
+	FixedStore(page_t startPage, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	//
+	// Constructor for a non continigous pmem space
+	//
+	FixedStore(page_t* pages, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	// Desctructor
+	virtual ~FixedStore();
+	
+	// Primitives of base class
+	virtual bool isWriteable(uint32_t vaddr) const;
+	virtual page_t getPageAddress(uint32_t vaddr);
+	virtual void writeback(uint32_t vaddr, page_t page);
+};
 
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
-
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+} // namespace VM

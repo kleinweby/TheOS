@@ -22,42 +22,50 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import <CoreSystem/CommonTypes.h>
 
-
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
-
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+//
+// Bootstrap
+// =========
+//
+// Bootstrap is responsible for setting up the temporary
+// higher-half kernel mechanism.
+//
+// For that we create a temporary mapping which will later
+// replaced by the VM-subsystem.
+//
 
-#endif /* COMMON_TYPES_H */
+#define BOOTSTRAP_SECTION  __attribute__ ((section (".bootstrap")))
+
+//
+// This temporarly maps paddr->vaddr for size.
+//
+// Note: during bootstrap the offset between paddr and
+// vaddr should always be KERNEL_LOAD_ADDRESS as we're
+// not able to manage the vspace.
+//
+void BooststrapMap(uint32_t paddr, uint32_t vaddr, uint32_t size) BOOTSTRAP_SECTION;
+
+//
+// This registers the pages used by bootstrap to the pmem subsystem
+//
+void BootstrapPhyMemInitialize() BOOTSTRAP_SECTION;
+
+//
+// This is used to map a page directory to a given vaddr
+//
+void BoostrapMapPageDirectory(uint32_t paddr, uint32_t vaddr) BOOTSTRAP_SECTION;
+
+//
+// This releases all the resources used by the bootstrap mechanism.
+// (Except for the this method it self)
+//
+void BootstrapRelease();
+
+#ifdef __cplusplus
+}
+#endif

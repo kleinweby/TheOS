@@ -1,7 +1,7 @@
 OUTPUT_FORMAT(elf32-i386)
 /**/
 
-ENTRY(startup);
+ENTRY(BootstrapASMEntry);
 
 SECTIONS
 {
@@ -13,22 +13,22 @@ SECTIONS
       LONG(1 << 1 | 1 << 0); /* Flags */
       LONG(-((1 << 1 | 1 << 0) + 0x1BADB002)); /* Checksum */
    }
-   
-   PROVIDE_HIDDEN(_KernelOffset = .);
-   
-   PROVIDE_HIDDEN(_KernelStartupOffset = .);
-   .startup ALIGN(4096) : {
-      *(.startup)
+      
+   PROVIDE_HIDDEN(_KernelBootstrapOffset = .);
+   .bootstrap ALIGN(4096) : {
+      *(.bootstrap)
    }
-   PROVIDE_HIDDEN(_KernelStartupLength = _KernelStartupOffset - .);
+   PROVIDE_HIDDEN(_KernelBootstrapLength = . - _KernelBootstrapOffset);
 
+   . = ALIGN(0x1000);
+   PROVIDE_HIDDEN(_KernelOffset = .);
    . += 0xC0000000;
 
    PROVIDE_HIDDEN(_KernelTextOffset = .);
    .text : AT(ADDR(.text) - 0xC0000000) {
       *(.text)
    }
-   PROVIDE_HIDDEN(_KernelTextLength = _KernelTextOffset - .);
+   PROVIDE_HIDDEN(_KernelTextLength = (. - 0xC0000000) - _KernelTextOffset);
    
    PROVIDE_HIDDEN(_KernelDataOffset = .);
    .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
@@ -41,7 +41,7 @@ SECTIONS
      *(.bss)
    }
    
-   /* Support for staticly declaring logging providers */
+   /* Support for staticly declaring logging drivers */
    .LoggingDrivers : {
       KEEP(*(.LoggingDrivers.*))
       KEEP(*(.LoggingDrivers))
@@ -49,8 +49,17 @@ SECTIONS
    PROVIDE_HIDDEN(_LoggingDrivers = ADDR(.LoggingDrivers));
    PROVIDE_HIDDEN(_LoggingDriversLength = SIZEOF(.LoggingDrivers));
    
-   PROVIDE_HIDDEN(_KernelDataLength = _KernelDataOffset - .);
-   PROVIDE_HIDDEN(_KernelLength = _KernelOffset - .);
+   /* Support for staticly declaring panic drivers */
+   .PanicDrivers : {
+      KEEP(*(.PanicDrivers.*))
+      KEEP(*(.PanicDrivers))
+   }
+   PROVIDE_HIDDEN(_PanicDrivers = ADDR(.PanicDrivers));
+   PROVIDE_HIDDEN(_PanicDriversLength = SIZEOF(.PanicDrivers));
+   
+   . = ALIGN(0x1000);
+   PROVIDE_HIDDEN(_KernelDataLength = (. - 0xC0000000) - _KernelDataOffset);
+   PROVIDE_HIDDEN(_KernelLength = (. - 0xC0000000) - _KernelOffset);
    
    /* for debug */
    .debug_abbrev 0 : { *(.debug_abbrev) }

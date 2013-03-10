@@ -23,41 +23,42 @@
 //
 
 //
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
+// Abstract 
 //
 
+#import <CoreSystem/CommonTypes.h>
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+#import "LinkerHelper.h"
 
-#include <CoreSystem/Integers.h>
-
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
-
-#ifndef __cplusplus
-typedef uint8_t bool;
-
-static const bool true = (bool)1;
-static const bool false = (bool)0;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+//
+// A string used as kernel version
+//
+// This may be a full version string, or
+// is equal to KernelGitVersion when a full version
+// could not be produced
+extern char* KernelVersion;
 
-#endif /* COMMON_TYPES_H */
+//
+// A short git hash identifier, describing the build
+// version of this theos kernel
+//
+extern char* KernelGitVersion;
+
+//
+// Some basic information about the compile-time
+// kernel layout
+//
+LINKER_SYMBOL(KernelOffset, pointer_t);
+LINKER_SYMBOL(KernelLength, offset_t);
+// Note: the bootstrap section will be deleted
+// when the vm subsystem is up and running
+LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
+LINKER_SYMBOL(KernelBootstrapLength, offset_t);
+
+#ifdef __cplusplus
+}
+#endif

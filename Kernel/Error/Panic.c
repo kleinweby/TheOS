@@ -22,18 +22,37 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Interrupts/Interrupts.h"
+#include "Panic.h"
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
+#include "LinkerHelper.h"
+
+#include <CoreSystem/MachineInstructions.h>
+
+LINKER_SYMBOL(PanicDrivers, PanicDriver*);
+LINKER_SYMBOL(PanicDriversLength, uint32_t);
+
+void panic(const char* message, ...)
 {
-	#pragma unused(magic)
-	#pragma unused(header)
+	CPUState state;
+	va_list args;
+	va_start(args, message);
+	panic_state(message, &state, args);
+	va_end(args);
+}
+
+void panic_state(const char* message, CPUState* cpuState, va_list args)
+{
+	// Prevent any futher interrupts from waking up the kernel
+	DisableInterrupts();
 	
-	LoggingInitialize();
+	uint64_t timestamp = TimeStampCounter() >> 24;
+	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
+
+	for (uint32_t i = 0; i < count; i++) {
+		PanicDrivers[i](timestamp, message, cpuState, args);
+	}
 	
-	InterruptsInitialize();
-	
-	__asm__ volatile ("int $0");
+	// Halt the kernel
+	while(true)
+		Halt();
 }

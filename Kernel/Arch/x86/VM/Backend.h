@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,56 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import "VM/Backend.h"
+#import "Boot/Bootstrap.h"
 
+namespace VM {
+namespace Backend {
+namespace X86 {
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+typedef uint32_t PageDirectoryEntry;
 
-#include <CoreSystem/Integers.h>
+typedef struct {
+	PageDirectoryEntry entries[1024];
+} PageDirectory;
 
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
+typedef uint32_t PageTableEntry;
 
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
+typedef struct {
+	PageTableEntry entries[1024];
+} PageTable;
 
-typedef void* pointer_t;
-#define NULL (0)
+void Initialize();
 
+// The Context used for paging on X86
+class Context : public VM::Backend::Context {
+protected:
+	// Base when the page tables can be accessed
+	PageTable* pageTablesBase;
+	PageDirectory* pageDirectory;
+	
+	// the page directory (paddr)
+	page_t paddrPageDirectory;
 
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
-}
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
+	void mapPageDirectory(page_t paddr, pointer_t vaddr);
 
-#ifndef __cplusplus
-typedef uint8_t bool;
+	// Overrided from abstract superclass
+	virtual bool map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options);
+	virtual bool unmap(pointer_t vaddr);
+	virtual page_t translate(pointer_t vaddr);
+	virtual void activate();
+	virtual bool makeAccessible();
+	virtual void endAccessible();
+	
+	// Call with false, to not initialize die pd. This
+	// is only used in the KernelContext Subclass
+	Context(VMBackendMapOptions options, bool initialize);
+public:
+	Context(VMBackendMapOptions options) : Context(options, true) {}
+};
 
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
+extern GlobalPtr<Context> KernelContext;
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
-
-#endif /* COMMON_TYPES_H */
+} // namespace X86
+} // namespace Backend
+} // namespace VM

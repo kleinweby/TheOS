@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,42 +22,48 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-//
-// Abstract
-// =======
-//
-// This file provides commong types used in the system
-//
+#import "VM.h"
+#import "Backend.h"
+#import "Context.h"
+#import "FixedStore.h"
+#import "Layer.h"
+#import "Region.h"
+#import "KernelInfo.h"
+#import "Logging/Logging.h"
 
+namespace VM {
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+GlobalPtr<Context> KernelContext;
 
-#include <CoreSystem/Integers.h>
+void SetupKernelContext();
 
-typedef uint32_t size_t;
-static const size_t kSizeMax = kUInt32Max;
-
-typedef uint32_t offset_t;
-static const offset_t kOffsetMax = kUInt32Max;
-
-typedef void* pointer_t;
-#define NULL (0)
-
-
-static inline pointer_t _OFFSET(pointer_t ptr, offset_t off) {
-	return (pointer_t)((uint32_t)ptr + off);
+void Initialize()
+{
+	Backend::Initialize();
+	
+	SetupKernelContext();
 }
-#define OFFSET(a,b) ((__typeof(a)) _OFFSET((pointer_t)(a),(b)))
 
-#ifndef __cplusplus
-typedef uint8_t bool;
+void SetupKernelContext()
+{
+	KernelContext = new Context(Backend::GetKernelContext());
+	Ptr<Layer> layer;
+	Ptr<Region> region;
+	
+	// TODO: we should make different regions, for text, data, rodata etc.
+	// Create a layer with the parts the bootloader loaded for us
+	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
+	// And create a region in the kernel context
+	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
+	// We need to fault this manually, as the fault handling code would not be present
+	region->fault();
 
-static const bool true = (bool)1;
-static const bool false = (bool)0;
-#endif
+	ActivateContext(KernelContext);
+}
 
-static const bool YES = (bool)1;
-static const bool NO = (bool)0;
+void ActivateContext(Ptr<Context> context)
+{
+	context->getBackend()->activate();
+}
 
-#endif /* COMMON_TYPES_H */
+} // namespace VM
