@@ -30,6 +30,25 @@
 #include <CoreSystem/CommonTypes.h>
 #include <CoreSystem/MachineInstructions.h>
 
+struct Interrupt {
+	uint32_t eip;
+	uint32_t edi;
+  	uint32_t esi;
+	uint32_t ebp;
+	uint32_t ebx;
+	uint32_t edx;
+	uint32_t ecx;
+	uint32_t eax;
+
+	uint32_t interruptNumber;
+	uint32_t errorCode;
+
+	uint32_t cs;
+	uint32_t eflags;
+	uint32_t esp;
+	uint32_t ss;
+};
+
 enum GateType {
   kGate32BitTaskType = 0x5,
   kGate16BitInterruptType = 0x6,
@@ -128,16 +147,16 @@ void InterruptsInitialize()
 	//
 	
 	// Initialize master PIC
-	// outb(0x20, 0x11); // Init
-	// outb(0x21, 0x20); // Interrupt number
-	// outb(0x21, 0x04); // IRQ 2 is slave
-	// outb(0x21, 0x01); // ??
-	//  
-	// // Initialize slave PIC
-	// outb(0xa0, 0x11); // Ini
-	// outb(0xa1, 0x28); // Interrupt number
-	// outb(0xa1, 0x02); // IRQ 2 is slave
-	// outb(0xa1, 0x01); // ??
+	outb(0x20, 0x11); // Init
+	outb(0x21, 0x20); // Interrupt number
+	outb(0x21, 0x04); // IRQ 2 is slave
+	outb(0x21, 0x01); // ??
+	 
+	// Initialize slave PIC
+	outb(0xa0, 0x11); // Ini
+	outb(0xa1, 0x28); // Interrupt number
+	outb(0xa1, 0x02); // IRQ 2 is slave
+	outb(0xa1, 0x01); // ??
  
  	LogTrace("Setup IDT");
  
@@ -184,15 +203,19 @@ void InterruptsInitialize()
  	InterruptsLoadIDT();
   
 	// Enable IRQs
-	// outb(0x20, 0x0);
-	// outb(0xa0, 0x0);
+	outb(0x20, 0x0);
+	outb(0xa0, 0x0);
 	EnableInterrupts();
 	LogInfo("Interrupts enabled");
 }
 
-void InterruptsHandler(void* ptr)
+void InterruptsHandler(struct Interrupt* ptr)
 {
-	#pragma unused(ptr)
-	LogInfo("Interrupt");
-	while (true) Halt();
+	//#pragma unused(ptr)
+	LogInfo("Interrupt %x: %x", ptr->interruptNumber, ptr->errorCode);
+	
+	if (ptr->interruptNumber >= 0x20)
+		outb(0x20,0x20);
+	
+	//while (true) Halt();
 }

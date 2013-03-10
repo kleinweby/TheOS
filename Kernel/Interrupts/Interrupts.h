@@ -25,9 +25,17 @@
 #ifndef _INTERRUPTS_H_
 #define _INTERRUPTS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Set ups the the interrupts subsystem
 //
 void InterruptsInitialize();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_INTERRUPTS_H_

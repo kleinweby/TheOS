@@ -27,6 +27,7 @@
 #include "Memory/PhyMem.h"
 #import "Memory/kalloc.h"
 #import "VM/VM.h"
+#import "Interrupts/Interrupts.h"
 
 #import "KernelInfo.h"
 #import "Bootstrap.h"
@@ -55,6 +56,8 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	VM::Initialize();
 	BootstrapRelease();
+	
+	InterruptsInitialize();
 	
 	LogInfo("booted");
 	LogPhyMem();
