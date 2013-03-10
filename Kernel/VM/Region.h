@@ -25,7 +25,6 @@
 #import <CoreSystem/CommonTypes.h>
 
 #import "Utils/KObject.h"
-#import "VM/PageFault.h"
 #import "VM/Permission.h"
 
 namespace VM {
