@@ -10,7 +10,7 @@ PLATFORM_DIR="Arch/x86"
 SRC.include([
   "Boot/Bootstrap.c",
   "Boot/BootstrapASM.nasm",
-  "Boot/KernelInitialize.c",
+  "Boot/KernelInitialize.cc",
   #"Boot/startup.nasm",
   
   # Multiboot
@@ -22,10 +22,6 @@ SRC.include([
   
   # PhyMem
   "Memory/PhyMem.c",
-  
-  # VirtMem
-  "Memory/VirtMem.cc",
-
   
   "VM/Backend.cc",
   "#{PLATFORM_DIR}/VM/Backend.cc",

@@ -36,6 +36,10 @@
 
 #include <CoreSystem/CommonTypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct Multiboot {
 	uint32_t flags;
 	uint32_t mem_lower;
@@ -78,7 +82,7 @@ struct MultibootModule {
 // Adjust Multiboot structure for a given offset
 //
 void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset);
-#define MultibootAdjust(multiboot, offset) multiboot = (pointer_t)((uint32_t)multiboot + offset); _MultibootAdjust(multiboot, offset)
+#define MultibootAdjust(multiboot, offset) multiboot = (__typeof(multiboot))((uint32_t)multiboot + offset); _MultibootAdjust(multiboot, offset)
 
 //
 // Initialize PhyMem from informations of the multiboot structure
@@ -87,5 +91,9 @@ void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset);
 //                  only valid during startup.
 //
 void MultibootInitializePhyMem(struct Multiboot* multiboot, offset_t phyOffset);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _MULTIBOOT_MULTIBOOT_H_

@@ -56,7 +56,7 @@ void SetupKernelContext()
 	// And create a region in the kernel context
 	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
 	// We need to fault this manually, as the fault handling code would not be present
-	region->fault(Permission::Read | Permission::Write | Permission::Execute);
+	region->fault();
 
 	ActivateContext(KernelContext);
 }

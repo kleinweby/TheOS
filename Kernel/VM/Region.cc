@@ -107,4 +107,9 @@ bool Region::fault(Permission _permissions)
 	return success;
 }
 
+bool Region::fault()
+{
+	return this->fault(this->permissions);
+}
+
 } // namespace VM

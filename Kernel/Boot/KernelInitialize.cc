@@ -26,7 +26,7 @@
 #include "Logging/Logging.h"
 #include "Memory/PhyMem.h"
 #import "Memory/kalloc.h"
-#import "Memory/VirtMem.h"
+#import "VM/VM.h"
 
 #import "KernelInfo.h"
 #import "Bootstrap.h"
@@ -37,7 +37,7 @@
 // Note: Heap is still valid, after boot up
 char StartupHeap[4*1024];
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
+extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
 	LoggingInitialize();
 	
@@ -53,7 +53,7 @@ void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	KallocInitialize(StartupHeap, sizeof(StartupHeap));
 	
-	VirtMemInitialize();
+	VM::Initialize();
 	BootstrapRelease();
 	
 	LogInfo("booted");

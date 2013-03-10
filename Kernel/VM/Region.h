@@ -125,6 +125,7 @@ public:
 	// on the whole region
 	//
 	bool fault(Permission permissions);
+	bool fault();
 };
 
 } //namespace VM
