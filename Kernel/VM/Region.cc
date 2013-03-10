@@ -90,7 +90,7 @@ void Region::removeFromContext()
 bool Region::handleFault(uint32_t vaddr, Permission _permissions)
 {
 	assert(this->offset <= vaddr && vaddr < this->offset+this->size);
-	// TODO: check permissions
+	assert((_permissions & ~this->permissions) == 0);
 
 	return this->layer->handleFault(vaddr - this->offset, _permissions, this);
 }

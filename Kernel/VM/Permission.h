@@ -38,11 +38,11 @@ enum Permission : int {
 	//
 	// This region is writeable
 	//
-	Write = (1 << 0),
+	Write = (1 << 1),
 	//
 	// This region is executable
 	//
-	Execute = (1 << 0)
+	Execute = (1 << 2)
 };
 
 // to allow Permission a = Permission::Read | Permission::Write;
