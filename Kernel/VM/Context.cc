@@ -22,35 +22,43 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#import "Context.h"
+#import "Region.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
-
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
+Context::Context() : Context(Backend::Context::create(0))
+{
+	
 }
-#endif
+
+Context::Context(Ptr<Backend::Context> _backend)
+{
+	this->backend = _backend;
+}
+
+Context::Context(Ptr<Context>& context)
+{
+	#pragma unused(context)
+}
+
+Context::~Context()
+{
+}
+
+Ptr<Backend::Context> Context::getBackend() const
+{
+	return this->backend;
+}
+
+void Context::addRegion(Ptr<Region> region)
+{
+	this->regions.set(region->getOffset(), region);
+}
+
+void Context::removeRegion(Ptr<Region> region)
+{
+	#pragma unused(region)
+}
+	
+} // namespace VM

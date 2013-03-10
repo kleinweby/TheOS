@@ -24,33 +24,61 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "VM/FixedStore.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+#import "Utils/Memutils.h"
+#import "Logging/Logging.h"
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+namespace VM {
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
+FixedStore::FixedStore(page_t _startPage, size_t _numberOfPages, bool _writeable, bool _free) : Store(_numberOfPages * kPhyMemPageSize)
+{
+	this->writeable = _writeable;
+	this->free = _free;
+	this->startPage = _startPage;
+	this->pages = NULL;
+	this->numberOfPages = _numberOfPages;
 }
-#endif
+	
+FixedStore::FixedStore(page_t* _pages, size_t _numberOfPages, bool _writeable, bool _free) : Store(_numberOfPages * kPhyMemPageSize)
+{
+	this->writeable = _writeable;
+	this->free = _free;
+	this->startPage = kPhyInvalidPage;
+	this->pages = _pages; // TODO: private copy needed
+	this->numberOfPages = _numberOfPages;
+}
+	
+FixedStore::~FixedStore()
+{
+	if (this->free) {
+		if (this->pages) {
+			for (uint32_t i = 0; i < this->numberOfPages; i++)
+				_PhyMemMarkFree(this->pages[i]);
+		}
+		else
+			_PhyMemMarkFreeRange(this->startPage, this->numberOfPages * kPhyMemPageSize);
+	}
+}
+	
+bool FixedStore::isWriteable(uint32_t vaddr) const
+{
+	#pragma unused(vaddr)
+	return this->writeable;
+}
+
+page_t FixedStore::getPageAddress(uint32_t vaddr)
+{
+	if (this->pages)
+		return this->pages[vaddr/kPhyMemPageSize];
+	else
+		return OFFSET(this->startPage, vaddr&kPhyPageMask);
+}
+
+void FixedStore::writeback(uint32_t vaddr, page_t page)
+{
+	LogWarning("Writeback on fixed store.");
+	#pragma unused(vaddr, page)
+}
+
+} // namespace VM

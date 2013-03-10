@@ -22,59 +22,46 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef _PHYMEM_H_
-#define _PHYMEM_H_
+#import "Memutils.h"
 
-#include <CoreSystem/CommonTypes.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//
-// Describes a physical page
-//
-typedef void* page_t;
-
-static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
-static const page_t kPhyInvalidPage = (void*)0xFFFFFFFF;
-static const uint32_t kPhyPageMask = 0xFFFFF000;
-
-//
-// Initializes the phy mem subsystem
-//
-void PhyMemInitialize();
-
-//
-// Initializetion routines. Be careful when using those
-// ====================================================
-//
-void _PhyMemMarkFree(page_t page);
-void _PhyMemMarkUsed(page_t page);
-void _PhyMemMarkUsedRange(page_t address, size_t size);
-void _PhyMemMarkFreeRange(page_t address, size_t size);
-
-//
-// Print phy mem layout
-//
-void LogPhyMem();
-
-// Alloc an physical memory page and returns the address of it.
-// 
-// When the allocation fails the address will be undefined.
-// 
-// Passing NULL as address pointer will cause a panic.
-// 
-// @param address Pointer to an pointer_t value that will contain the
-//                address of the allocated page.
-//                Note: 0x0 is an valid page address too. For error
-//                checking use the return value.
-// @return Returns true if the allocation succeeded. false otherwise.
-// 					
-bool PhyMemAlloc(page_t* address);
-
-#ifdef __cplusplus
+int memcmp(const void *_s1, const void *_s2, size_t n)
+{
+	const char *s1 = _s1;
+	const char *s2 = _s2;
+	
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		if (*s1 < *s2)
+			return -1;
+		else if (*s1 > *s2)
+			return 1;
+	}
+	
+	return 0;
 }
-#endif
 
-#endif // _PHYMEM_H_
+void *memset(void *_b, int c, size_t len)
+{
+	char *b = _b;
+	
+	for (size_t i = 0; i < len; i++)
+		*b = (char)c;
+	
+	return _b;
+}
+
+// void *memmove(void *s1, const void *s2, size_t n)
+// {
+// 	
+// }
+
+void *memcpy(void *restrict _s1, const void *restrict _s2, size_t n)
+{
+	char *s1 = _s1;
+	const char *s2 = _s2;
+	
+	for (size_t i = 0; i < n; i++, s1++, s2++) {
+		*s1 = *s2;
+	}
+	
+	return _s1;
+}

@@ -24,33 +24,22 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "Store.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
+Store::Store(size_t _size)
+{
+	this->size = _size;
 }
-#endif
+
+Store::~Store()
+{
+}
+
+size_t Store::getSize() const
+{
+	return this->size;
+}
+
+} // namespace VM

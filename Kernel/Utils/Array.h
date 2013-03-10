@@ -23,34 +23,27 @@
 //
 
 #import <CoreSystem/CommonTypes.h>
+#import "Error/Assert.h"
+#import "Utils/KObject.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
-
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+template<class T>
+class Array {
+private:
+protected:
+public:
+	//
+	// Initialize a new array, with a size hint if given
+	//
+	Array();
+	Array(size_t sizeHint);
+	
+	//
+	// Get the i-th element of this array
+	//
+	Ptr<T> get(uint32_t i);
+	
+	//
+	// Set the i-th element of this array
+	//
+	void set(uint32_t, Ptr<t> obj);
+};

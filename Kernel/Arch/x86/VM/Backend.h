@@ -22,35 +22,56 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#import "VM/Backend.h"
+#import "Boot/Bootstrap.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
+namespace Backend {
+namespace X86 {
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+typedef uint32_t PageDirectoryEntry;
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+typedef struct {
+	PageDirectoryEntry entries[1024];
+} PageDirectory;
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
+typedef uint32_t PageTableEntry;
 
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
+typedef struct {
+	PageTableEntry entries[1024];
+} PageTable;
 
-#ifdef __cplusplus
-}
-#endif
+void Initialize();
+
+// The Context used for paging on X86
+class Context : public VM::Backend::Context {
+protected:
+	// Base when the page tables can be accessed
+	PageTable* pageTablesBase;
+	PageDirectory* pageDirectory;
+	
+	// the page directory (paddr)
+	page_t paddrPageDirectory;
+
+	void mapPageDirectory(page_t paddr, pointer_t vaddr);
+
+	// Overrided from abstract superclass
+	virtual bool map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options);
+	virtual bool unmap(pointer_t vaddr);
+	virtual page_t translate(pointer_t vaddr);
+	virtual void activate();
+	virtual bool makeAccessible();
+	virtual void endAccessible();
+	
+	// Call with false, to not initialize die pd. This
+	// is only used in the KernelContext Subclass
+	Context(VMBackendMapOptions options, bool initialize);
+public:
+	Context(VMBackendMapOptions options) : Context(options, true) {}
+};
+
+extern GlobalPtr<Context> KernelContext;
+
+} // namespace X86
+} // namespace Backend
+} // namespace VM

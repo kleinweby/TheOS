@@ -22,35 +22,73 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#pragma once
+
 #import <CoreSystem/CommonTypes.h>
+#import "Utils/KObject.h"
+#import "Error/Error.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+enum class ResultType : short {
+	Success,
+	Error,
+	TryAgain
+};
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
-
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+template<class T = Error>
+class Result {
+private:
+	// Disallow dynamic instances
+	void* operator new(size_t) = delete;
+	void* operator new[](size_t) = delete;
+	void operator delete(void *) = delete;
+	void operator delete[](void*) = delete;
+protected:
+	ResultType resultType;
+	// Use kobject here to be able to store a
+	// waiting object here
+	Ptr<KObject> object;
+	
+public:
+	Result() : Result(ResultType::Success) {}
+	Result(ResultType _resultType)
+	{
+		this->resultType = _resultType;
+	}
+	
+	Result(Ptr<T> _object) : Result(ResultType::Success)
+	{
+		this->object = _object;
+	}
+	
+	Result(bool succeeded) : Result(succeeded ? ResultType::Success : ResultType::Error) {}
+	
+	operator bool() const
+	{
+		return this->isSuccess();
+	}
+	
+	inline bool isSuccess() const
+	{
+		return resultType == ResultType::Success;
+	}
+	
+	inline bool isError() const
+	{
+		return resultType == ResultType::Error;
+	}
+	
+	inline bool isTryAgain() const
+	{
+		return resultType == ResultType::TryAgain;
+	}
+	
+	operator T() const
+	{
+		return (T)this->object;
+	}
+	
+	operator Ptr<Error>() const
+	{
+		return (Ptr<Error>)this->object;
+	}
+};

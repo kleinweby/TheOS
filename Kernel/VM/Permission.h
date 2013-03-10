@@ -22,35 +22,31 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
 //
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+// Describes permissions used by the VM subsytem
+// The underlaying architecture may not be able to represent all combinations
+//	
+enum Permission : int {
+	//
+	// This region is readable
+	//
+	Read = (1 << 0),
+	//
+	// This region is writeable
+	//
+	Write = (1 << 1),
+	//
+	// This region is executable
+	//
+	Execute = (1 << 2)
+};
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+// to allow Permission a = Permission::Read | Permission::Write;
+inline Permission operator|(Permission a, Permission b)
+{return static_cast<Permission>(static_cast<int>(a) | static_cast<int>(b));}
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
 }
-#endif

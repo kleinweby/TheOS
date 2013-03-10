@@ -22,59 +22,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef _PHYMEM_H_
-#define _PHYMEM_H_
+#include "Multiboot/Multiboot.h"
+#include "Logging/Logging.h"
+#include "Memory/PhyMem.h"
+#import "Memory/kalloc.h"
+#import "VM/VM.h"
 
-#include <CoreSystem/CommonTypes.h>
+#import "KernelInfo.h"
+#import "Bootstrap.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+// This is the initial heap we use until we've
+// got a real heap.
 //
-// Describes a physical page
-//
-typedef void* page_t;
+// Note: Heap is still valid, after boot up
+char StartupHeap[4*1024];
 
-static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
-static const page_t kPhyInvalidPage = (void*)0xFFFFFFFF;
-static const uint32_t kPhyPageMask = 0xFFFFF000;
-
-//
-// Initializes the phy mem subsystem
-//
-void PhyMemInitialize();
-
-//
-// Initializetion routines. Be careful when using those
-// ====================================================
-//
-void _PhyMemMarkFree(page_t page);
-void _PhyMemMarkUsed(page_t page);
-void _PhyMemMarkUsedRange(page_t address, size_t size);
-void _PhyMemMarkFreeRange(page_t address, size_t size);
-
-//
-// Print phy mem layout
-//
-void LogPhyMem();
-
-// Alloc an physical memory page and returns the address of it.
-// 
-// When the allocation fails the address will be undefined.
-// 
-// Passing NULL as address pointer will cause a panic.
-// 
-// @param address Pointer to an pointer_t value that will contain the
-//                address of the allocated page.
-//                Note: 0x0 is an valid page address too. For error
-//                checking use the return value.
-// @return Returns true if the allocation succeeded. false otherwise.
-// 					
-bool PhyMemAlloc(page_t* address);
-
-#ifdef __cplusplus
+extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
+{	
+	LoggingInitialize();
+	
+	// This will also make a temporary bootstrap mapping
+	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
+	
+	LogVerbose("Magic %x, header: %p", magic, header);
+	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
+	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
+	_PhyMemMarkUsedRange(KernelBootstrapOffset, KernelBootstrapLength);
+	BootstrapPhyMemInitialize();
+	LogPhyMem();
+	
+	KallocInitialize(StartupHeap, sizeof(StartupHeap));
+	
+	VM::Initialize();
+	BootstrapRelease();
+	
+	LogInfo("booted");
+	LogPhyMem();
 }
-#endif
-
-#endif // _PHYMEM_H_

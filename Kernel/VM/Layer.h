@@ -24,33 +24,69 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "Utils/KObject.h"
+#import "Utils/Result.h"
+#import "VM/Region.h"
+#import "Memory/PhyMem.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+class Store;
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
+class Layer : public KObject {
+	//
+	// Lookup for pages not provided by this
+	// layer will be:
+	// Store -> Parent -> FAIL
+	//
+	// This way, a non root layer can get a
+	// swap storage to page out if needed
+	//
+	Ptr<Layer> parent;
+	Ptr<Store> store;
+	
+	//
+	// Addresses for the phy pages by this
+	// layer.
+	// TODO: maybe a map would be better here?
+	// probbably depends on the ratio covered by
+	// this layer.
+	//
+	page_t* pages;
+public:
+	//
+	// Construct a new layer with a parent
+	//
+	Layer(Ptr<Layer> parent);
+	
+	//
+	// Construct a new layer with a store
+	//
+	Layer(Ptr<Store> store);
+	
+	//
+	// Destructor
+	//
+	virtual ~Layer();
+	
+	//
+	// Ask the layer to handle a fault in the region at
+	// address.
+	//
+	// permissions - the permissions the layer should map
+	//
+	bool handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> region);
+	
+	//
+	// Gets the size of this layer
+	//
+	virtual size_t getSize();
+	
+	//
+	// Get the real size of this layer
+	// This means only the phy pages directly hold by this layer.
+	//
+	virtual size_t getRealSize();
+};
 
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

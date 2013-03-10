@@ -22,35 +22,36 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#import "KObject.h"
+#import "Memory/kalloc.h"
+#import "Error/Panic.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
-
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
+void* operator new(size_t size)
+{
+	void* obj = kalloc(size);
+	return obj;
 }
-#endif
+
+void* operator new[](size_t size)
+{
+	return kalloc(size);
+}
+
+void  operator delete(void* ptr)
+{
+	free(ptr);
+}
+
+void  operator delete[](void* ptr)
+{
+	free(ptr);
+}
+
+KObject::~KObject()
+{
+}
+
+
+extern "C" void __cxa_pure_virtual() {
+	panic("Call to pure virtual");
+}

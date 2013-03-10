@@ -22,35 +22,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
-
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
-
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+// #import "Array.h"
+// 
+// Array::Array()
+// {
+// 	
+// }
+// 
+// Array(size_t sizeHint)
+// {
+// 	
+// }
+// 
+// Ptr<T> get(uint32_t i)
+// {
+// 	
+// }
+// 
+// void set(uint32_t, Ptr<t> obj)
+// {
+// 	
+// }

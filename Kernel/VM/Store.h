@@ -24,33 +24,59 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "Utils/KObject.h"
+#import "Memory/PhyMem.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+class Store : public KObject {
+protected:
+	size_t size;
+public:
+	//
+	// Creates a new store with the size.
+	// If the object this store represents does not
+	// fill the complete size, the remainder will
+	// be null filled.
+	//
+	Store(size_t size);
+	virtual ~Store();
+	
+	//
+	// Get the size of this store
+	//
+	size_t getSize() const;
+	
+	//
+	// Checks wheter a page at vaddr is writable
+	// This way a private copy does not need to be make
+	// and the page of this store can be reused. 
+	//
+	// Note: areas where it is not allowed to write
+	// (due to permissons) can still be writeable at store
+	// level.
+	// The read onlyness will be enforced in VM::Region 
+	//
+	virtual bool isWriteable(uint32_t vaddr) const = 0;
+	
+	//
+	// Get the paddr for the page at address
+	//
+	// @param addess is relative to the start of this store
+	//
+	virtual page_t getPageAddress(uint32_t vaddr) = 0;
+	
+	//
+	// Writes back the content held by the layer to the
+	// store underlaying it. This may be used when isWriteable
+	// returned false, and we want to make a change permanent.
+	//
+	// @param vaddr address in this store
+	// @param page the phy page to write back
+	//             this page is not used by this store after this
+	//             call returns.
+	//
+	virtual void writeback(uint32_t vaddr, page_t page) = 0;
+};
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

@@ -24,33 +24,13 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "Utils/KObject.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
+class Context;
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+void Initialize();
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
+void ActivateContext(Ptr<Context> context);
 
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM

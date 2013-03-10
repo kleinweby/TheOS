@@ -22,27 +22,37 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
+#include "Panic.h"
 
-#import "KernelInfo.h"
+#include "LinkerHelper.h"
 
-// TODO: make a dynamic heap
-char heap[10*1024*1024];
+#include <CoreSystem/MachineInstructions.h>
 
-void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
+LINKER_SYMBOL(PanicDrivers, PanicDriver*);
+LINKER_SYMBOL(PanicDriversLength, uint32_t);
+
+void panic(const char* message, ...)
+{
+	CPUState state;
+	va_list args;
+	va_start(args, message);
+	panic_state(message, &state, args);
+	va_end(args);
+}
+
+void panic_state(const char* message, CPUState* cpuState, va_list args)
+{
+	// Prevent any futher interrupts from waking up the kernel
+	DisableInterrupts();
 	
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	LogPhyMem();
-	
-	KAllocInitialize(heap, sizeof(heap));
+	uint64_t timestamp = TimeStampCounter() >> 24;
+	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
 
+	for (uint32_t i = 0; i < count; i++) {
+		PanicDrivers[i](timestamp, message, cpuState, args);
+	}
+	
+	// Halt the kernel
+	while(true)
+		Halt();
 }

@@ -24,33 +24,50 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "Utils/KObject.h"
+#import "Backend.h"
+#import "Utils/Dictionary.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+class Region;
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
+class Context : public KObject {
+	// The backend we use to do the actuall mapping
+	Ptr<Backend::Context> backend;
+	
+	Dictionary<uint32_t, Ptr<Region>> regions;
 
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
+protected:
+	void addRegion(Ptr<Region> region);
+	void removeRegion(Ptr<Region> region);
 
-#ifdef __cplusplus
-}
-#endif
+	friend class Region;
+public:
+	//
+	// Create a new context with a private backend
+	//
+	Context();
+	
+	//
+	// Create a new context with a given backend
+	//
+	Context(Ptr<Backend::Context> backend);
+	
+	//
+	// Copy a context.
+	//
+	Context(Ptr<Context>& context);
+	
+	//
+	// Destructor
+	//
+	virtual ~Context();
+	
+	//
+	// Get the backend used to map.
+	//
+	Ptr<Backend::Context> getBackend() const;
+};
+	
+} // namespace VM

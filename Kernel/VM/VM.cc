@@ -22,35 +22,48 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#import "VM.h"
+#import "Backend.h"
+#import "Context.h"
+#import "FixedStore.h"
+#import "Layer.h"
+#import "Region.h"
+#import "KernelInfo.h"
+#import "Logging/Logging.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace VM {
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+GlobalPtr<Context> KernelContext;
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+void SetupKernelContext();
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
+void Initialize()
+{
+	Backend::Initialize();
+	
+	SetupKernelContext();
 }
-#endif
+
+void SetupKernelContext()
+{
+	KernelContext = new Context(Backend::GetKernelContext());
+	Ptr<Layer> layer;
+	Ptr<Region> region;
+	
+	// TODO: we should make different regions, for text, data, rodata etc.
+	// Create a layer with the parts the bootloader loaded for us
+	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
+	// And create a region in the kernel context
+	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
+	// We need to fault this manually, as the fault handling code would not be present
+	region->fault();
+
+	ActivateContext(KernelContext);
+}
+
+void ActivateContext(Ptr<Context> context)
+{
+	context->getBackend()->activate();
+}
+
+} // namespace VM

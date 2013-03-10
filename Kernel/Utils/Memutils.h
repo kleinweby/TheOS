@@ -22,59 +22,17 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef _PHYMEM_H_
-#define _PHYMEM_H_
-
 #include <CoreSystem/CommonTypes.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//
-// Describes a physical page
-//
-typedef void* page_t;
-
-static const uint32_t kPhyMemPageSize = 4 * 1024 /* 4 KiB */;
-static const page_t kPhyInvalidPage = (void*)0xFFFFFFFF;
-static const uint32_t kPhyPageMask = 0xFFFFF000;
-
-//
-// Initializes the phy mem subsystem
-//
-void PhyMemInitialize();
-
-//
-// Initializetion routines. Be careful when using those
-// ====================================================
-//
-void _PhyMemMarkFree(page_t page);
-void _PhyMemMarkUsed(page_t page);
-void _PhyMemMarkUsedRange(page_t address, size_t size);
-void _PhyMemMarkFreeRange(page_t address, size_t size);
-
-//
-// Print phy mem layout
-//
-void LogPhyMem();
-
-// Alloc an physical memory page and returns the address of it.
-// 
-// When the allocation fails the address will be undefined.
-// 
-// Passing NULL as address pointer will cause a panic.
-// 
-// @param address Pointer to an pointer_t value that will contain the
-//                address of the allocated page.
-//                Note: 0x0 is an valid page address too. For error
-//                checking use the return value.
-// @return Returns true if the allocation succeeded. false otherwise.
-// 					
-bool PhyMemAlloc(page_t* address);
+int memcmp(const void *s1, const void *s2, size_t n);
+void *memset(void *b, int c, size_t len);
+void *memmove(void *s1, const void *s2, size_t n);
+void *memcpy(void * s1, const void * s2, size_t n);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // _PHYMEM_H_

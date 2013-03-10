@@ -5,9 +5,13 @@ require 'json'
 
 SRC=FileList[]
 
+PLATFORM_DIR="Arch/x86"
+
 SRC.include([
-  "Boot/KernelInitialize.c",
-  "Boot/startup.nasm",
+  "Boot/Bootstrap.c",
+  "Boot/BootstrapASM.nasm",
+  "Boot/KernelInitialize.cc",
+  #"Boot/startup.nasm",
   
   # Multiboot
   "Multiboot/Multiboot.c",
@@ -19,22 +23,43 @@ SRC.include([
   # PhyMem
   "Memory/PhyMem.c",
   
-  "Utils/Object.c",
+  "VM/Backend.cc",
+  "#{PLATFORM_DIR}/VM/Backend.cc",
   
+  "VM/VM.cc",
+  "VM/Region.cc",
+  "VM/Context.cc",
+  "VM/Layer.cc",
+  "VM/Store.cc",
+  "VM/FixedStore.cc",
+  
+  "Utils/Object.c",
+  "Utils/KObject.cc",
+  "Utils/Array.cc",
+  "Utils/Memutils.cc",
   
   "Memory/kalloc.c",
   
   # Kernel Info
-  "KernelInfo.c"
+  "KernelInfo.c",
+  
+  #Error
+  "Error/Panic.c",
+  "Error/PanicDriverSerial.c",
+  "Error/PanicDriverVGA.c"
 ])
 
 CFLAGS << '-I.' \
        << '-ffreestanding' << '-mno-sse' << '-mno-red-zone' \
        << '-mno-mmx' << '-mno-sse' << '-mno-sse2' \
-       << '-mno-sse3' << '-mno-3dnow'
+       << '-mno-sse3' << '-mno-3dnow' \
+       << "-I#{PLATFORM_DIR}"
 
 # Relax some warnings
-CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed' << "-Wno-gnu" << "-Wno-variadic-macros" << '-Wno-missing-variable-declarations' << '-Wno-unused-variable' << '-Wno-pedantic'
+CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
+       << "-Wno-gnu" << "-Wno-variadic-macros"\
+       << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
+       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded' << '-Wno-unneeded-internal-declaration'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'
@@ -71,7 +96,7 @@ end
 
 task 'debug' => ['kernel'] do
     puts "Connect with gdb on tcp::1234. Execution is halted."
-    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -serial stdio -kernel kernel"
+    sh "qemu-system-#{PLATFORM} -S -gdb tcp::1234 -no-reboot -monitor stdio -kernel kernel"
 end
 
 task 'attach' => ['kernel.sym'] do

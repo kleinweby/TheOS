@@ -22,4 +22,4 @@ NASM    = 'nasm'
 OBJ_DIR = '.objs'
 
 DEFINES << '-D__PLATFORM_'+PLATFORM.upcase+'__'
-CFLAGS << '-std=c1x' << '-ggdb' << '-fno-builtin' << '-Werror' << '-Weverything'
+CFLAGS << '-ggdb' << '-fno-builtin' << '-Werror' << '-Weverything'

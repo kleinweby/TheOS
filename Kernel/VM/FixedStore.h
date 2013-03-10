@@ -24,33 +24,37 @@
 
 #import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#import "VM/Store.h"
 
-//
-// Initiztiales kalloc with a given heap
-//
-void KallocInitialize(void* ptr, size_t size);
+namespace VM {
 
-//
-// Adds a new heap space to Kalloc.
-//
-// TODO: as this heap can probbably grow/shrink
-// we may need to provide some callbacks here
-//
-void KallocAddHeap(void* ptr, size_t size);
+class FixedStore : public Store {
+private:
+	bool writeable;
+	bool free;
+	
+	page_t startPage;
+	page_t* pages;
+	size_t numberOfPages;
+protected:
+public:
+	//
+	// Constructor for a continigous pmem space
+	//
+	FixedStore(page_t startPage, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	//
+	// Constructor for a non continigous pmem space
+	//
+	FixedStore(page_t* pages, size_t numberOfPages, bool writeable = true, bool free = true);
+	
+	// Desctructor
+	virtual ~FixedStore();
+	
+	// Primitives of base class
+	virtual bool isWriteable(uint32_t vaddr) const;
+	virtual page_t getPageAddress(uint32_t vaddr);
+	virtual void writeback(uint32_t vaddr, page_t page);
+};
 
-//
-// Allocates memory at least of the size specified
-//
-void* kalloc(size_t size);
-
-//
-// Frees the allocated memory
-//
-void free(void* ptr);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace VM
