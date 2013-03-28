@@ -29,6 +29,8 @@
 extern "C" {
 #endif
 
+extern int interruptCount;
+
 //
 // Set ups the the interrupts subsystem
 //

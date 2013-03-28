@@ -32,6 +32,9 @@
 #import "KernelInfo.h"
 #import "Bootstrap.h"
 
+#include <CoreSystem/MachineInstructions.h>
+
+
 // This is the initial heap we use until we've
 // got a real heap.
 //
@@ -61,4 +64,16 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	LogInfo("booted");
 	LogPhyMem();
+
+
+	for(;;) {
+		LogInfo("Interrupts %i", interruptCount);
+		Halt();
+		if (interruptCount > 50) {
+			for(uint32_t j = 0; j < kUInt32Max - 1; j++) {
+			}
+
+			LogInfo("Done");
+		}
+	}
 }

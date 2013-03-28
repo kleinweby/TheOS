@@ -30,6 +30,8 @@
 #include <CoreSystem/CommonTypes.h>
 #include <CoreSystem/MachineInstructions.h>
 
+int interruptCount;
+
 struct Interrupt {
 	uint32_t eip;
 	uint32_t edi;
@@ -145,6 +147,8 @@ void InterruptsInitialize()
 	// In real mode a few irq's are on places where
 	// exceptions lay, so we nee to remap this
 	//
+
+	interruptCount = 0;
 	
 	// Initialize master PIC
 	outb(0x20, 0x11); // Init
@@ -203,8 +207,8 @@ void InterruptsInitialize()
  	InterruptsLoadIDT();
   
 	// Enable IRQs
-	outb(0x20, 0x0);
-	outb(0xa0, 0x0);
+	outb(0x20, 0x20);
+	outb(0xa0, 0x20);
 	EnableInterrupts();
 	LogInfo("Interrupts enabled");
 }
@@ -216,6 +220,8 @@ void InterruptsHandler(struct Interrupt* ptr)
 	
 	if (ptr->interruptNumber >= 0x20)
 		outb(0x20,0x20);
+
+	interruptCount++;
 	
 	//while (true) Halt();
 }
