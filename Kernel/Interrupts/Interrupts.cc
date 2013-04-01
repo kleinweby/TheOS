@@ -22,63 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Multiboot/Multiboot.h"
-#include "Logging/Logging.h"
-#include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
-#import "VM/VM.h"
 #include "Interrupts/Interrupts.h"
 
-#import "KernelInfo.h"
-#import "Bootstrap.h"
+using namespace Interrupts;
 
-#include <CoreSystem/MachineInstructions.h>
-
-
-// This is the initial heap we use until we've
-// got a real heap.
-//
-// Note: Heap is still valid, after boot up
-char StartupHeap[4*1024];
-
-extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
-{	
-	LoggingInitialize();
-	
-	Interrupts::Initialize();
-
-	// This will also make a temporary bootstrap mapping
-	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
-	
-	LogVerbose("Magic %x, header: %p", magic, header);
-	MultibootInitializePhyMem(header, KERNEL_LOAD_ADDRESS);
-	_PhyMemMarkUsedRange(KernelOffset, KernelLength);
-	_PhyMemMarkUsedRange(KernelBootstrapOffset, KernelBootstrapLength);
-	BootstrapPhyMemInitialize();
-	LogPhyMem();
-	
-	KallocInitialize(StartupHeap, sizeof(StartupHeap));
-	
-	VM::Initialize();
-	BootstrapRelease();
-	Interrupts::Enable();
-	
-	LogInfo("booted");
-	LogPhyMem();
-
-	int counter = 1193182 / 2;
-   	outb(0x43, 0x34);
-   	outb(0x40,counter & 0xFF);
-   	outb(0x40,(counter >> 8)&0xFF);
-
-	for(;;) {
-		//LogInfo("Interrupts %i", interruptCount);
-		//Halt();
-		// if (interruptCount > 50) {
-		// 	// for(uint32_t j = 0; j < kUInt32Max - 1; j++) {
-		// 	// }
-
-		// 	LogInfo("Done");
-		// }
-	}
+void Interrupts::Initialize()
+{
+	Native::Initialize();
 }

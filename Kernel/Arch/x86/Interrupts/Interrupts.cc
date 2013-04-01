@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,32 +24,11 @@
 
 #include "Interrupts.h"
 
-#include "Error/Assert.h"
+#include <CoreSystem/MachineInstructions.h>
 #include "Logging/Logging.h"
 
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/MachineInstructions.h>
-
-int interruptCount;
-
-struct Interrupt {
-	uint32_t eip;
-	uint32_t edi;
-  	uint32_t esi;
-	uint32_t ebp;
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
-
-	uint32_t interruptNumber;
-	uint32_t errorCode;
-
-	uint32_t cs;
-	uint32_t eflags;
-	uint32_t esp;
-	uint32_t ss;
-};
+namespace Interrupts {
+namespace X86 {
 
 enum GateType {
   kGate32BitTaskType = 0x5,
@@ -70,67 +49,67 @@ struct _IDTEntry {
    uint16_t handler_high;
 } __attribute__((packed));
 
-static_assert(sizeof(struct _IDTEntry) == 8);
+static_assert(sizeof(struct _IDTEntry) == 8, "IDT Entry was packed wrong");
 
 struct _IDTHeader {
   uint16_t size;
   uint32_t address;
 } __attribute__((packed));
 
-static_assert(sizeof(struct _IDTHeader) == 6);
+static_assert(sizeof(struct _IDTHeader) == 6, "IDT Header was packed wrong");
 
 static const uint8_t kInterruptsCount = 48;
 struct _IDTEntry IDT[kInterruptsCount];
-struct _IDTHeader InterruptsIDTHeader = {.address = (uint32_t)&IDT, .size = sizeof(IDT)};
+extern "C" struct _IDTHeader InterruptsIDTHeader = {.address = (uint32_t)&IDT, .size = sizeof(IDT)};
 
-extern void InterruptsLoadIDT();
+extern "C" void InterruptsLoadIDT();
 
 // All the trampolins from the nasm file
-extern void InterruptsTrampolin0();
-extern void InterruptsTrampolin1();
-extern void InterruptsTrampolin2();
-extern void InterruptsTrampolin3();
-extern void InterruptsTrampolin4();
-extern void InterruptsTrampolin5();
-extern void InterruptsTrampolin6();
-extern void InterruptsTrampolin7();
-extern void InterruptsTrampolin8();
-extern void InterruptsTrampolin9();
-extern void InterruptsTrampolin10();
-extern void InterruptsTrampolin11();
-extern void InterruptsTrampolin12();
-extern void InterruptsTrampolin13();
-extern void InterruptsTrampolin14();
-extern void InterruptsTrampolin15();
-extern void InterruptsTrampolin16();
-extern void InterruptsTrampolin17();
-extern void InterruptsTrampolin18();
-extern void InterruptsTrampolin32();
-extern void InterruptsTrampolin33();
-extern void InterruptsTrampolin34();
-extern void InterruptsTrampolin35();
-extern void InterruptsTrampolin36();
-extern void InterruptsTrampolin37();
-extern void InterruptsTrampolin38();
-extern void InterruptsTrampolin39();
-extern void InterruptsTrampolin40();
-extern void InterruptsTrampolin41();
-extern void InterruptsTrampolin42();
-extern void InterruptsTrampolin43();
-extern void InterruptsTrampolin44();
-extern void InterruptsTrampolin45();
-extern void InterruptsTrampolin46();
-extern void InterruptsTrampolin47();
+extern "C" void InterruptsTrampolin0();
+extern "C" void InterruptsTrampolin1();
+extern "C" void InterruptsTrampolin2();
+extern "C" void InterruptsTrampolin3();
+extern "C" void InterruptsTrampolin4();
+extern "C" void InterruptsTrampolin5();
+extern "C" void InterruptsTrampolin6();
+extern "C" void InterruptsTrampolin7();
+extern "C" void InterruptsTrampolin8();
+extern "C" void InterruptsTrampolin9();
+extern "C" void InterruptsTrampolin10();
+extern "C" void InterruptsTrampolin11();
+extern "C" void InterruptsTrampolin12();
+extern "C" void InterruptsTrampolin13();
+extern "C" void InterruptsTrampolin14();
+extern "C" void InterruptsTrampolin15();
+extern "C" void InterruptsTrampolin16();
+extern "C" void InterruptsTrampolin17();
+extern "C" void InterruptsTrampolin18();
+extern "C" void InterruptsTrampolin32();
+extern "C" void InterruptsTrampolin33();
+extern "C" void InterruptsTrampolin34();
+extern "C" void InterruptsTrampolin35();
+extern "C" void InterruptsTrampolin36();
+extern "C" void InterruptsTrampolin37();
+extern "C" void InterruptsTrampolin38();
+extern "C" void InterruptsTrampolin39();
+extern "C" void InterruptsTrampolin40();
+extern "C" void InterruptsTrampolin41();
+extern "C" void InterruptsTrampolin42();
+extern "C" void InterruptsTrampolin43();
+extern "C" void InterruptsTrampolin44();
+extern "C" void InterruptsTrampolin45();
+extern "C" void InterruptsTrampolin46();
+extern "C" void InterruptsTrampolin47();
 
-static void InterruptsInstallIDTEntry(uint32_t number, pointer_t tramp, 
+static void InterruptsInstallIDTEntry(uint32_t number, void (*tramp)(), 
 	uint16_t selector, enum GateType type, uint8_t storageSegment, uint8_t privilegLevel)
 {
     struct _IDTEntry *entry = &IDT[number];
 
-	// memset(entry, 0, sizeof(struct _IDTEntry));
+	//memset(entry, 0, sizeof(struct _IDTEntry));
 
-    entry->handler_low = (uint16_t)tramp;
-    entry->handler_high = (uint32_t)tramp >> 16;
+    entry->handler_low = reinterpret_cast<uint32_t>(tramp)&0xFFFF;
+    entry->handler_high = reinterpret_cast<uint32_t>(tramp) >> 16;
 
     entry->selector = selector;
     entry->storageSegment = storageSegment;
@@ -138,17 +117,17 @@ static void InterruptsInstallIDTEntry(uint32_t number, pointer_t tramp,
     entry->isPresent = 1;
 	entry->privilegLevel = privilegLevel;
 	entry->type = type;
+
+	LogInfo("En")
 }
 
-void InterruptsInitialize()
+void Initialize()
 {
 	LogTrace("Remap PIC interrupts");
 	//
 	// In real mode a few irq's are on places where
 	// exceptions lay, so we nee to remap this
 	//
-
-	interruptCount = 0;
 	
 	// Initialize master PIC
 	outb(0x20, 0x11); // Init
@@ -207,21 +186,55 @@ void InterruptsInitialize()
  	InterruptsLoadIDT();
   
 	// Enable IRQs
-	outb(0x20, 0x20);
-	outb(0xa0, 0x20);
-	EnableInterrupts();
+	outb(0x20, 0x00);
+	outb(0xa0, 0x00);
 	LogInfo("Interrupts enabled");
 }
 
-void InterruptsHandler(struct Interrupt* ptr)
+void Enable()
+{
+	EnableInterrupts();
+}
+
+void Disable()
+{
+	DisableInterrupts();
+}
+
+extern "C" CPUState* InterruptsHandler(CPUState* ptr)
 {
 	//#pragma unused(ptr)
-	LogInfo("Interrupt %x: %x", ptr->interruptNumber, ptr->errorCode);
-	
+	LogInfo("Interrupt");
+
+// Debug print of interrupt state	
+#if 0
+	LogInfo("  edi = %x", ptr->edi);
+  	LogInfo("  esi = %x", ptr->esi);
+	LogInfo("  edp = %x", ptr->ebp);
+	LogInfo("  ebx = %x", ptr->ebx);
+	LogInfo("  edx = %x", ptr->edx);
+	LogInfo("  ecx = %x", ptr->ecx);
+	LogInfo("  eax = %x", ptr->eax);
+
+	LogInfo("    # = %x", ptr->interruptNumber);
+	LogInfo(" code = %x", ptr->errorCode);
+
+	LogInfo("  eip = %x", ptr->eip);
+	LogInfo("   cs = %x", ptr->cs);
+	LogInfo("eflags= %x", ptr->eflags);
+	LogInfo("  esp = %x", ptr->esp);
+	LogInfo("   ss = %x", ptr->ss);
+#endif
+
 	if (ptr->interruptNumber >= 0x20)
 		outb(0x20,0x20);
 
-	interruptCount++;
+	// ptr->eip = (uint32_t)&blub;
+	// ptr->eflags = 0x202;
+	// ptr->esp = (uint32_t)&stack_b;
 	
-	//while (true) Halt();
+	return ptr;
+}
+
+}
 }

@@ -38,17 +38,31 @@ InterruptsLoadIDT:
 
 [extern InterruptsHandler]
 InterruptsTrampolinCommon:
-	pushad
+	; CPU-Zustand sichern
+    push ebp
+    push edi
+    push esi
+    push edx
+    push ecx
+    push ebx
+    push eax
 	
 	; Call Interrupts Handler with cpu state struct
 	push esp
 	call InterruptsHandler
-	add esp, 4
+	; Interruptshandler returns the state to restore
+	mov esp, eax
 	
-	popad
+	pop eax
+    pop ebx
+    pop ecx
+    pop edx
+    pop esi
+    pop edi
+    pop ebp
 	; Pop error + interrupt number
 	add esp, 8
-	iretd
+	iret
 
 %macro TrampolinStub 1
 [global InterruptsTrampolin%1]

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,21 +22,58 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#pragma once
-
-#include_next "Interrupts/Interrupts.h"
-
-//#include "Arch/x86/Interrupts/Interrupts.h"
+#import <CoreSystem/CommonTypes.h>
 
 namespace Interrupts {
+namespace X86 {
 
-namespace Native = Interrupts::X86;
+typedef struct {
+	uint32_t edi;
+  	uint32_t esi;
+	uint32_t ebp;
+	uint32_t ebx;
+	uint32_t edx;
+	uint32_t ecx;
+	uint32_t eax;
 
+	uint32_t interruptNumber;
+	uint32_t errorCode;
+
+	uint32_t eip;
+	uint32_t cs;
+	uint32_t eflags;
+	uint32_t esp;
+	uint32_t ss;
+} CPUState;
+
+//
+// Handles an interrupt.
+//
+// It may return NULL to indicate that it want the cpu
+// to be halted.
+//
+typedef CPUState* (Handler)(CPUState* cpuState);
+
+//
+// Initialize the subsystem but does not enable interrupts
+// (Exceptions may occour regardless)
+//
 void Initialize();
 
-// Import some native functions for easy access
-using Native::SetHandler;
-using Native::Enable;
-using Native::Disable;
+//
+// Enables interrupts
+//
+void Enable();
 
+//
+// Disable interrupts
+//
+void Disable();
+
+//
+// Sets a handler for a given interrupt number
+//
+void SetHandler(uint16_t interruptNumber, Handler handler);
+
+}
 }
