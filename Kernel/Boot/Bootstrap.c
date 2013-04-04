@@ -22,9 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Bootstrap.h"
-#import "Memory/PhyMem.h"
-#import "Logging/Logging.h"
+#include "Bootstrap.h"
+#include "Memory/PhyMem.h"
+#include "Logging/Logging.h"
 
 uint32_t* BootstrapPageDirectory BOOTSTRAP_SECTION;
 void Bootstrap() BOOTSTRAP_SECTION;

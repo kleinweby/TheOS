@@ -22,9 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
 
-#import "Utils/KObject.h"
+#include <CoreSystem/CommonTypes.h>
+
+#include "Utils/KObject.h"
 
 namespace VM {
 class Context;

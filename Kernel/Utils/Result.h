@@ -24,9 +24,9 @@
 
 #pragma once
 
-#import <CoreSystem/CommonTypes.h>
-#import "Utils/KObject.h"
-#import "Error/Error.h"
+#include <CoreSystem/CommonTypes.h>
+#include "Utils/KObject.h"
+#include "Error/Error.h"
 
 enum class ResultType : short {
 	Success,

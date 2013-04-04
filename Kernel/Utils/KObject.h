@@ -22,9 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
-#import "Error/Assert.h"
-#import "Logging/Logging.h"
+#pragma once
+
+#include <CoreSystem/CommonTypes.h>
+#include "Error/Assert.h"
+#include "Logging/Logging.h"
 
 //
 // Ptr and GlobalPtr

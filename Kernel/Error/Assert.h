@@ -29,10 +29,9 @@
 // This file provides macros for asserting assumtions like.
 //
 
-#import "Error/Panic.h"
+#pragma once
 
-#ifndef _ERROR_ASSERT_H_
-#define _ERROR_ASSERT_H_
+#include "Error/Panic.h"
 
 //
 // Asserts a given assumption expr at runtime
@@ -42,6 +41,4 @@
 //
 // Assert a given assumption expr at compile time
 //
-#define static_assert(expr) _Static_assert(expr, #expr)
-
-#endif // _ERROR_ASSERT_H_
+#define static_assert(expr, msg) _Static_assert(expr, #expr##" failed: "##msg)

@@ -22,7 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
+
+#include <CoreSystem/CommonTypes.h>
 
 #ifdef __cplusplus
 extern "C" {

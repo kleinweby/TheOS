@@ -22,9 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "KObject.h"
-#import "Memory/kalloc.h"
-#import "Error/Panic.h"
+#include "KObject.h"
+#include "Memory/kalloc.h"
+#include "Error/Panic.h"
 
 void* operator new(size_t size)
 {

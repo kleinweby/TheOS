@@ -29,8 +29,7 @@
 // This file provides structues uses for multiboo
 //
 
-#ifndef _MULTIBOOT_MULTIBOOT_H_
-#define _MULTIBOOT_MULTIBOOT_H_
+#pragma once
 
 #include "Error/Assert.h"
 
@@ -95,5 +94,3 @@ void MultibootInitializePhyMem(struct Multiboot* multiboot, offset_t phyOffset);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // _MULTIBOOT_MULTIBOOT_H_

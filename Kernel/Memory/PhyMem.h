@@ -22,8 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef _PHYMEM_H_
-#define _PHYMEM_H_
+#pragma once
 
 #include <CoreSystem/CommonTypes.h>
 
@@ -76,5 +75,3 @@ bool PhyMemAlloc(page_t* address);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // _PHYMEM_H_

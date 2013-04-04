@@ -28,7 +28,7 @@
 
 namespace Interrupts {
 
-namespace Native = Interrupts::X86;
+namespace Native = __PLATFORM__;
 
 void Initialize();
 

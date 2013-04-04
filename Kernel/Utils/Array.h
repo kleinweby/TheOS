@@ -22,9 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
-#import "Error/Assert.h"
-#import "Utils/KObject.h"
+#pragma once
+
+#include <CoreSystem/CommonTypes.h>
+#include "Error/Assert.h"
+#include "Utils/KObject.h"
 
 template<class T>
 class Array {

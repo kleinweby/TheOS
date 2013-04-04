@@ -22,9 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
 
-#import "VM/Store.h"
+#include <CoreSystem/CommonTypes.h>
+
+#include "VM/Store.h"
 
 namespace VM {
 

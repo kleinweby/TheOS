@@ -35,8 +35,7 @@
 //  - compile time arrays (e.g. to register modules)
 //
 
-#ifndef _LINKER_HELPER_H_
-#define _LINKER_HELPER_H_
+#pragma once
 
 #include <CoreSystem/CommonTypes.h>
 
@@ -49,5 +48,3 @@
 #else
 #define LINKER_SYMBOL(name, type) extern void _##name(); static const type name = (type)&_##name
 #endif
-
-#endif // _LINKER_HELPER_H_

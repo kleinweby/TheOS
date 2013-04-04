@@ -22,7 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Memutils.h"
+#include "Memutils.h"
 
 int memcmp(const void *_s1, const void *_s2, size_t n)
 {

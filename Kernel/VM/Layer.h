@@ -22,12 +22,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
 
-#import "Utils/KObject.h"
-#import "Utils/Result.h"
-#import "VM/Region.h"
-#import "Memory/PhyMem.h"
+#include <CoreSystem/CommonTypes.h>
+
+#include "Utils/KObject.h"
+#include "Utils/Result.h"
+#include "VM/Region.h"
+#include "Memory/PhyMem.h"
 
 namespace VM {
 

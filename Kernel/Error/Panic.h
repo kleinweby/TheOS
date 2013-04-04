@@ -27,10 +27,6 @@
 #include <CoreSystem/CommonTypes.h>
 #include <CoreSystem/VariadicArguments.h>
 
-#ifdef __cplusplus
-#include "Interrupts/Interrupts.h"
-#endif
-
 //
 // Causes the kernel to panic with a given message.
 //
@@ -42,6 +38,8 @@ extern "C"
 void panic(const char* message, ...) __attribute__((noreturn));
 
 #ifdef __cplusplus
+
+#include "Interrupts/Interrupts.h"
 
 //
 // This causes the kernel to panic with a given computed message and

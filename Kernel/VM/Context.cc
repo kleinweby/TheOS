@@ -22,8 +22,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Context.h"
-#import "Region.h"
+#include "Context.h"
+#include "Region.h"
 
 namespace VM {
 

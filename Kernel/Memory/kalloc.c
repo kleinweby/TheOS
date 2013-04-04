@@ -22,10 +22,10 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "kalloc.h"
+#include "kalloc.h"
 
-#import "Error/Assert.h"
-#import "Logging/Logging.h"
+#include "Error/Assert.h"
+#include "Logging/Logging.h"
 
 // kalloc is loosly based on http://g.oswego.edu/dl/html/malloc.html
 

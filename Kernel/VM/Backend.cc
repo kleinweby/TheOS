@@ -22,23 +22,20 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Backend.h"
+#include "VM/Backend.h"
 
-#import "Boot/Bootstrap.h"
+#include "Boot/Bootstrap.h"
 
-#import "Logging/Logging.h"
-#import "Memory/PhyMem.h"
-#import "Memory/Kalloc.h"
-#import "Error/Assert.h"
-#import <CoreSystem/CommonTypes.h>
-#import "Arch/x86/VM/Backend.h"
+#include "Logging/Logging.h"
+#include "Memory/PhyMem.h"
+#include "Memory/Kalloc.h"
+#include "Error/Assert.h"
+#include <CoreSystem/CommonTypes.h>
 
 using namespace VM::Backend;
 
 namespace VM { 
 namespace Backend {
-
-namespace Native = VM::Backend::X86;
 
 //
 // The Kernel Context

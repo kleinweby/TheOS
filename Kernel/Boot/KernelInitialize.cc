@@ -25,13 +25,13 @@
 #include "Multiboot/Multiboot.h"
 #include "Logging/Logging.h"
 #include "Memory/PhyMem.h"
-#import "Memory/kalloc.h"
-#import "VM/VM.h"
+#include "Memory/kalloc.h"
+#include "VM/VM.h"
 #include "Interrupts/Interrupts.h"
 #include "Interrupts/Timer.h"
 
-#import "KernelInfo.h"
-#import "Bootstrap.h"
+#include "KernelInfo.h"
+#include "Bootstrap.h"
 
 #include <CoreSystem/MachineInstructions.h>
 

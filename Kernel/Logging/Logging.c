@@ -25,7 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CoreSystem/MachineInstructions.h>
 
 #include "Logging.h"
-#import "KernelInfo.h"
+#include "KernelInfo.h"
 #include "LinkerHelper.h"
 
 LINKER_SYMBOL(LoggingDrivers, LogDriver*);

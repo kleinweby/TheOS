@@ -24,7 +24,7 @@
 
 #pragma once
 
-#import "Utils/KObject.h"
+#include "Utils/KObject.h"
 
 class Error : public KObject
 {

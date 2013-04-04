@@ -22,8 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "VM/Backend.h"
-#import "Boot/Bootstrap.h"
+#pragma once
+
+#include "Boot/Bootstrap.h"
 
 namespace VM {
 namespace Backend {

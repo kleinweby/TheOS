@@ -22,9 +22,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Region.h"
-#import "Context.h"
-#import "Layer.h"
+#include "Region.h"
+#include "Context.h"
+#include "Layer.h"
 
 namespace VM {
 

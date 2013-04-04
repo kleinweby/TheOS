@@ -22,12 +22,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <CoreSystem/CommonTypes.h>
+#include <CoreSystem/CommonTypes.h>
 
-#import "VM/FixedStore.h"
+#include "VM/FixedStore.h"
 
-#import "Utils/Memutils.h"
-#import "Logging/Logging.h"
+#include "Utils/Memutils.h"
+#include "Logging/Logging.h"
 
 namespace VM {
 

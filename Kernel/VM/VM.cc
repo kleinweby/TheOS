@@ -22,14 +22,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "VM.h"
-#import "Backend.h"
-#import "Context.h"
-#import "FixedStore.h"
-#import "Layer.h"
-#import "Region.h"
-#import "KernelInfo.h"
-#import "Logging/Logging.h"
+#include "VM.h"
+#include "VM/Backend.h"
+#include "Context.h"
+#include "FixedStore.h"
+#include "Layer.h"
+#include "Region.h"
+#include "KernelInfo.h"
+#include "Logging/Logging.h"
 
 namespace VM {
 

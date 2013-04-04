@@ -26,7 +26,7 @@
 
 #include "Memory/PhyMem.h"
 #include "Logging/Logging.h"
-#import "Boot/Bootstrap.h"
+#include "Boot/Bootstrap.h"
 
 void _MultibootAdjust(struct Multiboot* multiboot, offset_t offset)
 {

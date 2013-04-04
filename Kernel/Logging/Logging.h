@@ -22,8 +22,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#pragma once
 
 #include <CoreSystem/CommonTypes.h>
 #include <CoreSystem/Integers.h>
@@ -95,5 +94,3 @@ typedef struct LogDriver {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __LOGGING_H__ */

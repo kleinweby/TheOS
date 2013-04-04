@@ -22,8 +22,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Backend.h"
-#import "Utils/Memutils.h"
+#include "VM/Backend.h"
+#include "Utils/Memutils.h"
 
 // Use platform independet parts
 using namespace VM::Backend;

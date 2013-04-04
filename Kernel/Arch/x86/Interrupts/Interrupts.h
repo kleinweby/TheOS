@@ -24,7 +24,7 @@
 
 #pragma once
 
-#import <CoreSystem/CommonTypes.h>
+#include <CoreSystem/CommonTypes.h>
 
 namespace Interrupts {
 namespace X86 {

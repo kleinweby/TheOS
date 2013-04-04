@@ -26,9 +26,11 @@
 // Abstract 
 //
 
-#import <CoreSystem/CommonTypes.h>
+#pragma once
 
-#import "LinkerHelper.h"
+#include <CoreSystem/CommonTypes.h>
+
+#include "LinkerHelper.h"
 
 #ifdef __cplusplus
 extern "C" {
