@@ -54,7 +54,12 @@ SRC.include([
 
   # Timer
   "Interrupts/Timer.cc",
-  "#{PLATFORM_DIR}/Interrupts/Timer.cc"
+  "#{PLATFORM_DIR}/Interrupts/Timer.cc",
+
+  # Processes
+  "Process/Process.cc",
+  "Process/Scheduler.cc",
+  "Process/Thread.cc"
 ])
 
 CFLAGS << '-I.' \
