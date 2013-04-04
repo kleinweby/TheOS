@@ -28,6 +28,7 @@
 #import "Memory/kalloc.h"
 #import "VM/VM.h"
 #include "Interrupts/Interrupts.h"
+#include "Interrupts/Timer.h"
 
 #import "KernelInfo.h"
 #import "Bootstrap.h"
@@ -40,6 +41,12 @@
 //
 // Note: Heap is still valid, after boot up
 char StartupHeap[4*1024];
+
+const Interrupts::CPUState* TimerInterrupt(const Interrupts::CPUState* state) {
+	LogInfo("Blub");
+	Timer::GetLocalTimer()->setTicks(1193182);
+	return state;
+}
 
 extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
@@ -61,19 +68,18 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	VM::Initialize();
 	BootstrapRelease();
-	Interrupts::Enable();
+	Timer::Initialize();
 	
 	LogInfo("booted");
 	LogPhyMem();
 
-	int counter = 1193182 / 2;
-   	outb(0x43, 0x34);
-   	outb(0x40,counter & 0xFF);
-   	outb(0x40,(counter >> 8)&0xFF);
+	Timer::GetLocalTimer()->setHandler(TimerInterrupt);
+
+   	Interrupts::Enable();
 
 	for(;;) {
 		//LogInfo("Interrupts %i", interruptCount);
-		//Halt();
+		Halt();
 		// if (interruptCount > 50) {
 		// 	// for(uint32_t j = 0; j < kUInt32Max - 1; j++) {
 		// 	// }

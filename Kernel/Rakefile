@@ -33,7 +33,6 @@ SRC.include([
   "VM/Store.cc",
   "VM/FixedStore.cc",
   
-  "Utils/Object.c",
   "Utils/KObject.cc",
   "Utils/Array.cc",
   "Utils/Memutils.cc",
@@ -51,7 +50,11 @@ SRC.include([
   # Interrupts
   "Interrupts/Interrupts.c",
   "#{PLATFORM_DIR}/Interrupts/Interrupts.c",
-  "#{PLATFORM_DIR}/Interrupts/InterruptsASM.nasm"
+  "#{PLATFORM_DIR}/Interrupts/InterruptsASM.nasm",
+
+  # Timer
+  "Interrupts/Timer.cc",
+  "#{PLATFORM_DIR}/Interrupts/Timer.cc"
 ])
 
 CFLAGS << '-I.' \

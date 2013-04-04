@@ -22,6 +22,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#pragma once
+
 #import <CoreSystem/CommonTypes.h>
 
 namespace Interrupts {
@@ -52,7 +54,7 @@ typedef struct {
 // It may return NULL to indicate that it want the cpu
 // to be halted.
 //
-typedef CPUState* (Handler)(CPUState* cpuState);
+typedef const CPUState* (*Handler)(const CPUState* cpuState);
 
 //
 // Initialize the subsystem but does not enable interrupts
@@ -74,6 +76,11 @@ void Disable();
 // Sets a handler for a given interrupt number
 //
 void SetHandler(uint16_t interruptNumber, Handler handler);
+
+//
+// Gets thee handler set for the given interrupt
+//
+Handler GetHandler(uint16_t interruptNumber);
 
 }
 }

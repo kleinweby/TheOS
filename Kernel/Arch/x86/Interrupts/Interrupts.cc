@@ -26,6 +26,7 @@
 
 #include <CoreSystem/MachineInstructions.h>
 #include "Logging/Logging.h"
+#include "Error/Panic.h"
 
 namespace Interrupts {
 namespace X86 {
@@ -59,6 +60,9 @@ struct _IDTHeader {
 static_assert(sizeof(struct _IDTHeader) == 6, "IDT Header was packed wrong");
 
 static const uint8_t kInterruptsCount = 48;
+
+Handler Handlers[kInterruptsCount];
+
 struct _IDTEntry IDT[kInterruptsCount];
 extern "C" struct _IDTHeader InterruptsIDTHeader = {.address = (uint32_t)&IDT, .size = sizeof(IDT)};
 
@@ -117,8 +121,6 @@ static void InterruptsInstallIDTEntry(uint32_t number, void (*tramp)(),
     entry->isPresent = 1;
 	entry->privilegLevel = privilegLevel;
 	entry->type = type;
-
-	LogInfo("En")
 }
 
 void Initialize()
@@ -188,7 +190,6 @@ void Initialize()
 	// Enable IRQs
 	outb(0x20, 0x00);
 	outb(0xa0, 0x00);
-	LogInfo("Interrupts enabled");
 }
 
 void Enable()
@@ -201,9 +202,55 @@ void Disable()
 	DisableInterrupts();
 }
 
-extern "C" CPUState* InterruptsHandler(CPUState* ptr)
+void SetHandler(uint16_t interruptNumber, Handler handler)
 {
-	//#pragma unused(ptr)
+	Handlers[interruptNumber] = handler;
+}
+
+Handler GetHandler(uint16_t interruptNumber)
+{
+	return Handlers[interruptNumber];
+}
+
+// The Halt CPU State
+// ==================
+
+// A very little stack.
+uint8_t HaltCPUStack[4*1024];
+
+void HaltCPU()
+{
+	LogInfo("Halt");
+	while (1) {
+		Halt();
+	}
+}
+
+CPUState HaltCPUState {
+	.edi = 0xBADBEEF,
+  	.esi = 0xBADBEEF,
+	.ebp = 0xBADBEEF,
+	.ebx = 0xBADBEEF,
+	.edx = 0xBADBEEF,
+	.ecx = 0xBADBEEF,
+	.eax = 0xBADBEEF,
+
+	.interruptNumber = 0x0,
+	.errorCode = 0x0,
+
+	.eip = reinterpret_cast<uint32_t>(&HaltCPU),
+	.cs = 0x8, // Run in ring 0
+	.eflags = 0x202,
+	.esp = reinterpret_cast<uint32_t>(&HaltCPUStack[4*1024-1]),
+	.ss = 0x10
+};
+
+// The Interrupts handler
+// ======================
+
+extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
+{
+	const CPUState* newState;
 	LogInfo("Interrupt");
 
 // Debug print of interrupt state	
@@ -226,14 +273,55 @@ extern "C" CPUState* InterruptsHandler(CPUState* ptr)
 	LogInfo("   ss = %x", ptr->ss);
 #endif
 
+	Handler h = Handlers[ptr->interruptNumber];
+
+	if (ptr->interruptNumber == 14) {
+		uint32_t cr2;
+  __asm__ volatile( "mov %%cr2,%0"
+                  : "=a"(cr2));
+		LogWarning("Pagefault %x at %x", cr2, ptr->eip);
+	}
+
+	if (h) {
+		newState = h(ptr);
+	}
+	else {
+		panic("No handler present for interrupt #%x", ptr->interruptNumber);
+		newState = NULL;
+	}
+
+	if (ptr->interruptNumber < 0x20) {
+		panic("Exception");
+	}
+
 	if (ptr->interruptNumber >= 0x20)
 		outb(0x20,0x20);
+	// TODO: EOI for second pic
 
-	// ptr->eip = (uint32_t)&blub;
-	// ptr->eflags = 0x202;
-	// ptr->esp = (uint32_t)&stack_b;
-	
-	return ptr;
+	// TODO when ptr is NULL use halt cpu state
+	if (newState == NULL)
+		newState = &HaltCPUState;
+
+#if 0
+	LogInfo("  edi = %x", newState->edi);
+  	LogInfo("  esi = %x", newState->esi);
+	LogInfo("  edp = %x", newState->ebp);
+	LogInfo("  ebx = %x", newState->ebx);
+	LogInfo("  edx = %x", newState->edx);
+	LogInfo("  ecx = %x", newState->ecx);
+	LogInfo("  eax = %x", newState->eax);
+
+	LogInfo("    # = %x", newState->interruptNumber);
+	LogInfo(" code = %x", newState->errorCode);
+
+	LogInfo("  eip = %x", newState->eip);
+	LogInfo("   cs = %x", newState->cs);
+	LogInfo("eflags= %x", newState->eflags);
+	LogInfo("  esp = %x", newState->esp);
+	LogInfo("   ss = %x", newState->ss);
+#endif
+
+	return newState;
 }
 
 }

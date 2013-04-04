@@ -66,7 +66,7 @@ void MultibootInitializePhyMem(struct Multiboot* multiboot, offset_t phyOffset)
 		if (entry->type == 1) {
 			for (pointer_t address = (pointer_t)(uint32_t)entry->base_address; 
 			     address < (pointer_t)(uint32_t)(entry->base_address + entry->length);
-			     address += kPhyMemPageSize) {
+			     address = OFFSET(address, kPhyMemPageSize)) {
 				_PhyMemMarkFree(address);	
 			}
 		}

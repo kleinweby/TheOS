@@ -58,6 +58,11 @@ void SetupKernelContext()
 	// We need to fault this manually, as the fault handling code would not be present
 	region->fault();
 
+	// VGA
+	layer = new Layer(new FixedStore((page_t)0xB8000, 16*1024));
+	region = new Region(layer, 0xC00B8000, Permission::Read | Permission::Write, KernelContext);
+	region->fault();
+
 	ActivateContext(KernelContext);
 }
 

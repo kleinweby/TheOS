@@ -22,57 +22,16 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "Object.h"
+#include "Interrupts/Timer.h"
 
-#import "Error/Assert.h"
-#import "Memory/kalloc.h"
+namespace Timer {
 
-bool ObjectInit(void* _obj, void (*Dealloc)(void* ptr))
+void Initialize()
 {
-	assert(_obj != NULL);
-	assert(Dealloc != NULL);
-	
-	Object obj = _obj;
-	
-	obj->retainCount = 1;
-	obj->Dealloc = Dealloc;
-	
-	return true;
+	Native::Initialize();
 }
 
-Object _Retain(Object obj)
-{
-	assert(obj != NULL);
-	
-	int32_t rc;
-		
-	rc = __sync_add_and_fetch(&obj->retainCount, 1);
-	
-	//
-	// The retaincount must be greater than 1 because
-	// before it would be >=1 and we added one, so
-	// it must be > 1 now
-	//
-	assert(rc > 1);
-	
-	return obj;
-}
+Timer::~Timer()
+{}
 
-void _Release(Object obj)
-{
-	assert(obj != NULL);
-		
-	int32_t rc;
-		
-	rc = __sync_sub_and_fetch(&obj->retainCount, 1);
-		
-	//
-	// < 0 Would mean double free
-	//
-	assert(rc >= 0);
-	
-	if (rc == 0) {
-		obj->Dealloc(obj);
-		free(obj);
-	}
 }

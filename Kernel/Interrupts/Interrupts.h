@@ -26,8 +26,6 @@
 
 #include_next "Interrupts/Interrupts.h"
 
-//#include "Arch/x86/Interrupts/Interrupts.h"
-
 namespace Interrupts {
 
 namespace Native = Interrupts::X86;
@@ -36,7 +34,10 @@ void Initialize();
 
 // Import some native functions for easy access
 using Native::SetHandler;
+using Native::GetHandler;
 using Native::Enable;
 using Native::Disable;
+using Native::CPUState;
+using Native::Handler;
 
 }
