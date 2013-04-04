@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,42 +24,63 @@
 
 #pragma once
 
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/VariadicArguments.h>
+#import <CoreSystem/CommonTypes.h>
 
-#ifdef __cplusplus
-#include "Interrupts/Interrupts.h"
-#endif
+namespace Interrupts {
+namespace X86 {
 
-//
-// Causes the kernel to panic with a given message.
-//
-// Obviously this never returns
-//
-#ifdef __cplusplus
-extern "C" 
-#endif
-void panic(const char* message, ...) __attribute__((noreturn));
+typedef struct {
+	uint32_t edi;
+  	uint32_t esi;
+	uint32_t ebp;
+	uint32_t ebx;
+	uint32_t edx;
+	uint32_t ecx;
+	uint32_t eax;
 
-#ifdef __cplusplus
+	uint32_t interruptNumber;
+	uint32_t errorCode;
 
-//
-// This causes the kernel to panic with a given computed message and
-// cpu state. This will be called in some way be panic to capture the
-// cpu state.
-//
-void panic_state(const char* message, Interrupts::CPUState* cpuState, va_list args) __attribute__((noreturn));
+	uint32_t eip;
+	uint32_t cs;
+	uint32_t eflags;
+	uint32_t esp;
+	uint32_t ss;
+} CPUState;
 
 //
-// Panic drivers
-// =============
+// Handles an interrupt.
 //
-
-typedef void(*PanicDriver)(uint64_t timestamp, const char* message, Interrupts::CPUState* cpuState, va_list args);
+// It may return NULL to indicate that it want the cpu
+// to be halted.
+//
+typedef const CPUState* (*Handler)(const CPUState* cpuState);
 
 //
-// Use this macro on the top level to staticly register a panic driver at compile time
+// Initialize the subsystem but does not enable interrupts
+// (Exceptions may occour regardless)
 //
-#define PanicRegisterDriver(driver) PanicDriver PanicDriver_##driver __attribute__ ((section (".PanicDrivers"))) = &driver
+void Initialize();
 
-#endif
+//
+// Enables interrupts
+//
+void Enable();
+
+//
+// Disable interrupts
+//
+void Disable();
+
+//
+// Sets a handler for a given interrupt number
+//
+void SetHandler(uint16_t interruptNumber, Handler handler);
+
+//
+// Gets thee handler set for the given interrupt
+//
+Handler GetHandler(uint16_t interruptNumber);
+
+}
+}

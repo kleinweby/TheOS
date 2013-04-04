@@ -24,8 +24,10 @@
 
 #include "Panic.h"
 
+extern "C" {
 #include <CoreSystem/String.h>
 #include <CoreSystem/MachineInstructions.h>
+}
 
 static uint16_t *videoBuffer = (unsigned short *)0xC00B8000;
 static uint8_t width = 80;
@@ -49,6 +51,7 @@ static void VGAPutChar(char c)
 			break;
 		case '\n':
 			cursorPosition.y += 1;
+			[[clang::fallthrough]];
 		case '\r':
 			cursorPosition.x = 1;
 			break;
@@ -82,7 +85,7 @@ static void VGAClear()
 	outb(0x3D5, creg);
 }
 
-void PanicDriverVGA(uint64_t timestamp, const char* message, CPUState* cpuState, va_list args)
+void PanicDriverVGA(uint64_t timestamp, const char* message, Interrupts::CPUState* cpuState, va_list args)
 {
 	VGAClear();
 	

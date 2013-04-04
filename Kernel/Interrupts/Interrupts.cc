@@ -22,44 +22,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#pragma once
-
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/VariadicArguments.h>
-
-#ifdef __cplusplus
 #include "Interrupts/Interrupts.h"
-#endif
 
-//
-// Causes the kernel to panic with a given message.
-//
-// Obviously this never returns
-//
-#ifdef __cplusplus
-extern "C" 
-#endif
-void panic(const char* message, ...) __attribute__((noreturn));
+using namespace Interrupts;
 
-#ifdef __cplusplus
-
-//
-// This causes the kernel to panic with a given computed message and
-// cpu state. This will be called in some way be panic to capture the
-// cpu state.
-//
-void panic_state(const char* message, Interrupts::CPUState* cpuState, va_list args) __attribute__((noreturn));
-
-//
-// Panic drivers
-// =============
-//
-
-typedef void(*PanicDriver)(uint64_t timestamp, const char* message, Interrupts::CPUState* cpuState, va_list args);
-
-//
-// Use this macro on the top level to staticly register a panic driver at compile time
-//
-#define PanicRegisterDriver(driver) PanicDriver PanicDriver_##driver __attribute__ ((section (".PanicDrivers"))) = &driver
-
-#endif
+void Interrupts::Initialize()
+{
+	Native::Initialize();
+}

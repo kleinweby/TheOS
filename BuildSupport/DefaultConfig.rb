@@ -21,5 +21,5 @@ NASM    = 'nasm'
 
 OBJ_DIR = '.objs'
 
-DEFINES << '-D__PLATFORM_'+PLATFORM.upcase+'__'
+DEFINES << '-D__PLATFORM_'+PLATFORM.upcase+'__' << "-D__PLATFORM__=X86"
 CFLAGS << '-ggdb' << '-fno-builtin' << '-Werror' << '-Weverything'

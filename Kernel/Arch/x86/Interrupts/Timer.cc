@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,44 +22,75 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#pragma once
+#include "Interrupts/Timer.h"
 
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/VariadicArguments.h>
+#include <CoreSystem/MachineInstructions.h>
+#include "Logging/Logging.h"
 
-#ifdef __cplusplus
-#include "Interrupts/Interrupts.h"
-#endif
+namespace Timer {
+namespace X86 {
 
-//
-// Causes the kernel to panic with a given message.
-//
-// Obviously this never returns
-//
-#ifdef __cplusplus
-extern "C" 
-#endif
-void panic(const char* message, ...) __attribute__((noreturn));
+const uint16_t kPICInterruptNumber = 0x20;
+GlobalPtr<Timer> LocalTimer;
 
-#ifdef __cplusplus
+void Initialize()
+{
+	LocalTimer = new PIT();
+}
 
-//
-// This causes the kernel to panic with a given computed message and
-// cpu state. This will be called in some way be panic to capture the
-// cpu state.
-//
-void panic_state(const char* message, Interrupts::CPUState* cpuState, va_list args) __attribute__((noreturn));
+Ptr<Timer> GetLocalTimer()
+{
+	return LocalTimer;
+}
 
-//
-// Panic drivers
-// =============
-//
+PIT::PIT()
+{
+	//
+	// 0x43 is the config port for the PIT
+	//
+	// Config value:
+	//  bit 0 - 0 binary format
+	//  bit 1-3 - 0 One shot counter
+	//  bit 4-5 - 11b first LSB then MSB
+	//  bit 6-7 - 0 Channel 0
+	//
+	outb(0x43, 0x30);
+}
 
-typedef void(*PanicDriver)(uint64_t timestamp, const char* message, Interrupts::CPUState* cpuState, va_list args);
+PIT::~PIT()
+{
+	// Disable the timer
+	this->setTicks(0);
+	// Remove the handler
+	this->setHandler(NULL);
+}
 
-//
-// Use this macro on the top level to staticly register a panic driver at compile time
-//
-#define PanicRegisterDriver(driver) PanicDriver PanicDriver_##driver __attribute__ ((section (".PanicDrivers"))) = &driver
+Interrupts::Handler PIT::getHandler() const
+{
+	return Interrupts::GetHandler(kPICInterruptNumber);
+}
 
-#endif
+void PIT::setHandler(Interrupts::Handler handler)
+{
+	Interrupts::SetHandler(kPICInterruptNumber, handler);
+}
+
+uint32_t PIT::getTicks() const
+{
+	// Can we read from port 0x40?
+	return 0;
+}
+
+void PIT::setTicks(uint32_t ticks)
+{
+	if (ticks > kUInt16Max) {
+		LogWarning("PIT asked to interrupt in %d ticks, clapped to %d", ticks, kUInt16Max);
+		ticks = kUInt16Max;
+	}
+
+	outb(0x40, ticks & 0xFF);
+	outb(0x40, (ticks >> 8) &0xFF);
+}
+
+}
+}

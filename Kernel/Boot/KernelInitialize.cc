@@ -27,9 +27,14 @@
 #include "Memory/PhyMem.h"
 #import "Memory/kalloc.h"
 #import "VM/VM.h"
+#include "Interrupts/Interrupts.h"
+#include "Interrupts/Timer.h"
 
 #import "KernelInfo.h"
 #import "Bootstrap.h"
+
+#include <CoreSystem/MachineInstructions.h>
+
 
 // This is the initial heap we use until we've
 // got a real heap.
@@ -37,10 +42,18 @@
 // Note: Heap is still valid, after boot up
 char StartupHeap[4*1024];
 
+const Interrupts::CPUState* TimerInterrupt(const Interrupts::CPUState* state) {
+	LogInfo("Blub");
+	Timer::GetLocalTimer()->setTicks(1193182);
+	return state;
+}
+
 extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
 	LoggingInitialize();
 	
+	Interrupts::Initialize();
+
 	// This will also make a temporary bootstrap mapping
 	MultibootAdjust(header, KERNEL_LOAD_ADDRESS);
 	
@@ -55,7 +68,23 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	VM::Initialize();
 	BootstrapRelease();
+	Timer::Initialize();
 	
 	LogInfo("booted");
 	LogPhyMem();
+
+	Timer::GetLocalTimer()->setHandler(TimerInterrupt);
+
+   	Interrupts::Enable();
+
+	for(;;) {
+		//LogInfo("Interrupts %i", interruptCount);
+		Halt();
+		// if (interruptCount > 50) {
+		// 	// for(uint32_t j = 0; j < kUInt32Max - 1; j++) {
+		// 	// }
+
+		// 	LogInfo("Done");
+		// }
+	}
 }

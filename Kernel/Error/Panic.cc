@@ -24,41 +24,35 @@
 
 #include "Panic.h"
 
+#include "LinkerHelper.h"
+
 #include <CoreSystem/MachineInstructions.h>
-#include <CoreSystem/String.h>
 
-static void SerialWrite(uint16_t base, char chr) {
-  while ((inb(base+5)&0x20)==0);
-  outb(base,(uint8_t)chr);
+LINKER_SYMBOL(PanicDrivers, PanicDriver*);
+LINKER_SYMBOL(PanicDriversLength, uint32_t);
+
+void panic(const char* message, ...)
+{
+	Interrupts::CPUState state;
+	va_list args;
+	va_start(args, message);
+	panic_state(message, &state, args);
+	va_end(args);
 }
 
-static void SerialPutchar(char chr) {
-	SerialWrite(0x3F8, chr);
-}
-
-void PanicDriverSerial(uint64_t timestamp, const char* message, CPUState* cpuState, va_list args)
-{	
-	pprintf(SerialPutchar, "\033[0;37m[%10d]\033[1;31m[F] Panic\033[0m\n", (uint32_t)timestamp);
-	pprintf(SerialPutchar, "Message:");
-	vpprintf(SerialPutchar, message, args);
+void panic_state(const char* message, Interrupts::CPUState* cpuState, va_list args)
+{
+	// Prevent any futher interrupts from waking up the kernel
+	DisableInterrupts();
 	
-	if (cpuState) {
-		pprintf(SerialPutchar, "CPU State:\n");
-		pprintf(SerialPutchar, "    eax =  %08x\n", cpuState->eax);
-		pprintf(SerialPutchar, "    ebx =  %08x\n", cpuState->ebx);
-		pprintf(SerialPutchar, "    ecx =  %08x\n", cpuState->ecx);
-		pprintf(SerialPutchar, "    edx =  %08x\n", cpuState->edx);
-		pprintf(SerialPutchar, "    ebp =  %08x\n", cpuState->ebp);
-		pprintf(SerialPutchar, "    esi =  %08x\n", cpuState->esi);
-		pprintf(SerialPutchar, "    edi =  %08x\n", cpuState->edi);
-		pprintf(SerialPutchar, "    eip = %p\n", cpuState->eip);
-		pprintf(SerialPutchar, "     cs =  %08x\n", cpuState->cs);
-		pprintf(SerialPutchar, " eflags =  %08x\n", cpuState->eflags);
-		pprintf(SerialPutchar, "    esp =  %08x\n", cpuState->esp);
-		pprintf(SerialPutchar, "    ss  =  %08x\n\n", cpuState->ss);
-		
-		pprintf(SerialPutchar, "Backtrace:\n");
-	}
-}
+	uint64_t timestamp = TimeStampCounter() >> 24;
+	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
 
-PanicRegisterDriver(PanicDriverSerial);
+	for (uint32_t i = 0; i < count; i++) {
+		PanicDrivers[i](timestamp, message, cpuState, args);
+	}
+	
+	// Halt the kernel
+	while(true)
+		Halt();
+}

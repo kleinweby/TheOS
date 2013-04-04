@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,44 +22,25 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#pragma once
+#include "Interrupts/Timer.h"
 
-#include <CoreSystem/CommonTypes.h>
-#include <CoreSystem/VariadicArguments.h>
+namespace Timer {
+namespace X86 {
 
-#ifdef __cplusplus
-#include "Interrupts/Interrupts.h"
-#endif
+void Initialize();
 
-//
-// Causes the kernel to panic with a given message.
-//
-// Obviously this never returns
-//
-#ifdef __cplusplus
-extern "C" 
-#endif
-void panic(const char* message, ...) __attribute__((noreturn));
+Ptr<Timer> GetLocalTimer();
 
-#ifdef __cplusplus
+class PIT: public Timer {
+public:
+	PIT();
+	virtual ~PIT();
 
-//
-// This causes the kernel to panic with a given computed message and
-// cpu state. This will be called in some way be panic to capture the
-// cpu state.
-//
-void panic_state(const char* message, Interrupts::CPUState* cpuState, va_list args) __attribute__((noreturn));
+	virtual Interrupts::Handler getHandler() const;
+	virtual void setHandler(Interrupts::Handler handler);
+	virtual uint32_t getTicks() const;
+	virtual void setTicks(uint32_t ticks);
+};
 
-//
-// Panic drivers
-// =============
-//
-
-typedef void(*PanicDriver)(uint64_t timestamp, const char* message, Interrupts::CPUState* cpuState, va_list args);
-
-//
-// Use this macro on the top level to staticly register a panic driver at compile time
-//
-#define PanicRegisterDriver(driver) PanicDriver PanicDriver_##driver __attribute__ ((section (".PanicDrivers"))) = &driver
-
-#endif
+}
+}

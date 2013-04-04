@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012, Christian Speich
+// Copyright (c) 2013, Christian Speich
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,37 +22,59 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Panic.h"
+#pragma once
 
-#include "LinkerHelper.h"
+#include "Utils/KObject.h"
 
-#include <CoreSystem/MachineInstructions.h>
+#include "Interrupts/Interrupts.h"
 
-LINKER_SYMBOL(PanicDrivers, PanicDriver*);
-LINKER_SYMBOL(PanicDriversLength, uint32_t);
+namespace Timer {
 
-void panic(const char* message, ...)
-{
-	CPUState state;
-	va_list args;
-	va_start(args, message);
-	panic_state(message, &state, args);
-	va_end(args);
+
+//
+// Initialize the Timer subsystem
+//
+void Initialize();
+
+//
+// Timers will always be oneshot as they are
+// intended for scheduling purposes
+//
+class Timer : public KObject {
+public:
+	virtual ~Timer();
+
+	// Gets the current set handler
+	virtual Interrupts::Handler getHandler() const = 0;
+
+	// Sets the handler for timer interrupts
+	virtual void setHandler(Interrupts::Handler handler) = 0;
+
+	// Get the remaining ticks until the timer fires
+	// TODO: Implement some sort of universal time thingy here
+	virtual uint32_t getTicks() const = 0;
+
+	// Set the ticks until the timer fires
+	// Note: will enable the timer
+	// Setting a value of 0 results in disabling the timer
+	virtual void setTicks(uint32_t ticks) = 0;
+};
+
 }
 
-void panic_state(const char* message, CPUState* cpuState, va_list args)
-{
-	// Prevent any futher interrupts from waking up the kernel
-	DisableInterrupts();
-	
-	uint64_t timestamp = TimeStampCounter() >> 24;
-	uint32_t count = PanicDriversLength/sizeof(PanicDriver);
+#include_next "Interrupts/Timer.h"
 
-	for (uint32_t i = 0; i < count; i++) {
-		PanicDrivers[i](timestamp, message, cpuState, args);
-	}
-	
-	// Halt the kernel
-	while(true)
-		Halt();
+namespace Timer {
+
+// Import the platform timer namespace
+namespace Native = __PLATFORM__;
+
+//
+// Use this Timer object for scheduling timer interrupts
+//
+// It will always be local to the current cpu
+//
+using Native::GetLocalTimer;
+
 }
+

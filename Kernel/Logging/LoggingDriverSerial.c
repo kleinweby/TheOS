@@ -60,10 +60,10 @@ void LoggingDriverSerial(const char* function, const char* filename, uint32_t li
 			level = "\033[0;34m[I]\033[0m";
 			break;
 		case kLogLevelVerbose:
-			level = "\033[0;34m[V]\033[0m";
+			level = "\033[0;32m[V]\033[0m";
 			break;
 		case kLogLevelTrace:
-			level = "\033[0;34m[T]\033[0m";
+			level = "\033[0;32m[T]\033[0m";
 			break;
 	}
 
