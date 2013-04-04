@@ -92,7 +92,7 @@ BootstrapASMHighEntry:
 	hlt
 	jmp .loop
 
-[section .rodata]
+[section .data]
 GDTHeader:
 	; Size of the gdt
 	dw GDTEnd - GDT - 1
@@ -112,7 +112,12 @@ GDT:
 	; code selector 0x08: base 0x0, limit 0xFFFFFFFF, type 0x9A, granularity 0xCF
 	db 0xFF, 0xFF, 0, 0, 0, 11111010b, 11001111b, 0x0
 	; data selector 0x10: base 0x0, limit 0xFFFFFFFF, type 0x92, granularity 0xCF
-	db 0xFF, 0xFF, 0, 0 , 0, 11110010b, 11001111b, 0x0
+	db 0xFF, 0xFF, 0, 0, 0, 11110010b, 11001111b, 0x0
+; TSS
+[global GDTEntryTSS]
+GDTEntryTSS:
+	; selector: 0x28
+	dd 0,0
 GDTEnd:
 
 [section .bss]

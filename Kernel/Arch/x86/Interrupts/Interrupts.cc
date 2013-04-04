@@ -59,6 +59,53 @@ struct _IDTHeader {
 
 static_assert(sizeof(struct _IDTHeader) == 6, "IDT Header was packed wrong");
 
+struct TSS
+{
+   uint32_t prev_tss; 
+   uint32_t esp0; // Kernel stack
+   uint32_t ss0;  // kernel stack segment
+   uint32_t esp1;
+   uint32_t ss1;
+   uint32_t esp2;
+   uint32_t ss2;
+   uint32_t cr3;
+   uint32_t eip;
+   uint32_t eflags;
+   uint32_t eax;
+   uint32_t ecx;
+   uint32_t edx;
+   uint32_t ebx;
+   uint32_t esp;
+   uint32_t ebp;
+   uint32_t esi;
+   uint32_t edi;
+   uint32_t es;         
+   uint32_t cs;        
+   uint32_t ss;        
+   uint32_t ds;        
+   uint32_t fs;       
+   uint32_t gs;         
+   uint32_t ldt;      
+   uint16_t trap;
+   uint16_t iomap_base;
+} __attribute__((packed));
+
+struct GDTEntry {
+	uint16_t limitLow;
+	uint32_t baseLow:24;
+	uint8_t access;
+	uint8_t limitHigh:4;
+	uint8_t flags:4;
+	uint8_t baseHigh;
+} __attribute__((packed));
+
+static_assert(sizeof(struct GDTEntry) == 8, "GDT Entry was packed wrong");
+
+extern "C" struct GDTEntry GDTEntryTSS;
+TSS tss;
+
+extern "C" void InterruptsLOADTSS();
+
 static const uint8_t kInterruptsCount = 48;
 
 Handler Handlers[kInterruptsCount];
@@ -190,6 +237,22 @@ void Initialize()
 	// Enable IRQs
 	outb(0x20, 0x00);
 	outb(0xa0, 0x00);
+
+	// Setup TSS
+	LogInfo("tss entyr %p", &GDTEntryTSS);
+	GDTEntryTSS.access = 0xE9; 
+	GDTEntryTSS.flags = 0x4;
+	GDTEntryTSS.baseLow =   reinterpret_cast<uint32_t>(&tss)        & 0xFFFFFF;
+	GDTEntryTSS.baseHigh = (reinterpret_cast<uint32_t>(&tss) >> 24) & 0xFF;
+	GDTEntryTSS.limitLow =   sizeof(tss)        & 0xFFFF;
+	GDTEntryTSS.limitHigh = (sizeof(tss) >> 16) & 0xF;
+
+	tss.esp0 = 0x0;
+	tss.ss0 = 0x10;
+	tss.iomap_base = sizeof(tss);
+
+	// Load tss
+	InterruptsLOADTSS();
 }
 
 void Enable()
@@ -210,6 +273,16 @@ void SetHandler(uint16_t interruptNumber, Handler handler)
 Handler GetHandler(uint16_t interruptNumber)
 {
 	return Handlers[interruptNumber];
+}
+
+void SetKernelStack(uint32_t stack)
+{
+	tss.esp0 = stack;
+}
+
+uint32_t GetKernelStack()
+{
+	return tss.esp0;
 }
 
 // The Halt CPU State

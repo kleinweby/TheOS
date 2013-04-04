@@ -82,5 +82,15 @@ void SetHandler(uint16_t interruptNumber, Handler handler);
 //
 Handler GetHandler(uint16_t interruptNumber);
 
+//
+// Sets the kernel stack to use when interrupts fires
+//
+void SetKernelStack(uint32_t stack);
+
+//
+// Gets kernel stack
+//
+uint32_t GetKernelStack();
+
 }
 }
