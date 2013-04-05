@@ -58,6 +58,12 @@ public:
 	// Note: will enable the timer
 	// Setting a value of 0 results in disabling the timer
 	virtual void setTicks(uint32_t ticks) = 0;
+
+	// Enable the timer
+	virtual void enable() = 0;
+
+	// Disable the timer
+	virtual void disable() = 0;
 };
 
 }

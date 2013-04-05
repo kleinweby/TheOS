@@ -90,6 +90,17 @@ void PIT::setTicks(uint32_t ticks)
 
 	outb(0x40, ticks & 0xFF);
 	outb(0x40, (ticks >> 8) &0xFF);
+	this->enable();
+}
+
+void PIT::enable()
+{
+	Interrupts::UnmaskIRQ(kPICIRQNumber);
+}
+
+void PIT::disable()
+{
+	Interrupts::MaskIRQ(kPICIRQNumber);
 }
 
 }

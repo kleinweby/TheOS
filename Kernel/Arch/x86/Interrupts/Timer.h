@@ -40,6 +40,8 @@ public:
 	virtual void setHandler(Interrupts::Handler handler);
 	virtual uint32_t getTicks() const;
 	virtual void setTicks(uint32_t ticks);
+	virtual void enable();
+	virtual void disable();
 };
 
 }

@@ -88,6 +88,26 @@ Handler GetExceptionHandler(uint16_t exceptionNumber);
 void SetIRQHandler(uint16_t irqNumber, Handler handler);
 
 //
+// Masks a irq
+//
+void MaskIRQ(uint16_t irqNumber);
+
+//
+// Unmask a irq
+//
+void UnmaskIRQ(uint16_t irqNumber);
+
+//
+// Gets the IRQ Mask
+//
+uint32_t GetIRQMask();
+
+//
+// Sets the IRQ Mask
+//
+void SetIRQMask(uint32_t mask);
+
+//
 // Gets thee handler set for a given irq
 //
 Handler GetIRQHandler(uint16_t irqNumber);

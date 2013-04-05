@@ -41,5 +41,7 @@ using Native::Enable;
 using Native::Disable;
 using Native::CPUState;
 using Native::Handler;
+using Native::MaskIRQ;
+using Native::UnmaskIRQ;
 
 }

@@ -43,12 +43,6 @@
 // Note: Heap is still valid, after boot up
 char StartupHeap[4*1024];
 
-const Interrupts::CPUState* TimerInterrupt(const Interrupts::CPUState* state) {
-	LogInfo("Blub");
-	Timer::GetLocalTimer()->setTicks(1193182);
-	return state;
-}
-
 extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 {	
 	LoggingInitialize();
@@ -73,8 +67,6 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	
 	LogInfo("booted");
 	LogPhyMem();
-
-	Timer::GetLocalTimer()->setHandler(TimerInterrupt);
 
    	Interrupts::Enable();
 

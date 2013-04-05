@@ -234,9 +234,8 @@ void Initialize()
 	// Load IDT
  	InterruptsLoadIDT();
   
-	// Enable IRQs
-	outb(0x20, 0x00);
-	outb(0xa0, 0x00);
+	// Mask all irqs
+	SetIRQMask(kUInt32Max);
 
 	// Setup TSS
 	GDTEntryTSS.access = 0xE9; 
@@ -282,6 +281,43 @@ void SetIRQHandler(uint16_t irqNumber, Handler handler)
 Handler GetIRQHandler(uint16_t irqNumber)
 {
 	return Handlers[0x20 + irqNumber];
+}
+
+void MaskIRQ(uint16_t irqNumber)
+{
+	uint8_t port = 0x21;
+	uint8_t mask;
+
+	if (irqNumber >= 8) {
+		port = 0xA1;
+		irqNumber -= 8;
+	}
+
+	outb(port, inb(port) & (1 << irqNumber));
+}
+
+void UnmaskIRQ(uint16_t irqNumber)
+{
+	uint8_t port = 0x21;
+	uint8_t mask;
+
+	if (irqNumber >= 8) {
+		port = 0xA1;
+		irqNumber -= 8;
+	}
+
+	outb(port, inb(port) & ~(1 << irqNumber));
+}
+
+uint32_t GetIRQMask()
+{
+	return (uint32_t)(inb(0xA1) << 8 | inb(0x21));
+}
+
+void SetIRQMask(uint32_t mask)
+{
+	outb(0x21,  mask       & 0xFF);
+	outb(0xA1, (mask >> 8) & 0xFF);
 }
 
 void SetKernelStack(uint32_t stack)
