@@ -239,7 +239,6 @@ void Initialize()
 	outb(0xa0, 0x00);
 
 	// Setup TSS
-	LogInfo("tss entyr %p", &GDTEntryTSS);
 	GDTEntryTSS.access = 0xE9; 
 	GDTEntryTSS.flags = 0x4;
 	GDTEntryTSS.baseLow =   reinterpret_cast<uint32_t>(&tss)        & 0xFFFFFF;
@@ -265,14 +264,24 @@ void Disable()
 	DisableInterrupts();
 }
 
-void SetHandler(uint16_t interruptNumber, Handler handler)
+void SetExceptionHandler(uint16_t exceptionNumber, Handler handler)
 {
-	Handlers[interruptNumber] = handler;
+	Handlers[exceptionNumber] = handler;
 }
 
-Handler GetHandler(uint16_t interruptNumber)
+Handler GetExceptionHandler(uint16_t exceptionNumber)
 {
-	return Handlers[interruptNumber];
+	return Handlers[exceptionNumber];
+}
+
+void SetIRQHandler(uint16_t irqNumber, Handler handler)
+{
+	Handlers[0x20 + irqNumber] = handler;
+}
+
+Handler GetIRQHandler(uint16_t irqNumber)
+{
+	return Handlers[0x20 + irqNumber];
 }
 
 void SetKernelStack(uint32_t stack)
@@ -308,7 +317,7 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 	LogInfo("Interrupt");
 
 // Debug print of interrupt state	
-#if 1
+#if 0
 	LogInfo("  edi = %x", ptr->edi);
   	LogInfo("  esi = %x", ptr->esi);
 	LogInfo("  edp = %x", ptr->ebp);
@@ -376,7 +385,7 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 		}
 	}
 
-#if 1
+#if 0
 	LogInfo("  edi = %x", newState->edi);
   	LogInfo("  esi = %x", newState->esi);
 	LogInfo("  edp = %x", newState->ebp);

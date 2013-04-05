@@ -30,7 +30,7 @@
 namespace Timer {
 namespace X86 {
 
-const uint16_t kPICInterruptNumber = 0x20;
+const uint16_t kPICIRQNumber = 0x0;
 GlobalPtr<Timer> LocalTimer;
 
 void Initialize()
@@ -67,12 +67,12 @@ PIT::~PIT()
 
 Interrupts::Handler PIT::getHandler() const
 {
-	return Interrupts::GetHandler(kPICInterruptNumber);
+	return Interrupts::GetIRQHandler(kPICIRQNumber);
 }
 
 void PIT::setHandler(Interrupts::Handler handler)
 {
-	Interrupts::SetHandler(kPICInterruptNumber, handler);
+	Interrupts::SetIRQHandler(kPICIRQNumber, handler);
 }
 
 uint32_t PIT::getTicks() const

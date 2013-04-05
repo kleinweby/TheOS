@@ -33,8 +33,10 @@ namespace Native = __PLATFORM__;
 void Initialize();
 
 // Import some native functions for easy access
-using Native::SetHandler;
-using Native::GetHandler;
+using Native::SetIRQHandler;
+using Native::GetIRQHandler;
+using Native::SetExceptionHandler;
+using Native::GetExceptionHandler;
 using Native::Enable;
 using Native::Disable;
 using Native::CPUState;

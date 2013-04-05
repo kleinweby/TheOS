@@ -43,6 +43,7 @@ Scheduler::Scheduler()
 
 	this->timer = Timer::GetLocalTimer();
 	this->timer->setHandler(schedule_helper);
+	this->timer->setTicks(kUInt16Max);
 }
 Scheduler::~Scheduler()
 {
@@ -101,10 +102,12 @@ const Interrupts::CPUState* Scheduler::schedule(const Interrupts::CPUState* stat
 
 		this->nextItem = this->nextItem->next;
 
+		this->timer->setTicks(kUInt16Max);
 		return item->thread->getCPUState();
 	}
 	else {
 		LogInfo("Schedule Halt");
+		this->timer->setTicks(kUInt16Max);
 		return NULL;
 	}
 }

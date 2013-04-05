@@ -73,14 +73,24 @@ void Enable();
 void Disable();
 
 //
-// Sets a handler for a given interrupt number
+// Sets a handler for a given exception
 //
-void SetHandler(uint16_t interruptNumber, Handler handler);
+void SetExceptionHandler(uint16_t exceptionNumber, Handler handler);
 
 //
-// Gets thee handler set for the given interrupt
+// Gets thee handler set for a given exception
 //
-Handler GetHandler(uint16_t interruptNumber);
+Handler GetExceptionHandler(uint16_t exceptionNumber);
+
+//
+// Sets a handler for a given irq
+//
+void SetIRQHandler(uint16_t irqNumber, Handler handler);
+
+//
+// Gets thee handler set for a given irq
+//
+Handler GetIRQHandler(uint16_t irqNumber);
 
 //
 // Sets the kernel stack to use when interrupts fires
