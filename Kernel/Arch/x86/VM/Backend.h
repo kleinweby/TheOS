@@ -57,7 +57,7 @@ protected:
 	void mapPageDirectory(page_t paddr, pointer_t vaddr);
 
 	// Overrided from abstract superclass
-	virtual bool map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options);
+	virtual bool map(page_t paddr, pointer_t vaddr, Permission permissions, VMBackendMapOptions options);
 	virtual bool unmap(pointer_t vaddr);
 	virtual page_t translate(pointer_t vaddr);
 	virtual void activate();

@@ -29,6 +29,7 @@
 #include "VM/VM.h"
 #include "Interrupts/Interrupts.h"
 #include "Interrupts/Timer.h"
+#include "Process/Scheduler.h"
 
 #include "KernelInfo.h"
 #include "Bootstrap.h"
@@ -76,6 +77,8 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	Timer::GetLocalTimer()->setHandler(TimerInterrupt);
 
    	Interrupts::Enable();
+
+   	new Process::Scheduler();
 
 	for(;;) {
 		//LogInfo("Interrupts %i", interruptCount);

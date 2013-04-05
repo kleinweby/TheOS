@@ -51,7 +51,7 @@ void Initialize()
 {
 	Native::Initialize();
 	
-	LogVerbose("Create initial mapping...");
+	LogVerbose("VM subsystem initialized.");
 }
 
 //

@@ -299,25 +299,6 @@ void HaltCPU()
 	}
 }
 
-CPUState HaltCPUState {
-	.edi = 0xBADBEEF,
-  	.esi = 0xBADBEEF,
-	.ebp = 0xBADBEEF,
-	.ebx = 0xBADBEEF,
-	.edx = 0xBADBEEF,
-	.ecx = 0xBADBEEF,
-	.eax = 0xBADBEEF,
-
-	.interruptNumber = 0x0,
-	.errorCode = 0x0,
-
-	.eip = reinterpret_cast<uint32_t>(&HaltCPU),
-	.cs = 0x8, // Run in ring 0
-	.eflags = 0x202,
-	.esp = reinterpret_cast<uint32_t>(&HaltCPUStack[4*1024-1]),
-	.ss = 0x10
-};
-
 // The Interrupts handler
 // ======================
 
@@ -327,7 +308,7 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 	LogInfo("Interrupt");
 
 // Debug print of interrupt state	
-#if 0
+#if 1
 	LogInfo("  edi = %x", ptr->edi);
   	LogInfo("  esi = %x", ptr->esi);
 	LogInfo("  edp = %x", ptr->ebp);
@@ -372,10 +353,30 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 	// TODO: EOI for second pic
 
 	// TODO when ptr is NULL use halt cpu state
-	if (newState == NULL)
-		newState = &HaltCPUState;
+	if (newState == NULL) {
+		newState = reinterpret_cast<CPUState*>(OFFSET(&HaltCPUStack[4*1024-1], -sizeof(CPUState)));
+		{
+			CPUState* state = const_cast<CPUState*>(newState);
+			state->edi = 0xBADBEEF;
+			state->esi = 0xBADBEEF;
+			state->ebp = 0xBADBEEF;
+			state->ebx = 0xBADBEEF;
+			state->edx = 0xBADBEEF;
+			state->ecx = 0xBADBEEF;
+			state->eax = 0xBADBEEF;
 
-#if 0
+			state->interruptNumber = 0x0;
+			state->errorCode = 0x0;
+
+			state->eip = reinterpret_cast<uint32_t>(&HaltCPU);
+			state->cs = 0x8; // Run in ring 0
+			state->eflags = 0x202;
+			state->esp = reinterpret_cast<uint32_t>(&HaltCPUStack[4*1024-1]);
+			state->ss = 0x10;
+		}
+	}
+
+#if 1
 	LogInfo("  edi = %x", newState->edi);
   	LogInfo("  esi = %x", newState->esi);
 	LogInfo("  edp = %x", newState->ebp);

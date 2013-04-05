@@ -123,7 +123,7 @@ Context::Context(VMBackendMapOptions options, bool initialize) : VM::Backend::Co
 	}
 }
 
-bool Context::map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options)
+bool Context::map(page_t paddr, pointer_t vaddr, Permission permissions, VMBackendMapOptions options)
 {
 	assert(vaddr > (pointer_t)0x0); // Don't map 0x0
 	assert(paddr != kPhyInvalidPage);
@@ -137,6 +137,9 @@ bool Context::map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options)
 	
 	this->beginAccess();
 	
+	if (permissions & Permission::Write)
+		options |= VMBackendOptionWriteable;
+
 	uint32_t tableIndex = tableIndexFromAddress(vaddr);
 	
 	// Table is not present, must create it now
@@ -275,7 +278,7 @@ void Context::activate()
 	"mov %%eax, %%cr3\n" :: "m" (this->paddrPageDirectory));
 }
 
-KernelContext::KernelContext() : Context(VMBackendOptionGlobal|VMBackendOptionWriteable, false)
+KernelContext::KernelContext() : Context(VMBackendOptionGlobal, false)
 {	
 	this->pageTablesBase = (PageTable*)0xFFC00000;
 	this->pageDirectory = (PageDirectory*)0xFFFFF000;

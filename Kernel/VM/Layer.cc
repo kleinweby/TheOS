@@ -68,7 +68,7 @@ bool Layer::handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> regi
 			panic("Not implemented");
 		
 		if (paddr != kPhyInvalidPage) {
-			backend->map(paddr, (pointer_t)(vaddr + region->getOffset()), 0);
+			backend->map(paddr, (pointer_t)(vaddr + region->getOffset()), permissions, 0);
 		
 			return true;
 		}

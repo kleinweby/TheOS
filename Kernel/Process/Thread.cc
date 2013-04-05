@@ -45,9 +45,9 @@ Thread::~Thread()
 {
 }
 
-void Thread::setCPUState(Interrupts::CPUState* _state)
+void Thread::setCPUState(const Interrupts::CPUState* _state)
 {
-	memcpy(_state, &this->cpuState, sizeof(Interrupts::CPUState));
+	memcpy(&this->cpuState, _state, sizeof(Interrupts::CPUState));
 }
 
 const Interrupts::CPUState* Thread::getCPUState() const

@@ -28,6 +28,7 @@
 
 #include "Utils/KObject.h"
 #include "Memory/PhyMem.h"
+#include "VM/Permission.h"
 
 namespace VM {
 namespace Backend {
@@ -111,7 +112,7 @@ public:
 	// @param options The options for this mapping. (0=default)
 	// @returns YES if successfull, otherwise NO
 	//
-	virtual bool map(page_t paddr, pointer_t vaddr, VMBackendMapOptions options) = 0;
+	virtual bool map(page_t paddr, pointer_t vaddr, Permission permissions, VMBackendMapOptions options) = 0;
 	
 	//
 	// Unmaps a given vaddr in the context.

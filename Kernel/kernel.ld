@@ -24,23 +24,21 @@ SECTIONS
    PROVIDE_HIDDEN(_KernelOffset = .);
    . += 0xC0000000;
 
-   PROVIDE_HIDDEN(_KernelTextOffset = .);
+   PROVIDE_HIDDEN(_KernelTextOffset = (. - 0xC0000000));
    .text : AT(ADDR(.text) - 0xC0000000) {
       *(.text)
+      *(.text.*)
    }
+
+   . = ALIGN(0x1000);
    PROVIDE_HIDDEN(_KernelTextLength = (. - 0xC0000000) - _KernelTextOffset);
-   
-   PROVIDE_HIDDEN(_KernelDataOffset = .);
-   .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
-      *(.data)
-   }
+   PROVIDE_HIDDEN(_KernelRODataOffset = (. - 0xC0000000));
+
    .rodata ALIGN(4096) : AT(ADDR(.rodata) - 0xC0000000) {
       *(.rodata)
+      *(.rodata.*)
    }
-   .bss ALIGN(4096) :  AT(ADDR(.bss) - 0xC0000000) {
-     *(.bss)
-   }
-   
+
    /* Support for staticly declaring logging drivers */
    .LoggingDrivers : {
       KEEP(*(.LoggingDrivers.*))
@@ -56,6 +54,17 @@ SECTIONS
    }
    PROVIDE_HIDDEN(_PanicDrivers = ADDR(.PanicDrivers));
    PROVIDE_HIDDEN(_PanicDriversLength = SIZEOF(.PanicDrivers));
+
+   . = ALIGN(0x1000);
+   PROVIDE_HIDDEN(_KernelRODataLength = (. - 0xC0000000) - _KernelRODataOffset);
+   PROVIDE_HIDDEN(_KernelDataOffset = (. - 0xC0000000));
+   .data ALIGN(4096) : AT(ADDR(.data) - 0xC0000000) {
+      *(.data)
+      *(.data.*)
+   }
+   .bss ALIGN(4096) :  AT(ADDR(.bss) - 0xC0000000) {
+     *(.bss)
+   }
    
    . = ALIGN(0x1000);
    PROVIDE_HIDDEN(_KernelDataLength = (. - 0xC0000000) - _KernelDataOffset);

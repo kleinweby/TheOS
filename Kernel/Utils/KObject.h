@@ -74,6 +74,11 @@ public:
 			other->Retain();
 		this->object = *other;
 	}
+
+	bool operator==(GlobalPtr<T> other)
+	{
+		return this->object == *other;
+	}
 	
 	T* operator*() const
 	{

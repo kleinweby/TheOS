@@ -59,14 +59,14 @@ class Thread : public KObject
 	Interrupts::CPUState cpuState;
 	// Weak pointer to holding process
 	Process* process;
-
+	// The state this thread is in
 	ThreadState state;
 public:
 	Thread(uint32_t entryPoint, size_t stackSize, Ptr<Process> process);
 	virtual ~Thread();
 
 	// Saves the cpu state of this thread
-	void setCPUState(Interrupts::CPUState* state);
+	void setCPUState(const Interrupts::CPUState* state);
 	// Gets the cpu state of this thread
 	const Interrupts::CPUState* getCPUState() const;
 

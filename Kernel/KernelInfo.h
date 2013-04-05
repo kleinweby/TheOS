@@ -60,6 +60,15 @@ LINKER_SYMBOL(KernelLength, offset_t);
 // when the vm subsystem is up and running
 LINKER_SYMBOL(KernelBootstrapOffset, pointer_t);
 LINKER_SYMBOL(KernelBootstrapLength, offset_t);
+// The Text Section
+LINKER_SYMBOL(KernelTextOffset, pointer_t);
+LINKER_SYMBOL(KernelTextLength, offset_t);
+// The Data Section
+LINKER_SYMBOL(KernelDataOffset, pointer_t);
+LINKER_SYMBOL(KernelDataLength, offset_t);
+// The .rodata section
+LINKER_SYMBOL(KernelRODataOffset, pointer_t);
+LINKER_SYMBOL(KernelRODataLength, offset_t);
 
 #ifdef __cplusplus
 }

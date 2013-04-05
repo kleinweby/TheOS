@@ -49,13 +49,23 @@ void SetupKernelContext()
 	KernelContext = new Context(Backend::GetKernelContext());
 	Ptr<Layer> layer;
 	Ptr<Region> region;
-	
-	// TODO: we should make different regions, for text, data, rodata etc.
+
+	// Text Section
 	// Create a layer with the parts the bootloader loaded for us
-	layer = new Layer(new FixedStore(KernelOffset, KernelLength/kPhyMemPageSize));
+	layer = new Layer(new FixedStore(KernelTextOffset, KernelTextLength/kPhyMemPageSize));
 	// And create a region in the kernel context
-	region = new Region(layer, (offset_t)KernelOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
+	region = new Region(layer, (offset_t)KernelTextOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Execute, KernelContext);
 	// We need to fault this manually, as the fault handling code would not be present
+	region->fault();
+
+	// Data section
+	layer = new Layer(new FixedStore(KernelDataOffset, KernelDataLength/kPhyMemPageSize));
+	region = new Region(layer, (offset_t)KernelDataOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Write | Permission::Execute, KernelContext);
+	region->fault();
+
+	// ROData
+	layer = new Layer(new FixedStore(KernelRODataOffset, KernelRODataLength/kPhyMemPageSize));
+	region = new Region(layer, (offset_t)KernelRODataOffset + KERNEL_LOAD_ADDRESS, Permission::Read | Permission::Execute, KernelContext);
 	region->fault();
 
 	// VGA

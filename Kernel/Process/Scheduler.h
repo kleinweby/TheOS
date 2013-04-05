@@ -26,25 +26,40 @@
 
 #include "Utils/KObject.h"
 #include "Process/Thread.h"
+#include "Interrupts/Interrupts.h"
+#include "Interrupts/Timer.h"
 
 namespace Process {
 
+class Scheduler;
+
+extern GlobalPtr<Scheduler> GlobalScheduler;
+
 class SchedulerItem : public KObject
 {
+public:
 	Ptr<Thread> thread;
 	Ptr<SchedulerItem> next;
+	SchedulerItem(Ptr<Thread> t) : thread(t), next(NULL) {}
+	virtual ~SchedulerItem();
 };
 
 class Scheduler : public KObject
 {
 private:
 	Ptr<SchedulerItem> nextItem;
+	Ptr<Thread> currentThread;
+	Ptr<Timer::Timer> timer;
+
+	void removeThreadFromScheduling(Ptr<Thread> thread);
+	void addThreadToScheduling(Ptr<Thread> thread);
 protected:
 	friend class Thread;
 	void threadStateDidChange(Ptr<Thread> thread);
 public:
 	Scheduler();
 	virtual ~Scheduler();
+	const Interrupts::CPUState* schedule(const Interrupts::CPUState* state);
 };
 
 }
