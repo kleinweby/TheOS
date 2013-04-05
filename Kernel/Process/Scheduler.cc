@@ -23,6 +23,9 @@
 //
 
 #include "Process/Scheduler.h"
+#include "Logging/Logging.h"
+
+#include <CoreSystem/MachineInstructions.h>
 
 namespace Process {
 
@@ -33,17 +36,29 @@ const Interrupts::CPUState* schedule_helper(const Interrupts::CPUState* state)
 	return GlobalScheduler->schedule(state);
 }
 
+void Initialize()
+{
+	GlobalScheduler = new Scheduler();
+}
+
+void TakeOff()
+{
+	LogInfo("Take Off");
+	GlobalScheduler->timer->enable();
+
+	// This shoul normally not loop, the interrupt
+	// subsystem has its own halt process/state
+	while(1) Halt();
+}
+
 SchedulerItem::~SchedulerItem() 
 {
 }
 
 Scheduler::Scheduler()
 {
-	GlobalScheduler = this;
-
 	this->timer = Timer::GetLocalTimer();
 	this->timer->setHandler(schedule_helper);
-	this->timer->setTicks(kUInt16Max);
 }
 Scheduler::~Scheduler()
 {

@@ -64,22 +64,10 @@ extern "C" void KernelInitialize(uint32_t magic, struct Multiboot* header)
 	VM::Initialize();
 	BootstrapRelease();
 	Timer::Initialize();
-	
-	LogInfo("booted");
-	LogPhyMem();
+	Process::Initialize();
 
    	Interrupts::Enable();
 
-   	new Process::Scheduler();
-
-	for(;;) {
-		//LogInfo("Interrupts %i", interruptCount);
-		Halt();
-		// if (interruptCount > 50) {
-		// 	// for(uint32_t j = 0; j < kUInt32Max - 1; j++) {
-		// 	// }
-
-		// 	LogInfo("Done");
-		// }
-	}
+   	// Hav off controll to processes
+   	Process::TakeOff();
 }

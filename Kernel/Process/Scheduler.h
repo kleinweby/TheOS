@@ -33,6 +33,17 @@ namespace Process {
 
 class Scheduler;
 
+//
+// Initializes the scheduler subsystem
+// after that you can create threads/processes/etc
+//
+void Initialize();
+//
+// This will enabled scheduling for the current cpu
+// and transfers controll to processes.
+//
+void TakeOff() __attribute__((noreturn));
+
 extern GlobalPtr<Scheduler> GlobalScheduler;
 
 class SchedulerItem : public KObject
@@ -55,6 +66,7 @@ private:
 	void addThreadToScheduling(Ptr<Thread> thread);
 protected:
 	friend class Thread;
+	friend void TakeOff();
 	void threadStateDidChange(Ptr<Thread> thread);
 public:
 	Scheduler();
