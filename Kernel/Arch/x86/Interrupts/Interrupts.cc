@@ -334,11 +334,16 @@ uint32_t GetKernelStack()
 // ==================
 
 // A very little stack.
-uint8_t HaltCPUStack[4*1024];
+// TODO: at the moment, when the cpu wakes up from the halt
+// this stack will be used
+const uint32_t kHaltCPUStackSize = sizeof(CPUState) + 4096;
+uint8_t HaltCPUStack[kHaltCPUStackSize];
+
+void HaltCPU() __attribute__((naked));
 
 void HaltCPU()
 {
-	LogInfo("Halt");
+	__asm__ volatile ("1: hlt; jmp 1;");
 	while (1) {
 		Halt();
 	}
@@ -399,7 +404,7 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 
 	// TODO when ptr is NULL use halt cpu state
 	if (newState == NULL) {
-		newState = reinterpret_cast<CPUState*>(OFFSET(&HaltCPUStack[4*1024-1], -sizeof(CPUState)));
+		newState = reinterpret_cast<CPUState*>(OFFSET(&HaltCPUStack[kHaltCPUStackSize - 1], -sizeof(CPUState)));
 		{
 			CPUState* state = const_cast<CPUState*>(newState);
 			state->edi = 0xBADBEEF;
@@ -416,7 +421,9 @@ extern "C" const CPUState* InterruptsHandler(const CPUState* ptr)
 			state->eip = reinterpret_cast<uint32_t>(&HaltCPU);
 			state->cs = 0x8; // Run in ring 0
 			state->eflags = 0x202;
-			state->esp = reinterpret_cast<uint32_t>(&HaltCPUStack[4*1024-1]);
+			// ESP will not be switches by cpu
+			// so we need to install this state into the stack
+			state->esp = reinterpret_cast<uint32_t>(&HaltCPUStack[kHaltCPUStackSize - 1]);
 			state->ss = 0x10;
 		}
 	}
