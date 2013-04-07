@@ -48,6 +48,12 @@ public:
 	Process();
 	virtual ~Process();
 
+	// Gets the vm context accosiated with this parent
+	Ptr<VM::Context> getVMContext() const;
+
+	// Gets the pid of this process
+	pid_t getPID() const;
+
 	// Sets the parent process
 	void setParent(Ptr<Process> parent);
 	// Gets parent process

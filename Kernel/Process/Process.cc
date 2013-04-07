@@ -36,7 +36,16 @@ Process::Process()
 
 Process::~Process()
 {
+}
 
+Ptr<VM::Context> Process::getVMContext() const
+{
+	return this->vmContext;
+}
+
+pid_t Process::getPID() const
+{
+	return this->pid;
 }
 
 void Process::setParent(Ptr<Process> _parent)

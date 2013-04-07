@@ -65,6 +65,9 @@ public:
 	Thread(uint32_t entryPoint, size_t stackSize, Ptr<Process> process);
 	virtual ~Thread();
 
+	// Gets the containing process
+	Ptr<Process> getProcess() const;
+
 	// Saves the cpu state of this thread
 	void setCPUState(const Interrupts::CPUState* state);
 	// Gets the cpu state of this thread

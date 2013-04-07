@@ -38,11 +38,17 @@ class Scheduler;
 // after that you can create threads/processes/etc
 //
 void Initialize();
+
 //
 // This will enabled scheduling for the current cpu
 // and transfers controll to processes.
 //
 void TakeOff() __attribute__((noreturn));
+
+//
+// Get the current executing thread
+//
+Ptr<Thread> GetCurrentThread();
 
 extern GlobalPtr<Scheduler> GlobalScheduler;
 
@@ -72,6 +78,7 @@ public:
 	Scheduler();
 	virtual ~Scheduler();
 	const Interrupts::CPUState* schedule(const Interrupts::CPUState* state);
+	Ptr<Thread> getCurrentThread() const;
 };
 
 }

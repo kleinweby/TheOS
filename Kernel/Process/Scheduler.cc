@@ -51,6 +51,11 @@ void TakeOff()
 	while(1) Halt();
 }
 
+Ptr<Thread> GetCurrentThread()
+{
+	return GlobalScheduler->getCurrentThread();
+}
+
 SchedulerItem::~SchedulerItem() 
 {
 }
@@ -125,6 +130,11 @@ const Interrupts::CPUState* Scheduler::schedule(const Interrupts::CPUState* stat
 		this->timer->setTicks(kUInt16Max);
 		return NULL;
 	}
+}
+
+Ptr<Thread> Scheduler::getCurrentThread() const
+{
+	return this->currentThread;
 }
 
 }

@@ -45,6 +45,11 @@ Thread::~Thread()
 {
 }
 
+Ptr<Process> Thread::getProcess() const
+{
+	return this->process;
+}
+
 void Thread::setCPUState(const Interrupts::CPUState* _state)
 {
 	memcpy(&this->cpuState, _state, sizeof(Interrupts::CPUState));
