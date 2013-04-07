@@ -91,7 +91,7 @@ bool Layer::handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> regi
 	return false;
 }
 
-size_t Layer::getSize()
+size_t Layer::getSize() const
 {
 	if (this->parent) {
 		return this->parent->getSize();
@@ -100,7 +100,7 @@ size_t Layer::getSize()
 	return this->store->getSize();
 }
 
-size_t Layer::getRealSize()
+size_t Layer::getRealSize() const
 {
 	size_t size = 0x0;
 	

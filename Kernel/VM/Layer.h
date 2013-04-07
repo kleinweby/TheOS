@@ -82,13 +82,13 @@ public:
 	//
 	// Gets the size of this layer
 	//
-	virtual size_t getSize();
+	virtual size_t getSize() const;
 	
 	//
 	// Get the real size of this layer
 	// This means only the phy pages directly hold by this layer.
 	//
-	virtual size_t getRealSize();
+	virtual size_t getRealSize() const;
 };
 
 } // namespace VM
