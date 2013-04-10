@@ -46,19 +46,19 @@ protected:
 
 	friend class Region;
 public:
-	//
-	// Create a new context with a private backend
-	//
+	///
+	/// @brief Create a new context with a private backend
+	///
 	Context();
 	
-	//
-	// Create a new context with a given backend
-	//
+	///
+	/// Create a new context with a given backend
+	///
 	Context(Ptr<Backend::Context> backend);
 	
-	//
-	// Copy a context.
-	//
+	///
+	/// Copy a context.
+	///
 	Context(Ptr<Context>& context);
 	
 	//
@@ -66,9 +66,9 @@ public:
 	//
 	virtual ~Context();
 	
-	//
-	// Get the backend used to map.
-	//
+	///
+	/// Get the backend used to map.
+	///
 	Ptr<Backend::Context> getBackend() const;
 };
 	

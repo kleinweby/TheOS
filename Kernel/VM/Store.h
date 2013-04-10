@@ -35,49 +35,49 @@ class Store : public KObject {
 protected:
 	size_t size;
 public:
-	//
-	// Creates a new store with the size.
-	// If the object this store represents does not
-	// fill the complete size, the remainder will
-	// be null filled.
-	//
+	///
+	/// Creates a new store with the size.
+	/// If the object this store represents does not
+	/// fill the complete size, the remainder will
+	/// be null filled.
+	///
 	Store(size_t size);
 	virtual ~Store();
 	
-	//
-	// Get the size of this store
-	//
+	///
+	/// Get the size of this store
+	///
 	size_t getSize() const;
 	
-	//
-	// Checks wheter a page at vaddr is writable
-	// This way a private copy does not need to be make
-	// and the page of this store can be reused. 
-	//
-	// Note: areas where it is not allowed to write
-	// (due to permissons) can still be writeable at store
-	// level.
-	// The read onlyness will be enforced in VM::Region 
-	//
+	///
+	/// Checks wheter a page at vaddr is writable
+	/// This way a private copy does not need to be make
+	/// and the page of this store can be reused. 
+	///
+	/// @note areas where it is not allowed to write
+	/// (due to permissons) can still be writeable at store
+	/// level.
+	/// The read onlyness will be enforced in VM::Region 
+	///
 	virtual bool isWriteable(uint32_t vaddr) const = 0;
 	
-	//
-	// Get the paddr for the page at address
-	//
-	// @param addess is relative to the start of this store
-	//
+	///
+	/// Get the paddr for the page at address
+	///
+	/// @param addess is relative to the start of this store
+	///
 	virtual page_t getPageAddress(uint32_t vaddr) = 0;
 	
-	//
-	// Writes back the content held by the layer to the
-	// store underlaying it. This may be used when isWriteable
-	// returned false, and we want to make a change permanent.
-	//
-	// @param vaddr address in this store
-	// @param page the phy page to write back
-	//             this page is not used by this store after this
-	//             call returns.
-	//
+	///
+	/// Writes back the content held by the layer to the
+	/// store underlaying it. This may be used when isWriteable
+	/// returned false, and we want to make a change permanent.
+	///
+	/// @param vaddr address in this store
+	/// @param page the phy page to write back
+	///             this page is not used by this store after this
+	///             call returns.
+	///
 	virtual void writeback(uint32_t vaddr, page_t page) = 0;
 };
 

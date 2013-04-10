@@ -35,96 +35,96 @@ class Context;
 class Layer;
 
 enum class RegionType : unsigned short {
-	//
-	// On copy the regions underlaying data
-	// can be modified by both regions
-	// without the other region seeing the changes
-	//
+	///
+	/// On copy the regions underlaying data
+	/// can be modified by both regions
+	/// without the other region seeing the changes
+	///
 	Private,
-	//
-	// On copy, when one region changes the
-	// underlaying data, both regions see these
-	// changes.
-	//
+	///
+	/// On copy, when one region changes the
+	/// underlaying data, both regions see these
+	/// changes.
+	///
 	Shared
 };
 
 class Region : public KObject {
 
 protected:
-	Context* context; // The parent context for this region (weak to avoid cycles)
-	Ptr<Layer> layer; // The layer providing content for this region
+	Context* context; /// The parent context for this region (weak to avoid cycles)
+	Ptr<Layer> layer; /// The layer providing content for this region
 	
-	// The offset in the context (start address)
+	/// The offset in the context (start address)
 	offset_t offset;
-	// The size (same accross contexts)
+	/// The size (same accross contexts)
 	size_t size;
 
-	// The type of this region
+	/// The type of this region
 	RegionType type;
-	// The permissions of this region
+	/// The permissions of this region
 	Permission permissions;
 public:
-	//
-	// Default constructor
-	//
-	// @param layer The layer that will provide the content
-	// @param offset The offset in the context.
-	// @param context The context the region will be added to
-	//
+	///
+	/// Default constructor
+	///
+	/// @param layer The layer that will provide the content
+	/// @param offset The offset in the context.
+	/// @param context The context the region will be added to
+	///
 	Region(Ptr<Layer> layer, offset_t offset, Permission permissions, Ptr<Context> context);
 	
-	//
-	// Copy constructor
-	//
-	// @param region Region to copy.
-	// @param offset The offset in the context.
-	// @param context The context the region will be added to
-	//
+	///
+	/// Copy constructor
+	///
+	/// @param region Region to copy.
+	/// @param offset The offset in the context.
+	/// @param context The context the region will be added to
+	///
 	Region(Ptr<Region>& region, offset_t offset, Permission permissions, Ptr<Context> context);
 	
-	//
-	// Destructor
-	//
+	///
+	/// Destructor
+	///
 	virtual ~Region();
 	
-	//
-	// Set the region type.
-	// Obviously this will only affect region copies
-	// after the type was set.
-	//
+	///
+	/// Set the region type.
+	/// Obviously this will only affect region copies
+	/// after the type was set.
+	///
 	void setType(RegionType type);
 	RegionType getType() const;
 	
-	//
-	// Get the offset in the context
-	//
+	///
+	/// Get the offset in the context
+	///
 	offset_t getOffset() const;
 	
-	//
-	// Get the size in the offset
-	//
+	///
+	/// Get the size in the offset
+	///
 	size_t getSize() const;
 	
-	//
-	// Get the context
-	//
+	///
+	/// Get the context
+	///
 	Ptr<Context> getContext() const;
 	
-	//
-	// Removes the region from the context
-	//
+	///
+	/// Removes the region from the context
+	///
 	void removeFromContext();
 	
-	//
-	// Handle a page fault at address
-	//
+	///
+	/// Handle a page fault at address
+	///
 	bool handleFault(uint32_t vaddr, Permission permissions);
 	
-	//
-	// You can call this at any time, to cause a fault
-	// on the whole region
-	//
+	///
+	/// You can call this at any time, to cause a fault
+	/// on the whole region
+	///
 	bool fault(Permission permissions);
 	bool fault();
 };

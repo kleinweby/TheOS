@@ -56,14 +56,14 @@ class Layer : public KObject {
 	//
 	page_t* pages;
 public:
-	//
-	// Construct a new layer with a parent
-	//
+	///
+	/// Construct a new layer with a parent
+	///
 	Layer(Ptr<Layer> parent);
 	
-	//
-	// Construct a new layer with a store
-	//
+	///
+	/// Construct a new layer with a store
+	///
 	Layer(Ptr<Store> store);
 	
 	//
@@ -71,23 +71,23 @@ public:
 	//
 	virtual ~Layer();
 	
-	//
-	// Ask the layer to handle a fault in the region at
-	// address.
-	//
-	// permissions - the permissions the layer should map
-	//
+	///
+	/// Ask the layer to handle a fault in the region at
+	/// address.
+	///
+	/// @param permissions the permissions the layer should map
+	///
 	bool handleFault(uint32_t vaddr, Permission permissions, Ptr<Region> region);
 	
-	//
-	// Gets the size of this layer
-	//
+	///
+	/// Gets the size of this layer
+	///
 	virtual size_t getSize() const;
 	
-	//
-	// Get the real size of this layer
-	// This means only the phy pages directly hold by this layer.
-	//
+	///
+	/// Get the real size of this layer
+	/// This means only the phy pages directly hold by this layer.
+	///
 	virtual size_t getRealSize() const;
 };
 

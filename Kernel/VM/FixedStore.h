@@ -40,14 +40,23 @@ private:
 	size_t numberOfPages;
 protected:
 public:
-	//
-	// Constructor for a continigous pmem space
-	//
+	///
+	/// Constructor for a continigous pmem space
+	///
+	/// @param startPage the first page to use
+	/// @param numberOfPages how many pages should be used after startpage
+	///
+	///
 	FixedStore(page_t startPage, size_t numberOfPages, bool writeable = true, bool free = true);
 	
-	//
-	// Constructor for a non continigous pmem space
-	//
+	///
+	/// Constructor for a non continigous pmem space
+	///
+	/// @param pages Pointer to an array of pages
+	/// @param numberOfPages Number of entries in pages
+	/// @param writeable Can the phy pages be written to
+	/// @param free Mark pages free when this store deallocates
+	///
 	FixedStore(page_t* pages, size_t numberOfPages, bool writeable = true, bool free = true);
 	
 	// Desctructor
