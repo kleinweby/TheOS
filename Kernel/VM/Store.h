@@ -64,7 +64,7 @@ public:
 	///
 	/// Get the paddr for the page at address
 	///
-	/// @param addess is relative to the start of this store
+	/// @param vaddr is relative to the start of this store
 	///
 	virtual page_t getPageAddress(uint32_t vaddr) = 0;
 	
