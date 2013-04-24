@@ -126,9 +126,6 @@ rm -rf "$TOOLCHAIN_DIR"
 
 detect_host
 
-echo "$TEMP_DIR"
-exit 1
-
 download_precompiled_toolchain
 
 if [[ $TOOLCHAIN_PRECOMPILED -eq 1 ]]; then
