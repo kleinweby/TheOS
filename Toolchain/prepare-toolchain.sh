@@ -95,7 +95,7 @@ function patch_llvm_clang {
 function compile_binutils {
 	pushd "$TEMP_DIR/binutils"
 	# We don't want to prefix the comipler, as it will be contained in a platform dir
-	./configure --prefix="$TOOLCHAIN_DIR" --target=i386-unkown-elf --with-build-sysroot="$TOOLCHAIN_DIR" --program-prefix= --without-doc || exit 1
+	./configure --prefix="$TOOLCHAIN_DIR" --target=i386-unkown-elf --with-build-sysroot="$TOOLCHAIN_DIR" --program-prefix= --without-doc --disable-werror || exit 1
  	make -j$MAKE_JOBS || exit 1
  	make install || exit 1
 }
