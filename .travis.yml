@@ -1,4 +1,5 @@
 ---
+language: cpp
 env:
   global:
   - "ARTIFACTS_AWS_REGION=eu-west-1"
