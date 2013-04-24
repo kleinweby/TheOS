@@ -8,20 +8,23 @@ BASEDIR=`pwd`
 popd > /dev/null
 
 TOOLCHAIN_PATCHES=$BASEDIR/patches
-TOOLCHAIN_DIR=$BASEDIR/$PLATFORM
-TEMP_DIR="test-build" #$(mktemp -d -t theos-toolchain)
+TOOLCHAIN_DIR=$BASEDIR/$PLATFORM.toolchain
+TEMP_DIR=$(mktemp -d -t theos-toolchain)
 trap on_exit EXIT
 
 LLVM_REVERSION=180190
 CLANG_REVERSION=180187
 COMPILER_RT_REVERSION=180184
+CURL_OPTIONS="-L -i -f -#"
 TOOLCHAIN_VERSION=$(git rev-list -1 HEAD -- "$BASEDIR")
+TOOLCHAIN_URL=
+TOOLCHAIN_PRECOMPILED=0
 BINUTILS_VERSION=2.23.2
 MAKE_JOBS=1
 HOST=
 
 function on_exit {
-	#rm -rf "$TEMP_DIR"
+	rm -rf "$TEMP_DIR"
 	log "On exit"
 }
 
@@ -34,18 +37,30 @@ function detect_host {
 
 	if [ -e /proc/cpuinfo ]; then 
 		MAKE_JOBS=$(grep -c ^processor /proc/cpuinfo)
-	elif [ "$HOST" = "darwin" ]; then
+	elif [[ "$HOST" =~ "darwin_*" ]]; then
 		MAKE_JOBS=$(sysctl -n hw.ncpu)
+	fi
+
+	TOOLCHAIN_URL="https://chrspeich-theos.s3.amazonaws.com/toolchain/$HOST/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
+}
+
+function download_precompiled_toolchain {
+	log "Checking for precompiled toolchain..."
+	curl $CURL_OPTIONS -o "$TEMP_DIR/toolchain.tar.xz" "$TOOLCHAIN_URL"
+	if [[ $? -eq 0 ]]; then
+		TOOLCHAIN_PRECOMPILED=1
+	else
+		TOOLCHAIN_PRECOMPILED=0
 	fi
 }
 
 function download_binutils {
 	log "Download binutils"
-	#curl -o "$TEMP_DIR/binutils.tar.gz" "http://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.gz" || exit 1
+	curl -o "$TEMP_DIR/binutils.tar.gz" "http://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.gz" || exit 1
 	log "Unpack binutils"
 	mkdir "$TEMP_DIR/binutils"
 	tar xf "$TEMP_DIR/binutils.tar.gz" -C "$TEMP_DIR/binutils" --strip=1 || exit 1
-	#rm "$TEMP_DIR/binutils.tar.gz"
+	rm "$TEMP_DIR/binutils.tar.gz"
 }
 
 function download_llvm {
@@ -93,18 +108,36 @@ function compile_llvm_clang {
 	popd
 }
 
+function upload_toolchain {
+	log "Try to upload the toolchain"
+
+	pushd "$TOOLCHAIN_DIR"
+	tar c . | xz > "$TEMP_DIR/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
+	popd
+
+	travis-artifacts upload --target-path "toolchain/$HOST/" --path "$TEMP_DIR/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
+}
+
 log "Prepare toolchain for $PLATFORM"
 
-#rm -rf "$TOOLCHAIN_DIR"
+rm -rf "$TOOLCHAIN_DIR"
 
 detect_host
 
-#download_binutils
-#download_llvm
-#download_clang
+download_precompiled_toolchain
 
-#patch_llvm_clang
+if [[ $TOOLCHAIN_PRECOMPILED -eq 1 ]]; then
+	log "Found a precompiled version..."
+else
+	log "No precompiled version avaiable. Compile the toolchain..."
+	download_binutils
+	download_llvm
+	download_clang
 
-#compile_binutils
-#compile_llvm_clang
+	patch_llvm_clang
 
+	compile_binutils
+	compile_llvm_clang
+
+	upload_toolchain
+fi

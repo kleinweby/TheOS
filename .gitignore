@@ -12,4 +12,6 @@ KernelInfo.c
 
 doc/
 
+Toolchain/*.toolchain
+
 !.keep-folder

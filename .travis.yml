@@ -1,0 +1,18 @@
+---
+env:
+  global:
+  - "ARTIFACTS_AWS_REGION=eu-west-1"
+  - "ARTIFACTS_S3_BUCKET=chrspeich-theos"
+  - secure: ! 'HOAN8FzGjyER4OCvIY6yvu30aQW8+YqzsFxE8ZGpajkmTInESdFcB/Pglgon
+
+      CQRiPxnPNnJ3gCw94x6HeY79rk+Zs7NzPQcrHWcqy1UNc9MyHTp85qyOqO6M
+
+      HEcWXFo+o5BYhfaDfx1Fx6StVdS4kJ+ymyQPpStJi6qrSIxqSH0='
+  - secure: ! 'fXJNoo72Ui90qXOWSUySst3unrPj5B/+TRz0/VQ6Ap4fDzxauVNLoFblgC3X
+
+      RHM5pxpd29MIr7TIqWmXF2VkmImEaKbTCZ9Nbbv5AGP/5AU3B1Tx20uvXFJD
+
+      9eabxlIANSsVKwATV23/8h/OYYhSpP2KuN4dOLUe5ROz1JqWh64='
+before_script:
+  - "gem install travis-artifacts"
+  - "Toolchain/prepare-toolchain.sh" 
