@@ -1,8 +1,8 @@
 Index: lib/Driver/Tools.cpp
 ===================================================================
---- lib/Driver/Tools.cpp	(revision 171006)
-+++ lib/Driver/Tools.cpp	(working copy)
-@@ -5955,3 +5955,61 @@
+--- lib/Driver/Tools.cpp  (revision 180190)
++++ lib/Driver/Tools.cpp  (working copy)
+@@ -6402,3 +6402,61 @@
      Args.MakeArgString(getToolChain().GetProgramPath("link.exe"));
    C.addCommand(new Command(JA, *this, Exec, CmdArgs));
  }
@@ -66,11 +66,11 @@ Index: lib/Driver/Tools.cpp
 +}
 Index: lib/Driver/ToolChains.cpp
 ===================================================================
---- lib/Driver/ToolChains.cpp	(revision 171006)
-+++ lib/Driver/ToolChains.cpp	(working copy)
-@@ -2647,3 +2647,42 @@
- 
-   return *T;
+--- lib/Driver/ToolChains.cpp (revision 180190)
++++ lib/Driver/ToolChains.cpp (working copy)
+@@ -2579,3 +2579,18 @@
+ Tool *DragonFly::buildLinker() const {
+   return new tools::dragonfly::Link(*this);
  }
 +
 +TheOS::TheOS(const Driver &D, const llvm::Triple& Triple, const ArgList &Args)
@@ -79,43 +79,19 @@ Index: lib/Driver/ToolChains.cpp
 +//    getFilePaths().push_back("/usr/lib");
 +}
 +
-+Tool &TheOS::SelectTool(const Compilation &C, const JobAction &JA,
-+                        const ActionList &Inputs) const {
-+    Action::ActionClass Key;
-+    if (getDriver().ShouldUseClangCompiler(C, JA, getTriple()))
-+        Key = Action::AnalyzeJobClass;
-+    else
-+        Key = JA.getKind();
-+    
-+    bool UseIntegratedAs = C.getArgs().hasFlag(options::OPT_integrated_as,
-+                                               options::OPT_no_integrated_as,
-+                                               IsIntegratedAssemblerDefault());
-+    
-+    Tool *&T = Tools[Key];
-+    if (!T) {
-+        switch (Key) {
-+            case Action::AssembleJobClass:
-+                if (UseIntegratedAs)
-+                    T = new tools::ClangAs(*this);
-+                else
-+                    T = new tools::gcc::Assemble(*this); break;
-+                break;
-+            case Action::LinkJobClass:
-+                T = new tools::theos::Link(*this); break;
-+            default:
-+                T = &Generic_GCC::SelectTool(C, JA, Inputs);
++Tool *TheOS::buildAssembler() const {
++    return new tools::ClangAs(*this);
++}
 +
-+        }
-+    }
-+    
-+    return *T;
++Tool *TheOS::buildLinker() const {
++    return new tools::theos::Link(*this);
 +}
 +
 Index: lib/Driver/Tools.h
 ===================================================================
---- lib/Driver/Tools.h	(revision 171006)
-+++ lib/Driver/Tools.h	(working copy)
-@@ -590,6 +590,23 @@
+--- lib/Driver/Tools.h  (revision 180190)
++++ lib/Driver/Tools.h  (working copy)
+@@ -593,6 +593,23 @@
    };
  } // end namespace visualstudio
  
@@ -141,30 +117,31 @@ Index: lib/Driver/Tools.h
  } // end namespace clang
 Index: lib/Driver/ToolChains.h
 ===================================================================
---- lib/Driver/ToolChains.h	(revision 171006)
-+++ lib/Driver/ToolChains.h	(working copy)
-@@ -578,6 +578,14 @@
-                                             ArgStringList &CC1Args) const;
- 
+--- lib/Driver/ToolChains.h (revision 180190)
++++ lib/Driver/ToolChains.h (working copy)
+@@ -571,6 +571,15 @@
+   bool isPIEDefault() const;
+   bool isPICDefaultForced() const;
  };
 +        
 +class LLVM_LIBRARY_VISIBILITY TheOS : public Generic_ELF {
 +public:
 +    TheOS(const Driver &D, const llvm::Triple& Triple, const ArgList &Args);
 +            
-+    virtual Tool &SelectTool(const Compilation &C, const JobAction &JA,
-+                             const ActionList &Inputs) const;
++protected:
++    virtual Tool *buildLinker() const;
++    virtual Tool *buildAssembler() const;
 +};
  
- } // end namespace toolchains
- } // end namespace driver
+ class LLVM_LIBRARY_VISIBILITY Windows : public ToolChain {
+ public:
 Index: lib/Driver/Driver.cpp
 ===================================================================
---- lib/Driver/Driver.cpp	(revision 171006)
-+++ lib/Driver/Driver.cpp	(working copy)
-@@ -1715,6 +1715,9 @@
+--- lib/Driver/Driver.cpp (revision 180190)
++++ lib/Driver/Driver.cpp (working copy)
+@@ -1745,6 +1745,9 @@
      case llvm::Triple::Win32:
-       TC = new toolchains::Windows(*this, Target);
+       TC = new toolchains::Windows(*this, Target, Args);
        break;
 +    case llvm::Triple::TheOS:
 +      TC = new toolchains::TheOS(*this, Target, Args);
