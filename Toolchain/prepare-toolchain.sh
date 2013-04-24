@@ -9,7 +9,7 @@ popd > /dev/null
 
 TOOLCHAIN_PATCHES=$BASEDIR/patches
 TOOLCHAIN_DIR=$BASEDIR/$PLATFORM.toolchain
-TEMP_DIR=$(mktemp -d -t theos-toolchain)
+TEMP_DIR=
 trap on_exit EXIT
 
 LLVM_REVERSION=180190
@@ -37,8 +37,10 @@ function detect_host {
 
 	if [ -e /proc/cpuinfo ]; then 
 		MAKE_JOBS=$(grep -c ^processor /proc/cpuinfo)
+		TEMP_DIR=$(mktemp -d --tmpdir theos-toolchain-XXXXXX)
 	elif [[ "$HOST" =~ "darwin_*" ]]; then
 		MAKE_JOBS=$(sysctl -n hw.ncpu)
+		TEMP_DIR=$(mktemp -d t theos-toolchain)
 	fi
 
 	TOOLCHAIN_URL="https://chrspeich-theos.s3.amazonaws.com/toolchain/$HOST/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
@@ -123,6 +125,9 @@ log "Prepare toolchain for $PLATFORM"
 rm -rf "$TOOLCHAIN_DIR"
 
 detect_host
+
+echo "$TEMP_DIR"
+exit 1
 
 download_precompiled_toolchain
 
