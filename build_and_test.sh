@@ -7,7 +7,7 @@ popd > /dev/null
 
 pushd "$BASEDIR"
 pushd "CoreSystem"
-rake CoreSystem.framework || exit 1
+rake CoreSystem.framework libCoreSystem-kernel.a || exit 1
 popd
 pushd "Kernel"
 rake || exit 1

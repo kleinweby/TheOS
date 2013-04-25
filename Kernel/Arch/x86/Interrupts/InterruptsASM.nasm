@@ -90,7 +90,7 @@ InterruptsTrampolin%1:
 
 %macro TrampolinStubWithErrno 1
 [global InterruptsTrampolin%1]
-InterruptsTrampolin%1
+InterruptsTrampolin%1:
 	; Push Interrupt Number
 	push dword %1
 	jmp InterruptsTrampolinCommon
