@@ -40,7 +40,7 @@ function detect_host {
 		TEMP_DIR=$(mktemp -d --tmpdir theos-toolchain-XXXXXX)
 	elif [[ $HOST =~ darwin_* ]]; then
 		MAKE_JOBS=$(sysctl -n hw.ncpu)
-		TEMP_DIR=$(mktemp -d t theos-toolchain)
+		TEMP_DIR=$(mktemp -d -t theos-toolchain)
 	else
 		echo "Unsupported host $HOST"
 		exit 1
