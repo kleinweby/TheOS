@@ -15,7 +15,7 @@ trap on_exit EXIT
 LLVM_REVERSION=180190
 CLANG_REVERSION=180187
 COMPILER_RT_REVERSION=180184
-CURL_OPTIONS="-L -i -f -#"
+CURL_OPTIONS="-L -f -#"
 TOOLCHAIN_VERSION=$(git rev-list -1 HEAD -- "$BASEDIR")
 TOOLCHAIN_URL=
 TOOLCHAIN_PRECOMPILED=0
@@ -61,7 +61,7 @@ function download_precompiled_toolchain {
 
 function download_binutils {
 	log "Download binutils"
-	curl -o "$TEMP_DIR/binutils.tar.gz" "http://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.gz" || exit 1
+	curl $CURL_OPTIONS -o "$TEMP_DIR/binutils.tar.gz" "http://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.gz" || exit 1
 	log "Unpack binutils"
 	mkdir "$TEMP_DIR/binutils"
 	tar xf "$TEMP_DIR/binutils.tar.gz" -C "$TEMP_DIR/binutils" --strip=1 || exit 1
@@ -70,14 +70,14 @@ function download_binutils {
 
 function download_llvm {
 	pushd "$TEMP_DIR"
-	svn co "http://llvm.org/svn/llvm-project/llvm/trunk"@"$LLVM_REVERSION" llvm || exit 1
+	svn co "http://llvm.org/svn/llvm-project/llvm/trunk"@"$LLVM_REVERSION" llvm > /dev/null || exit 1
 	popd
 }
 
 function download_clang {
 	pushd "$TEMP_DIR/llvm"
 	pushd "tools"
-	svn co "http://llvm.org/svn/llvm-project/cfe/trunk"@"$CLANG_REVERSION" clang || exit 1
+	svn co "http://llvm.org/svn/llvm-project/cfe/trunk"@"$CLANG_REVERSION" clang > /dev/null || exit 1
 	popd
 	#pushd "projects"
 	#svn co -r COMPILER_RT_REVERSION http://llvm.org/svn/llvm-project/compiler-rt/trunk compiler-rt || exit 1
