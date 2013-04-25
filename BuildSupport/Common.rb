@@ -1,6 +1,6 @@
 require_relative 'DefaultConfig'
 
-RakeFileUtils.verbose_flag = false if RakeFileUtils.verbose_flag == RakeFileUtils::DEFAULT
+RakeFileUtils.verbose_flag = false # if RakeFileUtils.verbose_flag == RakeFileUtils::DEFAULT
 
 # Rule for c -> o (with deps)
 rule '.o' => [
