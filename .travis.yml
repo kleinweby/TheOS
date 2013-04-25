@@ -16,6 +16,7 @@ env:
 
       9eabxlIANSsVKwATV23/8h/OYYhSpP2KuN4dOLUe5ROz1JqWh64='
 before_script:
+  - "sudo apt-get install nasm qemu"
   - "gem install travis-artifacts"
   - "Toolchain/prepare-toolchain.sh" 
 script: ./build_and_test.sh
