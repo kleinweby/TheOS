@@ -28,7 +28,7 @@
 
 #include "Logging/Logging.h"
 #include "Memory/PhyMem.h"
-#include "Memory/Kalloc.h"
+#include "Memory/kalloc.h"
 #include "Error/Assert.h"
 #include <CoreSystem/CommonTypes.h>
 
