@@ -38,9 +38,12 @@ function detect_host {
 	if [ -e /proc/cpuinfo ]; then 
 		MAKE_JOBS=$(grep -c ^processor /proc/cpuinfo)
 		TEMP_DIR=$(mktemp -d --tmpdir theos-toolchain-XXXXXX)
-	elif [[ "$HOST" =~ "darwin_*" ]]; then
+	elif [[ $HOST =~ darwin_* ]]; then
 		MAKE_JOBS=$(sysctl -n hw.ncpu)
 		TEMP_DIR=$(mktemp -d t theos-toolchain)
+	else
+		echo "Unsupported host $HOST"
+		exit 1
 	fi
 
 	TOOLCHAIN_URL="https://chrspeich-theos.s3.amazonaws.com/toolchain/$HOST/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
