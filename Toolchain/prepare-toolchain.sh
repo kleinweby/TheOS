@@ -111,13 +111,23 @@ function compile_llvm_clang {
 }
 
 function upload_toolchain {
-	log "Try to upload the toolchain"
+	log "Cache toolchain..."
 
+	log "Compress toolchain archive"
 	pushd "$TOOLCHAIN_DIR"
 	tar c . | xz > "$TEMP_DIR/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
 	popd
 
-	travis-artifacts upload --target-path "toolchain/$HOST/" --path "$TEMP_DIR/$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
+	log "Upload toolchain archive"
+	pushd "$TEMP_DIR"
+	travis-artifacts upload --target-path "toolchain/$HOST/" --path "$PLATFORM-$TOOLCHAIN_VERSION.tar.xz"
+	popd
+}
+
+function install_precompiled_toolchain {
+	log "Unpack precompiled toolchain"
+	mkdir "$TOOLCHAIN_DIR"
+	xz -d -c "$TEMP_DIR/toolchain.tar.xz" | tar xf - -C "$TOOLCHAIN_DIR"
 }
 
 log "Prepare toolchain for $PLATFORM"
@@ -130,6 +140,7 @@ download_precompiled_toolchain
 
 if [[ $TOOLCHAIN_PRECOMPILED -eq 1 ]]; then
 	log "Found a precompiled version..."
+	install_precompiled_toolchain
 else
 	log "No precompiled version avaiable. Compile the toolchain..."
 	download_binutils

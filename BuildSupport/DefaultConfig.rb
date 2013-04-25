@@ -1,6 +1,7 @@
-PLATFORM='i386'
+PLATFORM='x86'
+ARCH='i386'
 
-TOOLCHAIN="#{File.dirname(__FILE__)}/toolchain"
+TOOLCHAIN="#{File.dirname(File.dirname(__FILE__))}/Toolchain/#{PLATFORM.downcase}.toolchain"
 
 ROOT="#{File.dirname(File.dirname(__FILE__))}/root"
 
@@ -11,15 +12,15 @@ DEFINES = []
 
 ENV['PATH'] = "#{TOOLCHAIN}/bin:#{ENV['PATH']}"
 
-CC      = ENV['CC'] || "#{PLATFORM}-unkown-theos-clang"
-LD      = "#{PLATFORM}-theos-elf-ld"
-AR      = "#{PLATFORM}-theos-elf-ar"
-OBJCOPY = "#{PLATFORM}-theos-elf-objcopy"
-STRIP   = "#{PLATFORM}-theos-elf-strip"
+CC      = "clang"
+LD      = "ld"
+AR      = "ar"
+OBJCOPY = "objcopy"
+STRIP   = "strip"
 GDB     = "#{TOOLCHAIN}/bin/#{PLATFORM}-theos-elf-gdb"
 NASM    = 'nasm'
 
 OBJ_DIR = '.objs'
 
-DEFINES << '-D__PLATFORM_'+PLATFORM.upcase+'__' << "-D__PLATFORM__=X86"
+DEFINES << '-D__PLATFORM_'+ARCH.upcase+'__' << "-D__PLATFORM__="+PLATFORM.upcase
 CFLAGS << '-ggdb' << '-fno-builtin' << '-Werror' << '-Weverything'
