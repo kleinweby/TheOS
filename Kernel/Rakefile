@@ -72,7 +72,7 @@ CFLAGS << '-I.' \
 CFLAGS << '-Wno-missing-prototypes' << '-Wno-packed'\
        << "-Wno-gnu" << "-Wno-variadic-macros"\
        << '-Wno-missing-variable-declarations' << '-Wno-unused-variable'\
-       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded' << '-Wno-unneeded-internal-declaration'
+       << '-Wno-missing-noreturn' << '-Wno-pedantic' << '-Wno-padded' << '-Wno-unneeded-internal-declaration' << '-Wno-vla'
 
 DEFINES << '-D__KERNEL__'
 DEFINES << '-DKERNEL_LOAD_ADDRESS=0xC0000000'

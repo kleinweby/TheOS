@@ -18,3 +18,4 @@ env:
 before_script:
   - "gem install travis-artifacts"
   - "Toolchain/prepare-toolchain.sh" 
+script: ./build_and_test.sh
