@@ -80,7 +80,7 @@ InterruptsTrampolinCommon:
 
 %macro TrampolinStub 1
 [global InterruptsTrampolin%1]
-InterruptsTrampolin%1
+InterruptsTrampolin%1:
 	; Push invalid error no
 	push dword 0
 	; Push Interrupt Number
